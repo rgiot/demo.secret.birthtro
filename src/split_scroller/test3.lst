@@ -1,0 +1,1596 @@
+Context: test3_code_generation.asm
+0000                                    1 ;;
+0000                                    2 ; Step 3 - Generation of scroller code from a pregenerated buffer of textures
+0000                                    3 ;
+0000                                    4 ; Krusty/Benediction
+0000                                    5 ; May 2026
+0000                                    6 ;
+0000                                    7 ; The main idea is as follow:
+0000                                    8 ; For a given split raster line we need to generate the display code from the split raster code of the scroller. To do so we use a ring buffer that is fed with the scroll text (here we do not try to feed it is is manually done) and read to generate the soruce code for the split raster.
+0000                                    9 ; However the source code is build in a kind of destructive way at the beginning and end of a line to be sure we always scroll left of 4 nops and use 64 nops of timing
+0000                                   10 ;  - out (c), e activate a split raster/border pixel
+0000                                   11 ;  - out (c), d deactivate a split raster/border pixel
+0000                                   12 ; By convention a letter MUST end with a space
+0000                                   13 ; IDEA: by also using a ring buffer for the scroller routines, we could allow a horizontal translation of the text
+0000                                   14 ; IDEA it is probably possible to have a zooming scroller too by generating zoomed version of the splits
+0000                                   15 ;
+0008 ????? SCROLLER_NB_VERTICAL_BLOCS  16 SCROLLER_NB_VERTICAL_BLOCS equ 8
+0000                                   17 ;; The number of times a routine is dulicated
+0008 ????? BLOC_HEIGHT                 18 BLOC_HEIGHT equ 8
+4000                                   22 	org 0x4000
+4000 04000 init                        24 init
+4000        F3                         26 	di
+4004        21 FB C9 22 38 00          27 		ld hl, 0xc9fb : ld (0x38), hl
+400F        01 01 BC ED 49 01 30 BD    28 		ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00 + 96/2 : out (c), c
+            ED 49                         
+4019        01 02 BC ED 49 01 32 BD    29 		ld bc, 0xbc00 + 2 : out (c), c : ld bc, 0xbd00 + 50 : out (c), c
+            ED 49                         
+4023        01 07 BC ED 49 01 00 BD    30 		ld bc, 0xbc00 + 7 : out (c), c : ld bc, 0xbd00 : out (c), c
+            ED 49                         
+402D        01 06 BC ED 49 01 26 BD    31 		ld bc, 0xbc00 + 6 : out (c), c : ld bc, 0xbd00 + 38 : out (c), c
+            ED 49                         
+402F        21 00 10                   32 		ld hl, 0x1000
+403A        01 0C BC ED 49 01 00 BD    33 		ld bc, 0xbc00 + 12 : out (c),c : ld bc, 0xbd00 : out (c), h
+            ED 61                         
+4044        01 0D BC ED 49 01 00 BD    34 		ld bc, 0xbc00 + 13 : out (c),c : ld bc, 0xbd00 : out (c), l
+            ED 69                         
+4049        01 8C 7F ED 49             35 		ld bc, 0x7f8c : out (c), c
+404E        01 10 7F ED 49             37 		ld bc, 0x7f10 : out (c), c
+4053        01 40 7F ED 49             38 		ld bc, 0x7f40 : out (c), c
+4055        31 55 40                   39 		ld sp, $
+4058                                   42 		; generate 1set code
+4058        CD B2 40                   43 		call scroller_update_code
+405B        FB                         44 	ei
+405C 0405C frame                       46 frame
+405C        CD 95 41                   48 	call secure_vsync
+405F        76                         50 	halt
+4060        76                         53 	halt
+4061        F3                         54 	di
+406F        00 00 00 00 00 00 00 00    55 	defs 13 ; ensure proper alignement
+            00 00 00 00 00                
+406F        CD 88 40                   56 	call scroller_show
+4075        01 00 7F ED 49             58 	ld bc, 0x7f00 : out(c), c
+407A        01 4B 7F ED 49             59 	ld bc, 0x7f4b : out(c), c
+407C        CD A4 40                   60 	call scroller_handle_scrolling
+4082        01 54 7F ED 49             61 	ld bc, 0x7f54 : out(c), c
+4084        FB                         63 	ei
+4085        C3 5C 40                   64 	jp frame
+4088                                   67 ;; Show the split raster scroller
+4088 04088 scroller_show               68 scroller_show
+4088        ED 73 A1 40                69 	ld (.backup_sp), sp
+408C                                   71 	; split raster
+408C                                   72 	;ld bc, 0x7f10 : out (c), c
+408C                                   73 	;ld de, 0x544b
+408C                                   75 	;split border
+4091        01 08 BC ED 49             76 	ld bc, 0xbc00+8 : out (c), c ; (6 on CRTC 1)
+4094        11 30 00                   77 	ld de, 0x0000 + %110000     ; 0x0000 + height on CRTC1
+4094        04                         78 	inc b
+4095        18 00                      80 	jr .wait4
+4096 ????? .left_shift                 81 .left_shift equ $-1
+4097 04097 .wait4                      82 .wait4
+4097        00                         83 	nop
+4098 04098 .wait3                      84 .wait3
+4098        00                         85 	nop
+4099 04099 .wait2                      86 .wait2
+4099        00                         87 	nop
+409A 0409A .wait1                      88 .wait1
+409A        31 13 41                   90 	ld sp, scroller_routine_table
+409B ????? .selected_jump_table        91 .selected_jump_table equ $-2
+409E        C9                         93 	ret ; => execute the first line of scroller
+409E 0409E .continue                   94 .continue
+409E        ED 51                      95 	out (c), d
+40A0        31 00 00                   97 	ld sp, 0
+40A1 ????? .backup_sp                  98 .backup_sp equ $-2
+40A3        C9                         99 	ret
+40A4 040A4 scroller_handle_scrolling  101 scroller_handle_scrolling
+40A4                                  103 	; make the screen shift to the left by one nop
+40A4        3A 96 40                  104 	ld a, (scroller_show.left_shift)
+40A7        3C                        105 	inc a
+40A8        E6 03                     106 	and %11
+40AA        32 96 40                  107 	ld (scroller_show.left_shift), a
+40AD                                  108 	; when arriving once again at 0, it means we need to move the code of 4 nops
+40AD                                  109 	; and we'll try another code location
+40AD        C0                        111 	ret nz
+40AE        CD B2 40                  113 	call scroller_update_code
+40B1        C9                        114 	ret
+40B2 040B2 scroller_update_code       116 scroller_update_code
+40B2                                  118 repeat SCROLLER_NB_VERTICAL_BLOCS, line, 0
+40B2                                  119 		ld ix, SCROLLER_CONFIG_{{line}}
+40B2                                  120 		ld h, high(SCROLLER_RING_BUFFER_{{line}})
+40B2                                  121 		ld de, SCROLLER_CODE_{{line}}
+40B2                                  122 		call scroller_generate_line_code
+40B2                                  123 	endr
+0000 ????? {line}
+40B2        DD 21 AD 42               119 		ld ix, SCROLLER_CONFIG_{{line}}
+40B6        26 45                     120 		ld h, high(SCROLLER_RING_BUFFER_{{line}})
+40B8        11 B0 42                  121 		ld de, SCROLLER_CODE_{{line}}
+0001 ????? {line}
+40BB        CD 01 42                  122 		call scroller_generate_line_code
+40BE        DD 21 F2 42               119 		ld ix, SCROLLER_CONFIG_{{line}}
+40C2        26 46                     120 		ld h, high(SCROLLER_RING_BUFFER_{{line}})
+40C4        11 F5 42                  121 		ld de, SCROLLER_CODE_{{line}}
+0002 ????? {line}
+40C7        CD 01 42                  122 		call scroller_generate_line_code
+40CA        DD 21 37 43               119 		ld ix, SCROLLER_CONFIG_{{line}}
+40CE        26 47                     120 		ld h, high(SCROLLER_RING_BUFFER_{{line}})
+40D0        11 3A 43                  121 		ld de, SCROLLER_CODE_{{line}}
+0003 ????? {line}
+40D3        CD 01 42                  122 		call scroller_generate_line_code
+40D6        DD 21 7C 43               119 		ld ix, SCROLLER_CONFIG_{{line}}
+40DA        26 48                     120 		ld h, high(SCROLLER_RING_BUFFER_{{line}})
+40DC        11 7F 43                  121 		ld de, SCROLLER_CODE_{{line}}
+0004 ????? {line}
+40DF        CD 01 42                  122 		call scroller_generate_line_code
+40E2        DD 21 C1 43               119 		ld ix, SCROLLER_CONFIG_{{line}}
+40E6        26 49                     120 		ld h, high(SCROLLER_RING_BUFFER_{{line}})
+40E8        11 C4 43                  121 		ld de, SCROLLER_CODE_{{line}}
+0005 ????? {line}
+40EB        CD 01 42                  122 		call scroller_generate_line_code
+40EE        DD 21 06 44               119 		ld ix, SCROLLER_CONFIG_{{line}}
+40F2        26 4A                     120 		ld h, high(SCROLLER_RING_BUFFER_{{line}})
+40F4        11 09 44                  121 		ld de, SCROLLER_CODE_{{line}}
+0006 ????? {line}
+40F7        CD 01 42                  122 		call scroller_generate_line_code
+40FA        DD 21 4B 44               119 		ld ix, SCROLLER_CONFIG_{{line}}
+40FE        26 4B                     120 		ld h, high(SCROLLER_RING_BUFFER_{{line}})
+4100        11 4E 44                  121 		ld de, SCROLLER_CODE_{{line}}
+0007 ????? {line}
+4103        CD 01 42                  122 		call scroller_generate_line_code
+4106        DD 21 90 44               119 		ld ix, SCROLLER_CONFIG_{{line}}
+410A        26 4C                     120 		ld h, high(SCROLLER_RING_BUFFER_{{line}})
+410C        11 93 44                  121 		ld de, SCROLLER_CODE_{{line}}
+410F        CD 01 42                  122 		call scroller_generate_line_code
+4112        C9                        124 	ret
+4113 04113 scroller_routine_table     130 scroller_routine_table
+4113                                  131 repeat 8, line, 0
+4113                                  132 		repeat BLOC_HEIGHT
+4113                                  133 			dw SCROLLER_CODE_{{line}}
+4113                                  134 		endr
+4113                                  135 	endr
+0000 ????? {line}
+0001 ????? <new iteration>
+4113                                  132 repeat BLOC_HEIGHT
+4113                                  133 			dw SCROLLER_CODE_{{line}}
+4113                                  134 		endr
+0002 ????? <new iteration>
+4121        B0 42 B0 42 B0 42 B0 42   133 			dw SCROLLER_CODE_{{line}}
+            B0 42 B0 42 B0 42 B0 42       
+0003 ????? <new iteration>
+0004 ????? <new iteration>
+0005 ????? <new iteration>
+0006 ????? <new iteration>
+0007 ????? <new iteration>
+0008 ????? <new iteration>
+0001 ????? {line}
+0001 ????? <new iteration>
+4123                                  132 repeat BLOC_HEIGHT
+4123                                  133 			dw SCROLLER_CODE_{{line}}
+4123                                  134 		endr
+0002 ????? <new iteration>
+4131        F5 42 F5 42 F5 42 F5 42   133 			dw SCROLLER_CODE_{{line}}
+            F5 42 F5 42 F5 42 F5 42       
+0003 ????? <new iteration>
+0004 ????? <new iteration>
+0005 ????? <new iteration>
+0006 ????? <new iteration>
+0007 ????? <new iteration>
+0008 ????? <new iteration>
+0002 ????? {line}
+0001 ????? <new iteration>
+4133                                  132 repeat BLOC_HEIGHT
+4133                                  133 			dw SCROLLER_CODE_{{line}}
+4133                                  134 		endr
+0002 ????? <new iteration>
+4141        3A 43 3A 43 3A 43 3A 43   133 			dw SCROLLER_CODE_{{line}}
+            3A 43 3A 43 3A 43 3A 43       
+0003 ????? <new iteration>
+0004 ????? <new iteration>
+0005 ????? <new iteration>
+0006 ????? <new iteration>
+0007 ????? <new iteration>
+0008 ????? <new iteration>
+0003 ????? {line}
+0001 ????? <new iteration>
+4143                                  132 repeat BLOC_HEIGHT
+4143                                  133 			dw SCROLLER_CODE_{{line}}
+4143                                  134 		endr
+0002 ????? <new iteration>
+4151        7F 43 7F 43 7F 43 7F 43   133 			dw SCROLLER_CODE_{{line}}
+            7F 43 7F 43 7F 43 7F 43       
+0003 ????? <new iteration>
+0004 ????? <new iteration>
+0005 ????? <new iteration>
+0006 ????? <new iteration>
+0007 ????? <new iteration>
+0008 ????? <new iteration>
+0004 ????? {line}
+0001 ????? <new iteration>
+4153                                  132 repeat BLOC_HEIGHT
+4153                                  133 			dw SCROLLER_CODE_{{line}}
+4153                                  134 		endr
+0002 ????? <new iteration>
+4161        C4 43 C4 43 C4 43 C4 43   133 			dw SCROLLER_CODE_{{line}}
+            C4 43 C4 43 C4 43 C4 43       
+0003 ????? <new iteration>
+0004 ????? <new iteration>
+0005 ????? <new iteration>
+0006 ????? <new iteration>
+0007 ????? <new iteration>
+0008 ????? <new iteration>
+0005 ????? {line}
+0001 ????? <new iteration>
+4163                                  132 repeat BLOC_HEIGHT
+4163                                  133 			dw SCROLLER_CODE_{{line}}
+4163                                  134 		endr
+0002 ????? <new iteration>
+4171        09 44 09 44 09 44 09 44   133 			dw SCROLLER_CODE_{{line}}
+            09 44 09 44 09 44 09 44       
+0003 ????? <new iteration>
+0004 ????? <new iteration>
+0005 ????? <new iteration>
+0006 ????? <new iteration>
+0007 ????? <new iteration>
+0008 ????? <new iteration>
+0006 ????? {line}
+0001 ????? <new iteration>
+4173                                  132 repeat BLOC_HEIGHT
+4173                                  133 			dw SCROLLER_CODE_{{line}}
+4173                                  134 		endr
+0002 ????? <new iteration>
+4181        4E 44 4E 44 4E 44 4E 44   133 			dw SCROLLER_CODE_{{line}}
+            4E 44 4E 44 4E 44 4E 44       
+0003 ????? <new iteration>
+0004 ????? <new iteration>
+0005 ????? <new iteration>
+0006 ????? <new iteration>
+0007 ????? <new iteration>
+0008 ????? <new iteration>
+0007 ????? {line}
+0001 ????? <new iteration>
+4183                                  132 repeat BLOC_HEIGHT
+4183                                  133 			dw SCROLLER_CODE_{{line}}
+4183                                  134 		endr
+0002 ????? <new iteration>
+4191        93 44 93 44 93 44 93 44   133 			dw SCROLLER_CODE_{{line}}
+            93 44 93 44 93 44 93 44       
+0003 ????? <new iteration>
+0004 ????? <new iteration>
+0005 ????? <new iteration>
+0006 ????? <new iteration>
+0007 ????? <new iteration>
+0008 ????? <new iteration>
+4193        9E 40                     136 	dw scroller_show.continue
+4195 04195 secure_vsync               138 secure_vsync
+4195        06 F5                     139 	ld b, 0xf5
+4197 04197 .loop                      140 .loop
+4197        ED 78                     141 	in a, (c)
+4199        1F                        142 	rra
+419A        38 FB                     143 	jr c, .loop
+419C 0419C vsync                      144 vsync
+419C        06 F5                     145 	ld b, 0xf5
+419E 0419E .loop                      146 .loop
+419E        ED 78                     147 	in a, (c)
+41A0        1F                        148 	rra
+41A1        30 FB                     149 	jr nc, .loop
+41A3        C9                        150 	ret
+41A4                                  153 ;; The code at the very start of the display routine.
+41A4 041A4 scroller_template_start_code 154 scroller_template_start_code
+0004 ????? SCROLLER_TEMPLATE_START_CODE_DURATION 155 SCROLLER_TEMPLATE_START_CODE_DURATION equ duration(out (c), d); The first fir opcode is always OUT
+41A4                                  155 SCROLLER_TEMPLATE_START_CODE_DURATION equ duration(out (c), d); The first fir opcode is always OUT
+41A4        00 00 00 00 00 00 00 00   158 	align 256
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00                   
+4200                                  159 ;; The code at the very end of the display routine.
+4200                                  160 ;; we must use inc l to copy it. But in fact it is not mandatory to be aligned
+4200 04200 scroller_template_end_code 161 scroller_template_end_code
+4200 04200 .start                     163 .start
+4200        C9                        164 	ret
+4201 04201 .end                       165 .end
+4201                                  169 ;; The number of bytes to copy to generate the end of the display routine
+0001 ????? SCROLLER_TEMPLATE_END_CODE_SIZE 170 SCROLLER_TEMPLATE_END_CODE_SIZE equ scroller_template_end_code.end - scroller_template_end_code.start
+MACRO      BUFFER_READ_BYTE           187 macro BUFFER_READ_BYTE
+                                      188 		ld a, (hl) : inc l
+                                      189 	endm
+MACRO      CODE_WRITE_BYTE            191 macro CODE_WRITE_BYTE
+                                      192 		ld (de), a : inc de
+                                      193 	endm
+4201                                  196 ;;
+4201                                  197 ; Generate the code for a split raster line.
+4201                                  198 ; The code must be at 64 nops of course and must be generated from the ring buffer of the line data.
+4201                                  199 ; Start and end code cannot be exactly the same of the ring buffer to respect nop alignment and 64 nops duration
+4201                                  200 ; Input:
+4201                                  201 ;  - IX: address of the configuration of the line
+4201                                  202 ;  - H: high byte of the ring buffer
+4201                                  203 ;  - DE: address of the line code to generate
+4201                                  204 ; Side effect:
+4201                                  205 ;  - Alter the ring buffer at the beginning to properly handle the 4 nops shift
+4201                                  206 ;  - alter ring_buffer_read_pos to be at the next 4 nops position
+4201 04201 scroller_generate_line_code 207 scroller_generate_line_code
+4203        3E ED                     208 	ld a, list_get(opcode(out (c), d), 0) ; set the first byte of out
+4203                                  209 	CODE_WRITE_BYTE()
+Context: test3_code_generation.asm:191:2 > MACRO CODE_WRITE_BYTE:
+4204        12 13                       2 		ld (de), a : inc de
+Context: test3_code_generation.asm
+4205                                  211 	; set up a nop counter
+4205        3E 39                     212 	ld a, 64 - SCROLLER_TEMPLATE_START_CODE_DURATION - SCROLLER_TEMPLATE_END_CODE_DURATION
+4207        08                        213 	ex af, af'
+4208                                  216 	; Get the true start of the split raster code
+420B        DD 6E 01                  217 	ld l, (ix + SCROLLER_LINE_DATA.ring_buffer_read_pos) ; => HL=buffer location to read
+420B                                  220 	; Handle first out and first 4 nops coloumn
+420D        06 00                     221 	ld b, 0 ; counter number of nops met before out
+420F        0E 00                     222 	ld c, 0 ;presence of out. is it usefull ?
+420F                                  224 	; Duplicate this code for the potential 4 nops positions
+0000 ????? {nb_nops}
+420F                                  225 repeat 4, nb_nops, 0
+420F                                  226 		BUFFER_READ_BYTE()
+420F                                  227 		or a
+420F                                  228 		jr z, .has_nops{{nb_nops}}
+420F                                  229 	.no_nops{{nb_nops}}
+420F                                  230 		inc c
+420F                                  231 ; XXX I comment the code because I do not understand why I handled 2 cases
+420F                                  232 ;		if {nb_nops} == 0
+420F                                  233 ;			; there was no nop at all
+420F                                  234 ;			; we decrement L to move back before the out code
+420F                                  235 ;			dec l
+420F                                  236 ;		else
+420F                                  237 			; there was at least one nop
+420F                                  238 			; here we have a out (c), e|d and we want to update the last color configuration with it and then continue
+420F                                  239 			; the code generation
+420F                                  240 			BUFFER_READ_BYTE() ; get the register of out (c), e|d
+420F                                  241 			ld (ix + SCROLLER_LINE_DATA.last_color_config), a ; store it for the next code generation
+420F                                  242 ;		endif
+420F                                  243 		jr .generate_first_color_from_a
+420F                                  244 	.has_nops{{nb_nops}}
+420F                                  245 		inc b  ; we will have one nop to add
+420F                                  246 	endr
+420F                                  226 		BUFFER_READ_BYTE()
+Context: test3_code_generation.asm:187:2 > MACRO BUFFER_READ_BYTE:
+4210        7E 2C                       2 		ld a, (hl) : inc l
+Context: test3_code_generation.asm
+4211        B7                        227 		or a
+4212        28 08                     228 		jr z, .has_nops{{nb_nops}}
+4214 04214 .no_nops{{nb_nops}}        229 	.no_nops{{nb_nops}}
+4214        0C                        230 		inc c
+4215                                  231 ; XXX I comment the code because I do not understand why I handled 2 cases
+4215                                  232 ;		if {nb_nops} == 0
+4215                                  233 ;			; there was no nop at all
+4215                                  234 ;			; we decrement L to move back before the out code
+4215                                  235 ;			dec l
+4215                                  236 ;		else
+4215                                  237 			; there was at least one nop
+4215                                  238 			; here we have a out (c), e|d and we want to update the last color configuration with it and then continue
+4215                                  239 			; the code generation
+4215                                  240 			BUFFER_READ_BYTE() ; get the register of out (c), e|d
+Context: test3_code_generation.asm:187:2 > MACRO BUFFER_READ_BYTE:
+4216        7E 2C                       2 		ld a, (hl) : inc l
+Context: test3_code_generation.asm
+4217                                  240 			BUFFER_READ_BYTE() ; get the register of out (c), e|d
+421A        DD 77 02                  241 			ld (ix + SCROLLER_LINE_DATA.last_color_config), a ; store it for the next code generation
+421A                                  242 ;		endif
+421A        18 2E                     243 		jr .generate_first_color_from_a
+421C 0421C .has_nops{{nb_nops}}       244 	.has_nops{{nb_nops}}
+421D        04                        245 		inc b  ; we will have one nop to add
+0001 ????? {nb_nops}
+421D                                  226 		BUFFER_READ_BYTE()
+Context: test3_code_generation.asm:187:2 > MACRO BUFFER_READ_BYTE:
+421E        7E 2C                       2 		ld a, (hl) : inc l
+Context: test3_code_generation.asm
+421F        B7                        227 		or a
+4220        28 08                     228 		jr z, .has_nops{{nb_nops}}
+4222 04222 .no_nops{{nb_nops}}        229 	.no_nops{{nb_nops}}
+4222        0C                        230 		inc c
+4223                                  231 ; XXX I comment the code because I do not understand why I handled 2 cases
+4223                                  232 ;		if {nb_nops} == 0
+4223                                  233 ;			; there was no nop at all
+4223                                  234 ;			; we decrement L to move back before the out code
+4223                                  235 ;			dec l
+4223                                  236 ;		else
+4223                                  237 			; there was at least one nop
+4223                                  238 			; here we have a out (c), e|d and we want to update the last color configuration with it and then continue
+4223                                  239 			; the code generation
+4223                                  240 			BUFFER_READ_BYTE() ; get the register of out (c), e|d
+Context: test3_code_generation.asm:187:2 > MACRO BUFFER_READ_BYTE:
+4224        7E 2C                       2 		ld a, (hl) : inc l
+Context: test3_code_generation.asm
+4225                                  240 			BUFFER_READ_BYTE() ; get the register of out (c), e|d
+4228        DD 77 02                  241 			ld (ix + SCROLLER_LINE_DATA.last_color_config), a ; store it for the next code generation
+4228                                  242 ;		endif
+4228        18 20                     243 		jr .generate_first_color_from_a
+422A 0422A .has_nops{{nb_nops}}       244 	.has_nops{{nb_nops}}
+422B        04                        245 		inc b  ; we will have one nop to add
+0002 ????? {nb_nops}
+422B                                  226 		BUFFER_READ_BYTE()
+Context: test3_code_generation.asm:187:2 > MACRO BUFFER_READ_BYTE:
+422C        7E 2C                       2 		ld a, (hl) : inc l
+Context: test3_code_generation.asm
+422D        B7                        227 		or a
+422E        28 08                     228 		jr z, .has_nops{{nb_nops}}
+4230 04230 .no_nops{{nb_nops}}        229 	.no_nops{{nb_nops}}
+4230        0C                        230 		inc c
+4231                                  231 ; XXX I comment the code because I do not understand why I handled 2 cases
+4231                                  232 ;		if {nb_nops} == 0
+4231                                  233 ;			; there was no nop at all
+4231                                  234 ;			; we decrement L to move back before the out code
+4231                                  235 ;			dec l
+4231                                  236 ;		else
+4231                                  237 			; there was at least one nop
+4231                                  238 			; here we have a out (c), e|d and we want to update the last color configuration with it and then continue
+4231                                  239 			; the code generation
+4231                                  240 			BUFFER_READ_BYTE() ; get the register of out (c), e|d
+Context: test3_code_generation.asm:187:2 > MACRO BUFFER_READ_BYTE:
+4232        7E 2C                       2 		ld a, (hl) : inc l
+Context: test3_code_generation.asm
+4233                                  240 			BUFFER_READ_BYTE() ; get the register of out (c), e|d
+4236        DD 77 02                  241 			ld (ix + SCROLLER_LINE_DATA.last_color_config), a ; store it for the next code generation
+4236                                  242 ;		endif
+4236        18 12                     243 		jr .generate_first_color_from_a
+4238 04238 .has_nops{{nb_nops}}       244 	.has_nops{{nb_nops}}
+4239        04                        245 		inc b  ; we will have one nop to add
+0003 ????? {nb_nops}
+4239                                  226 		BUFFER_READ_BYTE()
+Context: test3_code_generation.asm:187:2 > MACRO BUFFER_READ_BYTE:
+423A        7E 2C                       2 		ld a, (hl) : inc l
+Context: test3_code_generation.asm
+423B        B7                        227 		or a
+423C        28 08                     228 		jr z, .has_nops{{nb_nops}}
+423E 0423E .no_nops{{nb_nops}}        229 	.no_nops{{nb_nops}}
+423E        0C                        230 		inc c
+423F                                  231 ; XXX I comment the code because I do not understand why I handled 2 cases
+423F                                  232 ;		if {nb_nops} == 0
+423F                                  233 ;			; there was no nop at all
+423F                                  234 ;			; we decrement L to move back before the out code
+423F                                  235 ;			dec l
+423F                                  236 ;		else
+423F                                  237 			; there was at least one nop
+423F                                  238 			; here we have a out (c), e|d and we want to update the last color configuration with it and then continue
+423F                                  239 			; the code generation
+423F                                  240 			BUFFER_READ_BYTE() ; get the register of out (c), e|d
+Context: test3_code_generation.asm:187:2 > MACRO BUFFER_READ_BYTE:
+4240        7E 2C                       2 		ld a, (hl) : inc l
+Context: test3_code_generation.asm
+4241                                  240 			BUFFER_READ_BYTE() ; get the register of out (c), e|d
+4244        DD 77 02                  241 			ld (ix + SCROLLER_LINE_DATA.last_color_config), a ; store it for the next code generation
+4244                                  242 ;		endif
+4244        18 04                     243 		jr .generate_first_color_from_a
+4246 04246 .has_nops{{nb_nops}}       244 	.has_nops{{nb_nops}}
+4247        04                        245 		inc b  ; we will have one nop to add
+4247                                  248 	; if we arrive here, it is because there was 4 sucessive nops.
+4247                                  249 	; it is the easy case. But still we need to read the saved 1st colot
+4247 04247 .generate_first_color_from_ix 251 .generate_first_color_from_ix
+4247        DD 7E 02                  252 	ld a, (ix + SCROLLER_LINE_DATA.last_color_config)
+424A 0424A .generate_first_color_from_a 253 .generate_first_color_from_a
+424A                                  254 	; generate the first instruction that selects the appropriate color
+424A                                  255 	; its duration is already stored in af'
+424A                                  256 	CODE_WRITE_BYTE()
+Context: test3_code_generation.asm:191:2 > MACRO CODE_WRITE_BYTE:
+424B        12 13                       2 		ld (de), a : inc de
+Context: test3_code_generation.asm
+424C                                  259 	; patch the ring buffer to handle the 4 nops shift
+424C                                  260 	; as well as the construction of the first instructions
+424C                                  261 	; patch the ring buffer to handle the 4 nops shift
+424C                                  262 	; as well as the construction of the first instructions
+424C 0424C .patch_ring_buffer_start_and_scroll_buffer_index 263 .patch_ring_buffer_start_and_scroll_buffer_index
+424C                                  264 	; Here HL points to the next instruction
+424C                                  265 	; B contains the number of nops to inject in replacement of the moved out (c), e|d
+424C        78                        267 	ld a, b
+424D 0424D .test_zero_nop             268 .test_zero_nop
+424E        B7 20 05                  269 	or a : jr nz, .handle_nops
+4250 04250 .handle_no_nops            270 .handle_no_nops
+4250                                  271 	; B=0 => nothing to modify in the configuration or the buffer
+4250                                  272 	;        l contains the position of the next instruction
+4250                                  273 	;        and the current color has already been copied
+4250        DD 75 01                  274 	ld (ix + SCROLLER_LINE_DATA.ring_buffer_read_pos), l
+4253        18 13                     275 	jr .add_instructions
+4255                                  278    ; To keep the code simple we repeat the same thing for B=1,B=2,B=3, B=4
+4255                                  279    ; in fact B=4 does not need at all all steps
+4255 04255 .handle_nops               280 .handle_nops
+4255                                  281 	; B=1 C=1 +2
+4255                                  282 	;          *nop : out (1) : out (2) :< next  <= buffer before
+4255                                  283 	;           nop :  nop    : *nop    : <next   <= buffer after
+4255                                  284 	; B=2 C=1 +2
+4255                                  285 	;          *nop : nop : out (1) : out (2) :< next  <= buffer before
+4255                                  286 	;           nop : nop : *nop    : nop     : <next   <= buffer after
+4255                                  287 	; B=3 C=1 +2
+4255                                  288 	;          *nop : nop : nop : out (1) : out (2) :< next  <= buffer before
+4255                                  289 	;           nop : nop : *nop: nop     : nop     :< next   <= buffer after
+4255                                  290     ; B=4 C=0 +4
+4255                                  291 	;          *nop : nop : nop : nop :< next  <= buffer before
+4255                                  292 	;           nop : nop : nop : nop :< next   <= buffer after
+4257        FE 04 20 05               293 	cp 4 : jr nz, .inject_nops
+4259 04259 .handle_4_nops             295 .handle_4_nops
+4259                                  296 	; we already move l after the 4 nops, so we just store its value
+4259        DD 75 01                  297 	ld (ix + SCROLLER_LINE_DATA.ring_buffer_read_pos), l
+425C        18 0A                     298 	jr .add_instructions
+425E                                  302 	; really does the nops injection in the read buffer
+425E 0425E .inject_nops               303 .inject_nops
+425F        AF                        304 	xor a ; NOP instruction
+425F 0425F .inject_nops_loop          305 .inject_nops_loop
+4260        2D                        306 	dec l ; (was pointing on the next instruction to execute)
+4260        77                        307 	ld (hl), a
+4261        10 FC                     308 	djnz .inject_nops_loop
+4266        DD 75 01                  310 	ld (ix + SCROLLER_LINE_DATA.ring_buffer_read_pos), l ; update the new ring buffer read
+4266        18 00                     311 	jr .add_instructions
+4268                                  317 	; HL points on the buffer start
+4268                                  318 	; af' contains the number of remaining nops
+4268 04268 .add_instructions          319 .add_instructions
+4268        08                        320 	ex af, af'
+4269        4F                        321 	ld c, a
+426A        08                        322 	ex af, af'
+426B 0426B .add_instruction_loop      324 .add_instruction_loop
+426B                                  325 	BUFFER_READ_BYTE() ; get the first byte of the next instruction to add
+Context: test3_code_generation.asm:187:2 > MACRO BUFFER_READ_BYTE:
+426C        7E 2C                       2 		ld a, (hl) : inc l
+Context: test3_code_generation.asm
+426D                                  325 	BUFFER_READ_BYTE() ; get the first byte of the next instruction to add
+426D        B7                        326 	or a
+426E        28 16                     327 	jr z, .try_handle_nop
+4270 04270 .try_handle_out            328 .try_handle_out
+4273        79 FE 04                  329 	ld a, c : cp 4 ; check if we have enough time to inject the out instruction
+4273        30 03                     330 	jr nc, .really_handle_out
+4275 04275 .unable_to_handle_out      331 .unable_to_handle_out
+4276        2D                        332 	dec l ; move back to the previous instruction
+4276        18 1E                     333 	jr .stabilize_code
+4278 04278 .really_handle_out         334 .really_handle_out
+427A        3E ED                     335 	ld a, list_get(opcode(out (c), d), 0) ; set the first byte of out (we've lost this value previouslly read)
+427A                                  336 	CODE_WRITE_BYTE() ; write the out instruction
+Context: test3_code_generation.asm:191:2 > MACRO CODE_WRITE_BYTE:
+427B        12 13                       2 		ld (de), a : inc de
+Context: test3_code_generation.asm
+427C                                  336 	CODE_WRITE_BYTE() ; write the out instruction
+427C                                  337 	BUFFER_READ_BYTE() ; get the register of out (c), e|d
+Context: test3_code_generation.asm:187:2 > MACRO BUFFER_READ_BYTE:
+427D        7E 2C                       2 		ld a, (hl) : inc l
+Context: test3_code_generation.asm
+427E                                  337 	BUFFER_READ_BYTE() ; get the register of out (c), e|d
+427E                                  338 	CODE_WRITE_BYTE() ; write the out register
+Context: test3_code_generation.asm:191:2 > MACRO CODE_WRITE_BYTE:
+427F        12 13                       2 		ld (de), a : inc de
+Context: test3_code_generation.asm
+4280                                  338 	CODE_WRITE_BYTE() ; write the out register
+4284        3E FC 81 4F               339 	ld a, -4 : add c : ld c, a ; update the number of nops left
+4284        18 E5                     340 	jr .add_instruction_loop
+4286 04286 .try_handle_nop            342 .try_handle_nop
+4289        79 FE 01                  343 	ld a, c : cp 1 ; check if we have enough time to inject nop instruction
+4289        30 03                     344 	jr nc, .really_handle_nop
+428B 0428B .unable_to_handle_nop      345 .unable_to_handle_nop
+428C        2D                        346 	dec l ; move back to the previous instruction
+428C        18 08                     347 	jr .stabilize_code
+428E 0428E .really_handle_nop         348 .really_handle_nop
+428F        AF                        349 	xor a ; NOP instruction
+428F                                  350 	CODE_WRITE_BYTE() ; write the nop
+Context: test3_code_generation.asm:191:2 > MACRO CODE_WRITE_BYTE:
+4290        12 13                       2 		ld (de), a : inc de
+Context: test3_code_generation.asm
+4291                                  350 	CODE_WRITE_BYTE() ; write the nop
+4291        0D                        351 	dec c
+4292        18 D7                     352 	jr .add_instruction_loop
+4294        18 D2                     355 	jr .add_instructions
+4296                                  357 	; Stabilize the code to be sure it takes exactly 64 nops
+4296                                  358 	; af' is not up to date, the real value is in c
+4296 04296 .stabilize_code            359 .stabilize_code
+4296        08                        360 	ex af, af'
+4298        79                        361 	ld a, c ; restore the real value
+4299        B7 28 06                  362 	or a : jr z, .finalize_code
+429B        47                        363 	ld b, a
+429D        AF                        364 	xor a ; NOP
+429D 0429D .stabilize_loop            365 .stabilize_loop
+429D                                  366 		CODE_WRITE_BYTE() ; write nop
+Context: test3_code_generation.asm:191:2 > MACRO CODE_WRITE_BYTE:
+429E        12 13                       2 		ld (de), a : inc de
+Context: test3_code_generation.asm
+429F                                  366 		CODE_WRITE_BYTE() ; write nop
+429F        10 FC                     367 	djnz .stabilize_loop
+42A1                                  369 	; Here we want to add the instructions at the end of the line
+42A1                                  370 	; at least a nop, but maybe something to play with rasters too
+42A1 042A1 .finalize_code             371 .finalize_code
+42A1        21 00 42                  372 	ld hl, scroller_template_end_code
+42A4        06 01                     373 	ld b, SCROLLER_TEMPLATE_END_CODE_SIZE
+42A6 042A6 .finalize_loop             374 .finalize_loop
+42A6                                  375 		BUFFER_READ_BYTE()
+Context: test3_code_generation.asm:187:2 > MACRO BUFFER_READ_BYTE:
+42A7        7E 2C                       2 		ld a, (hl) : inc l
+Context: test3_code_generation.asm
+42A8                                  376 		CODE_WRITE_BYTE()
+Context: test3_code_generation.asm:191:2 > MACRO CODE_WRITE_BYTE:
+42A9        12 13                       2 		ld (de), a : inc de
+Context: test3_code_generation.asm
+42AA        10 FA                     377 	djnz .finalize_loop
+42AC        C9                        379 	ret
+42AD                                  383 	; reserve the space for the scroller routines
+0000 ????? {line}
+42AD                                  384 repeat SCROLLER_NB_VERTICAL_BLOCS, line, 0
+42AD                                  385 SCROLLER_CONFIG_{{line}}
+42AD                                  386 	SCROLLER_LINE_DATA(SCROLLER_RING_BUFFER_{{line}}.test_write, SCROLLER_RING_BUFFER_{{line}}.test_read)
+42AD                                  387 
+42AD                                  388 SCROLLER_CODE_{{line}}
+42AD                                  389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+42AD                                  390 	defs 64
+42AD                                  391 	endr
+42AD 042AD SCROLLER_CONFIG_{{line}}   385 SCROLLER_CONFIG_{{line}}
+42AD                                  386 	SCROLLER_LINE_DATA(SCROLLER_RING_BUFFER_{{line}}.test_write, SCROLLER_RING_BUFFER_{{line}}.test_read)
+Context: test3_code_generation.asm:174:2 > STRUCT SCROLLER_LINE_DATA:
+42AD        D6                          1  DB SCROLLER_RING_BUFFER_{{line}}.test_write
+42AE        00                          2  DB SCROLLER_RING_BUFFER_{{line}}.test_read
+42AF        51                          3  DB list_get(OPCODE(OUT (C), D),0x1)
+Context: test3_code_generation.asm
+42B0 042B0 SCROLLER_CODE_{{line}}     388 SCROLLER_CODE_{{line}}
+42B0 042B0 .first_color               389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+42B2        ED 51                     389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+0001 ????? {line}
+42B2        00 00 00 00 00 00 00 00   390 	defs 64
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+42F2 042F2 SCROLLER_CONFIG_{{line}}   385 SCROLLER_CONFIG_{{line}}
+42F2                                  386 	SCROLLER_LINE_DATA(SCROLLER_RING_BUFFER_{{line}}.test_write, SCROLLER_RING_BUFFER_{{line}}.test_read)
+Context: test3_code_generation.asm:174:2 > STRUCT SCROLLER_LINE_DATA:
+42F2        D7                          1  DB SCROLLER_RING_BUFFER_{{line}}.test_write
+42F3        00                          2  DB SCROLLER_RING_BUFFER_{{line}}.test_read
+42F4        51                          3  DB list_get(OPCODE(OUT (C), D),0x1)
+Context: test3_code_generation.asm
+42F5 042F5 SCROLLER_CODE_{{line}}     388 SCROLLER_CODE_{{line}}
+42F5 042F5 .first_color               389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+42F7        ED 51                     389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+0002 ????? {line}
+42F7        00 00 00 00 00 00 00 00   390 	defs 64
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+4337 04337 SCROLLER_CONFIG_{{line}}   385 SCROLLER_CONFIG_{{line}}
+4337                                  386 	SCROLLER_LINE_DATA(SCROLLER_RING_BUFFER_{{line}}.test_write, SCROLLER_RING_BUFFER_{{line}}.test_read)
+Context: test3_code_generation.asm:174:2 > STRUCT SCROLLER_LINE_DATA:
+4337        D8                          1  DB SCROLLER_RING_BUFFER_{{line}}.test_write
+4338        00                          2  DB SCROLLER_RING_BUFFER_{{line}}.test_read
+4339        51                          3  DB list_get(OPCODE(OUT (C), D),0x1)
+Context: test3_code_generation.asm
+433A 0433A SCROLLER_CODE_{{line}}     388 SCROLLER_CODE_{{line}}
+433A 0433A .first_color               389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+433C        ED 51                     389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+0003 ????? {line}
+433C        00 00 00 00 00 00 00 00   390 	defs 64
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+437C 0437C SCROLLER_CONFIG_{{line}}   385 SCROLLER_CONFIG_{{line}}
+437C                                  386 	SCROLLER_LINE_DATA(SCROLLER_RING_BUFFER_{{line}}.test_write, SCROLLER_RING_BUFFER_{{line}}.test_read)
+Context: test3_code_generation.asm:174:2 > STRUCT SCROLLER_LINE_DATA:
+437C        D9                          1  DB SCROLLER_RING_BUFFER_{{line}}.test_write
+437D        00                          2  DB SCROLLER_RING_BUFFER_{{line}}.test_read
+437E        51                          3  DB list_get(OPCODE(OUT (C), D),0x1)
+Context: test3_code_generation.asm
+437F 0437F SCROLLER_CODE_{{line}}     388 SCROLLER_CODE_{{line}}
+437F 0437F .first_color               389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+4381        ED 51                     389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+0004 ????? {line}
+4381        00 00 00 00 00 00 00 00   390 	defs 64
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+43C1 043C1 SCROLLER_CONFIG_{{line}}   385 SCROLLER_CONFIG_{{line}}
+43C1                                  386 	SCROLLER_LINE_DATA(SCROLLER_RING_BUFFER_{{line}}.test_write, SCROLLER_RING_BUFFER_{{line}}.test_read)
+Context: test3_code_generation.asm:174:2 > STRUCT SCROLLER_LINE_DATA:
+43C1        D9                          1  DB SCROLLER_RING_BUFFER_{{line}}.test_write
+43C2        00                          2  DB SCROLLER_RING_BUFFER_{{line}}.test_read
+43C3        51                          3  DB list_get(OPCODE(OUT (C), D),0x1)
+Context: test3_code_generation.asm
+43C4 043C4 SCROLLER_CODE_{{line}}     388 SCROLLER_CODE_{{line}}
+43C4 043C4 .first_color               389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+43C6        ED 51                     389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+0005 ????? {line}
+43C6        00 00 00 00 00 00 00 00   390 	defs 64
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+4406 04406 SCROLLER_CONFIG_{{line}}   385 SCROLLER_CONFIG_{{line}}
+4406                                  386 	SCROLLER_LINE_DATA(SCROLLER_RING_BUFFER_{{line}}.test_write, SCROLLER_RING_BUFFER_{{line}}.test_read)
+Context: test3_code_generation.asm:174:2 > STRUCT SCROLLER_LINE_DATA:
+4406        D8                          1  DB SCROLLER_RING_BUFFER_{{line}}.test_write
+4407        00                          2  DB SCROLLER_RING_BUFFER_{{line}}.test_read
+4408        51                          3  DB list_get(OPCODE(OUT (C), D),0x1)
+Context: test3_code_generation.asm
+4409 04409 SCROLLER_CODE_{{line}}     388 SCROLLER_CODE_{{line}}
+4409 04409 .first_color               389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+440B        ED 51                     389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+0006 ????? {line}
+440B        00 00 00 00 00 00 00 00   390 	defs 64
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+444B 0444B SCROLLER_CONFIG_{{line}}   385 SCROLLER_CONFIG_{{line}}
+444B                                  386 	SCROLLER_LINE_DATA(SCROLLER_RING_BUFFER_{{line}}.test_write, SCROLLER_RING_BUFFER_{{line}}.test_read)
+Context: test3_code_generation.asm:174:2 > STRUCT SCROLLER_LINE_DATA:
+444B        D7                          1  DB SCROLLER_RING_BUFFER_{{line}}.test_write
+444C        00                          2  DB SCROLLER_RING_BUFFER_{{line}}.test_read
+444D        51                          3  DB list_get(OPCODE(OUT (C), D),0x1)
+Context: test3_code_generation.asm
+444E 0444E SCROLLER_CODE_{{line}}     388 SCROLLER_CODE_{{line}}
+444E 0444E .first_color               389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+4450        ED 51                     389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+0007 ????? {line}
+4450        00 00 00 00 00 00 00 00   390 	defs 64
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+4490 04490 SCROLLER_CONFIG_{{line}}   385 SCROLLER_CONFIG_{{line}}
+4490                                  386 	SCROLLER_LINE_DATA(SCROLLER_RING_BUFFER_{{line}}.test_write, SCROLLER_RING_BUFFER_{{line}}.test_read)
+Context: test3_code_generation.asm:174:2 > STRUCT SCROLLER_LINE_DATA:
+4490        D6                          1  DB SCROLLER_RING_BUFFER_{{line}}.test_write
+4491        00                          2  DB SCROLLER_RING_BUFFER_{{line}}.test_read
+4492        51                          3  DB list_get(OPCODE(OUT (C), D),0x1)
+Context: test3_code_generation.asm
+4493 04493 SCROLLER_CODE_{{line}}     388 SCROLLER_CODE_{{line}}
+4493 04493 .first_color               389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+4495        ED 51                     389 .first_color out (c), d ; Always starts with no pixel, will be updated by the code generation
+4495        00 00 00 00 00 00 00 00   390 	defs 64
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+MACRO      BUFFER_FILLER              398 macro BUFFER_FILLER pos
+                                      399 
+                                      400 
+                                      401 	out(c), e: out(c), d
+                                      402 	out(c), e: out (c), e : out(c), d
+                                      403 	out(c), e: out(c), d
+                                      404 	out(c), e: out (c), e  :out(c), d
+                                      405 
+                                      406 	out(c), e: out(c), d
+                                      407 	out(c), e: out(c), d
+                                      408 	out(c), e: out(c), d
+                                      409 	out(c), e: nop: out(c), d
+                                      410 	out(c), e: nop: nop: out(c), d
+                                      411 	out(c), e: nop: nop: nop : out(c), d
+                                      412 
+                                      413 	out (c), e
+                                      414 	repeat {pos}
+                                      415 		nop
+                                      416 	endr
+                                      417 	out (c), d
+                                      418 	endm
+44D5                                  422 ;; Manually made scroller ring buffer for testing.
+44D5                                  423 ;; should be generated programmatically in a real world scenario.
+44D5                                  424 ;; Here we have a bit of empty data, then 5 repetitions of S letter
+44D5                                  425 ;; To ease the writting of the routines, the ring buffer is read destructively: the reading head of the buffer may modify the code to handle properly 4 nops scroll and split/pixel start
+44D5        00 00 00 00 00 00 00 00   427 	align 256
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00                      
+4500 04500 SCROLLER_RING_BUFFER_0     428 SCROLLER_RING_BUFFER_0
+4500 04500 .test_read                 429 .test_read
+4500        00 00 00 00 00 00 00 00   430 	defs 10*4
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+0001 ????? <new iteration>
+4528                                  431 repeat 10
+4528                                  432 		nop
+4528                                  433 		out(c), e
+4528                                  434 		nop
+4528                                  435 		nop
+4528                                  436 		nop
+4528                                  437 		nop
+4528                                  438 		nop
+4528                                  439 		nop
+4528                                  440 		nop
+4528                                  441 		out(c), d
+4528                                  442 	endr
+4528        00                        432 		nop
+4529        ED 59                     433 		out(c), e
+452B        00                        434 		nop
+452C        00                        435 		nop
+452D        00                        436 		nop
+452E        00                        437 		nop
+452F        00                        438 		nop
+4530        00                        439 		nop
+4531        00                        440 		nop
+0002 ????? <new iteration>
+4532        ED 51                     441 		out(c), d
+4534        00                        432 		nop
+4535        ED 59                     433 		out(c), e
+4537        00                        434 		nop
+4538        00                        435 		nop
+4539        00                        436 		nop
+453A        00                        437 		nop
+453B        00                        438 		nop
+453C        00                        439 		nop
+453D        00                        440 		nop
+0003 ????? <new iteration>
+453E        ED 51                     441 		out(c), d
+4540        00                        432 		nop
+4541        ED 59                     433 		out(c), e
+4543        00                        434 		nop
+4544        00                        435 		nop
+4545        00                        436 		nop
+4546        00                        437 		nop
+4547        00                        438 		nop
+4548        00                        439 		nop
+4549        00                        440 		nop
+0004 ????? <new iteration>
+454A        ED 51                     441 		out(c), d
+454C        00                        432 		nop
+454D        ED 59                     433 		out(c), e
+454F        00                        434 		nop
+4550        00                        435 		nop
+4551        00                        436 		nop
+4552        00                        437 		nop
+4553        00                        438 		nop
+4554        00                        439 		nop
+4555        00                        440 		nop
+0005 ????? <new iteration>
+4556        ED 51                     441 		out(c), d
+4558        00                        432 		nop
+4559        ED 59                     433 		out(c), e
+455B        00                        434 		nop
+455C        00                        435 		nop
+455D        00                        436 		nop
+455E        00                        437 		nop
+455F        00                        438 		nop
+4560        00                        439 		nop
+4561        00                        440 		nop
+0006 ????? <new iteration>
+4562        ED 51                     441 		out(c), d
+4564        00                        432 		nop
+4565        ED 59                     433 		out(c), e
+4567        00                        434 		nop
+4568        00                        435 		nop
+4569        00                        436 		nop
+456A        00                        437 		nop
+456B        00                        438 		nop
+456C        00                        439 		nop
+456D        00                        440 		nop
+0007 ????? <new iteration>
+456E        ED 51                     441 		out(c), d
+4570        00                        432 		nop
+4571        ED 59                     433 		out(c), e
+4573        00                        434 		nop
+4574        00                        435 		nop
+4575        00                        436 		nop
+4576        00                        437 		nop
+4577        00                        438 		nop
+4578        00                        439 		nop
+4579        00                        440 		nop
+0008 ????? <new iteration>
+457A        ED 51                     441 		out(c), d
+457C        00                        432 		nop
+457D        ED 59                     433 		out(c), e
+457F        00                        434 		nop
+4580        00                        435 		nop
+4581        00                        436 		nop
+4582        00                        437 		nop
+4583        00                        438 		nop
+4584        00                        439 		nop
+4585        00                        440 		nop
+0009 ????? <new iteration>
+4586        ED 51                     441 		out(c), d
+4588        00                        432 		nop
+4589        ED 59                     433 		out(c), e
+458B        00                        434 		nop
+458C        00                        435 		nop
+458D        00                        436 		nop
+458E        00                        437 		nop
+458F        00                        438 		nop
+4590        00                        439 		nop
+4591        00                        440 		nop
+000A ????? <new iteration>
+4592        ED 51                     441 		out(c), d
+4594        00                        432 		nop
+4595        ED 59                     433 		out(c), e
+4597        00                        434 		nop
+4598        00                        435 		nop
+4599        00                        436 		nop
+459A        00                        437 		nop
+459B        00                        438 		nop
+459C        00                        439 		nop
+459D        00                        440 		nop
+459E        ED 51                     441 		out(c), d
+45A0                                  443 	BUFFER_FILLER(0)
+Context: test3_code_generation.asm:398:2 > MACRO BUFFER_FILLER:
+45A2        ED 59 ED 51                 4 	out(c), e: out(c), d
+45A8        ED 59 ED 59 ED 51           5 	out(c), e: out (c), e : out(c), d
+45AC        ED 59 ED 51                 6 	out(c), e: out(c), d
+45B2        ED 59 ED 59 ED 51           7 	out(c), e: out (c), e  :out(c), d
+45B6        ED 59 ED 51                 9 	out(c), e: out(c), d
+45BA        ED 59 ED 51                10 	out(c), e: out(c), d
+45BE        ED 59 ED 51                11 	out(c), e: out(c), d
+45C3        ED 59 00 ED 51             12 	out(c), e: nop: out(c), d
+45C9        ED 59 00 00 ED 51          13 	out(c), e: nop: nop: out(c), d
+45D0        ED 59 00 00 00 ED 51       14 	out(c), e: nop: nop: nop : out(c), d
+45D2        ED 59                      16 	out (c), e
+45D4                                   17 repeat 0
+45D4                                   18 		nop
+45D4                                   19 	endr
+45D4        ED 51                      20 	out (c), d
+Context: test3_code_generation.asm
+45D6 045D6 .test_write                444 .test_write
+45D6        00 00 00 00 00 00 00 00   446 	align 256
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00                         
+4600 04600 SCROLLER_RING_BUFFER_1     447 SCROLLER_RING_BUFFER_1
+4600 04600 .test_read                 448 .test_read
+4600        00 00 00 00 00 00 00 00   449 	defs 10*4
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+0001 ????? <new iteration>
+4628                                  450 repeat 10
+4628                                  451 		out(c), e
+4628                                  452 		out(c), d
+4628                                  453 		nop:nop:nop:nop
+4628                                  454 		nop:nop:nop:nop
+4628                                  455 	endr
+4628        ED 59                     451 		out(c), e
+462A        ED 51                     452 		out(c), d
+462F        00 00 00 00               453 		nop:nop:nop:nop
+4633        00 00 00 00               454 		nop:nop:nop:nop
+0002 ????? <new iteration>
+4634        ED 59                     451 		out(c), e
+4636        ED 51                     452 		out(c), d
+463B        00 00 00 00               453 		nop:nop:nop:nop
+463F        00 00 00 00               454 		nop:nop:nop:nop
+0003 ????? <new iteration>
+4640        ED 59                     451 		out(c), e
+4642        ED 51                     452 		out(c), d
+4647        00 00 00 00               453 		nop:nop:nop:nop
+464B        00 00 00 00               454 		nop:nop:nop:nop
+0004 ????? <new iteration>
+464C        ED 59                     451 		out(c), e
+464E        ED 51                     452 		out(c), d
+4653        00 00 00 00               453 		nop:nop:nop:nop
+4657        00 00 00 00               454 		nop:nop:nop:nop
+0005 ????? <new iteration>
+4658        ED 59                     451 		out(c), e
+465A        ED 51                     452 		out(c), d
+465F        00 00 00 00               453 		nop:nop:nop:nop
+4663        00 00 00 00               454 		nop:nop:nop:nop
+0006 ????? <new iteration>
+4664        ED 59                     451 		out(c), e
+4666        ED 51                     452 		out(c), d
+466B        00 00 00 00               453 		nop:nop:nop:nop
+466F        00 00 00 00               454 		nop:nop:nop:nop
+0007 ????? <new iteration>
+4670        ED 59                     451 		out(c), e
+4672        ED 51                     452 		out(c), d
+4677        00 00 00 00               453 		nop:nop:nop:nop
+467B        00 00 00 00               454 		nop:nop:nop:nop
+0008 ????? <new iteration>
+467C        ED 59                     451 		out(c), e
+467E        ED 51                     452 		out(c), d
+4683        00 00 00 00               453 		nop:nop:nop:nop
+4687        00 00 00 00               454 		nop:nop:nop:nop
+0009 ????? <new iteration>
+4688        ED 59                     451 		out(c), e
+468A        ED 51                     452 		out(c), d
+468F        00 00 00 00               453 		nop:nop:nop:nop
+4693        00 00 00 00               454 		nop:nop:nop:nop
+000A ????? <new iteration>
+4694        ED 59                     451 		out(c), e
+4696        ED 51                     452 		out(c), d
+469B        00 00 00 00               453 		nop:nop:nop:nop
+469F        00 00 00 00               454 		nop:nop:nop:nop
+46A0                                  456 	BUFFER_FILLER(1)
+Context: test3_code_generation.asm:398:2 > MACRO BUFFER_FILLER:
+46A2        ED 59 ED 51                 4 	out(c), e: out(c), d
+46A8        ED 59 ED 59 ED 51           5 	out(c), e: out (c), e : out(c), d
+46AC        ED 59 ED 51                 6 	out(c), e: out(c), d
+46B2        ED 59 ED 59 ED 51           7 	out(c), e: out (c), e  :out(c), d
+46B6        ED 59 ED 51                 9 	out(c), e: out(c), d
+46BA        ED 59 ED 51                10 	out(c), e: out(c), d
+46BE        ED 59 ED 51                11 	out(c), e: out(c), d
+46C3        ED 59 00 ED 51             12 	out(c), e: nop: out(c), d
+46C9        ED 59 00 00 ED 51          13 	out(c), e: nop: nop: out(c), d
+46D0        ED 59 00 00 00 ED 51       14 	out(c), e: nop: nop: nop : out(c), d
+46D2        ED 59                      16 	out (c), e
+0001 ????? <new iteration>
+46D4                                   17 repeat 1
+46D4                                   18 		nop
+46D4                                   19 	endr
+46D4        00                         18 		nop
+46D5        ED 51                      20 	out (c), d
+Context: test3_code_generation.asm
+46D7 046D7 .test_write                457 .test_write
+46D7        00 00 00 00 00 00 00 00   459 	align 256
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00                            
+4700 04700 SCROLLER_RING_BUFFER_2     460 SCROLLER_RING_BUFFER_2
+4700 04700 .test_read                 461 .test_read
+4700        00 00 00 00 00 00 00 00   462 	defs 10*4
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+0001 ????? <new iteration>
+4728                                  463 repeat 10
+4728                                  464 		out(c), e
+4728                                  465 		out(c), d
+4728                                  466 		nop:nop:nop:nop
+4728                                  467 		nop:nop:nop:nop
+4728                                  468 	endr
+4728        ED 59                     464 		out(c), e
+472A        ED 51                     465 		out(c), d
+472F        00 00 00 00               466 		nop:nop:nop:nop
+4733        00 00 00 00               467 		nop:nop:nop:nop
+0002 ????? <new iteration>
+4734        ED 59                     464 		out(c), e
+4736        ED 51                     465 		out(c), d
+473B        00 00 00 00               466 		nop:nop:nop:nop
+473F        00 00 00 00               467 		nop:nop:nop:nop
+0003 ????? <new iteration>
+4740        ED 59                     464 		out(c), e
+4742        ED 51                     465 		out(c), d
+4747        00 00 00 00               466 		nop:nop:nop:nop
+474B        00 00 00 00               467 		nop:nop:nop:nop
+0004 ????? <new iteration>
+474C        ED 59                     464 		out(c), e
+474E        ED 51                     465 		out(c), d
+4753        00 00 00 00               466 		nop:nop:nop:nop
+4757        00 00 00 00               467 		nop:nop:nop:nop
+0005 ????? <new iteration>
+4758        ED 59                     464 		out(c), e
+475A        ED 51                     465 		out(c), d
+475F        00 00 00 00               466 		nop:nop:nop:nop
+4763        00 00 00 00               467 		nop:nop:nop:nop
+0006 ????? <new iteration>
+4764        ED 59                     464 		out(c), e
+4766        ED 51                     465 		out(c), d
+476B        00 00 00 00               466 		nop:nop:nop:nop
+476F        00 00 00 00               467 		nop:nop:nop:nop
+0007 ????? <new iteration>
+4770        ED 59                     464 		out(c), e
+4772        ED 51                     465 		out(c), d
+4777        00 00 00 00               466 		nop:nop:nop:nop
+477B        00 00 00 00               467 		nop:nop:nop:nop
+0008 ????? <new iteration>
+477C        ED 59                     464 		out(c), e
+477E        ED 51                     465 		out(c), d
+4783        00 00 00 00               466 		nop:nop:nop:nop
+4787        00 00 00 00               467 		nop:nop:nop:nop
+0009 ????? <new iteration>
+4788        ED 59                     464 		out(c), e
+478A        ED 51                     465 		out(c), d
+478F        00 00 00 00               466 		nop:nop:nop:nop
+4793        00 00 00 00               467 		nop:nop:nop:nop
+000A ????? <new iteration>
+4794        ED 59                     464 		out(c), e
+4796        ED 51                     465 		out(c), d
+479B        00 00 00 00               466 		nop:nop:nop:nop
+479F        00 00 00 00               467 		nop:nop:nop:nop
+47A0                                  469 	BUFFER_FILLER(2)
+Context: test3_code_generation.asm:398:2 > MACRO BUFFER_FILLER:
+47A2        ED 59 ED 51                 4 	out(c), e: out(c), d
+47A8        ED 59 ED 59 ED 51           5 	out(c), e: out (c), e : out(c), d
+47AC        ED 59 ED 51                 6 	out(c), e: out(c), d
+47B2        ED 59 ED 59 ED 51           7 	out(c), e: out (c), e  :out(c), d
+47B6        ED 59 ED 51                 9 	out(c), e: out(c), d
+47BA        ED 59 ED 51                10 	out(c), e: out(c), d
+47BE        ED 59 ED 51                11 	out(c), e: out(c), d
+47C3        ED 59 00 ED 51             12 	out(c), e: nop: out(c), d
+47C9        ED 59 00 00 ED 51          13 	out(c), e: nop: nop: out(c), d
+47D0        ED 59 00 00 00 ED 51       14 	out(c), e: nop: nop: nop : out(c), d
+47D2        ED 59                      16 	out (c), e
+0001 ????? <new iteration>
+47D4                                   17 repeat 2
+47D4                                   18 		nop
+47D4                                   19 	endr
+0002 ????? <new iteration>
+47D5        00 00                      18 		nop
+47D6        ED 51                      20 	out (c), d
+Context: test3_code_generation.asm
+47D8 047D8 .test_write                470 .test_write
+47D8        00 00 00 00 00 00 00 00   472 	align 256
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+4800 04800 SCROLLER_RING_BUFFER_3     473 SCROLLER_RING_BUFFER_3
+4800 04800 .test_read                 474 .test_read
+4800        00 00 00 00 00 00 00 00   475 	defs 10*4
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+0001 ????? <new iteration>
+4828                                  476 repeat 10
+4828                                  477 		nop
+4828                                  478 		out(c), e
+4828                                  479 		nop : nop: nop : nop : nop : nop
+4828                                  480 		out(c), d
+4828                                  481 		nop
+4828                                  482 	endr
+4828        00                        477 		nop
+4829        ED 59                     478 		out(c), e
+4830        00 00 00 00 00 00         479 		nop : nop: nop : nop : nop : nop
+4831        ED 51                     480 		out(c), d
+0002 ????? <new iteration>
+4833        00                        481 		nop
+4834        00                        477 		nop
+4835        ED 59                     478 		out(c), e
+483C        00 00 00 00 00 00         479 		nop : nop: nop : nop : nop : nop
+483D        ED 51                     480 		out(c), d
+0003 ????? <new iteration>
+483F        00                        481 		nop
+4840        00                        477 		nop
+4841        ED 59                     478 		out(c), e
+4848        00 00 00 00 00 00         479 		nop : nop: nop : nop : nop : nop
+4849        ED 51                     480 		out(c), d
+0004 ????? <new iteration>
+484B        00                        481 		nop
+484C        00                        477 		nop
+484D        ED 59                     478 		out(c), e
+4854        00 00 00 00 00 00         479 		nop : nop: nop : nop : nop : nop
+4855        ED 51                     480 		out(c), d
+0005 ????? <new iteration>
+4857        00                        481 		nop
+4858        00                        477 		nop
+4859        ED 59                     478 		out(c), e
+4860        00 00 00 00 00 00         479 		nop : nop: nop : nop : nop : nop
+4861        ED 51                     480 		out(c), d
+0006 ????? <new iteration>
+4863        00                        481 		nop
+4864        00                        477 		nop
+4865        ED 59                     478 		out(c), e
+486C        00 00 00 00 00 00         479 		nop : nop: nop : nop : nop : nop
+486D        ED 51                     480 		out(c), d
+0007 ????? <new iteration>
+486F        00                        481 		nop
+4870        00                        477 		nop
+4871        ED 59                     478 		out(c), e
+4878        00 00 00 00 00 00         479 		nop : nop: nop : nop : nop : nop
+4879        ED 51                     480 		out(c), d
+0008 ????? <new iteration>
+487B        00                        481 		nop
+487C        00                        477 		nop
+487D        ED 59                     478 		out(c), e
+4884        00 00 00 00 00 00         479 		nop : nop: nop : nop : nop : nop
+4885        ED 51                     480 		out(c), d
+0009 ????? <new iteration>
+4887        00                        481 		nop
+4888        00                        477 		nop
+4889        ED 59                     478 		out(c), e
+4890        00 00 00 00 00 00         479 		nop : nop: nop : nop : nop : nop
+4891        ED 51                     480 		out(c), d
+000A ????? <new iteration>
+4893        00                        481 		nop
+4894        00                        477 		nop
+4895        ED 59                     478 		out(c), e
+489C        00 00 00 00 00 00         479 		nop : nop: nop : nop : nop : nop
+489D        ED 51                     480 		out(c), d
+489F        00                        481 		nop
+48A0                                  483 	BUFFER_FILLER(3)
+Context: test3_code_generation.asm:398:2 > MACRO BUFFER_FILLER:
+48A2        ED 59 ED 51                 4 	out(c), e: out(c), d
+48A8        ED 59 ED 59 ED 51           5 	out(c), e: out (c), e : out(c), d
+48AC        ED 59 ED 51                 6 	out(c), e: out(c), d
+48B2        ED 59 ED 59 ED 51           7 	out(c), e: out (c), e  :out(c), d
+48B6        ED 59 ED 51                 9 	out(c), e: out(c), d
+48BA        ED 59 ED 51                10 	out(c), e: out(c), d
+48BE        ED 59 ED 51                11 	out(c), e: out(c), d
+48C3        ED 59 00 ED 51             12 	out(c), e: nop: out(c), d
+48C9        ED 59 00 00 ED 51          13 	out(c), e: nop: nop: out(c), d
+48D0        ED 59 00 00 00 ED 51       14 	out(c), e: nop: nop: nop : out(c), d
+48D2        ED 59                      16 	out (c), e
+0001 ????? <new iteration>
+48D4                                   17 repeat 3
+48D4                                   18 		nop
+48D4                                   19 	endr
+0002 ????? <new iteration>
+48D6        00 00 00                   18 		nop
+0003 ????? <new iteration>
+48D7        ED 51                      20 	out (c), d
+Context: test3_code_generation.asm
+48D9 048D9 .test_write                484 .test_write
+48D9        00 00 00 00 00 00 00 00   486 	align 256
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00          
+4900 04900 SCROLLER_RING_BUFFER_4     487 SCROLLER_RING_BUFFER_4
+4900 04900 .test_read                 488 .test_read
+4900        00 00 00 00 00 00 00 00   489 	defs 10*4
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+0001 ????? <new iteration>
+4928                                  490 repeat 10
+4928                                  491 		nop : nop : nop : nop
+4928                                  492 		nop : nop : nop : nop
+4928                                  493 		out(c), e
+4928                                  494 		out(c), d
+4928                                  495 	endr
+492B        00 00 00 00               491 		nop : nop : nop : nop
+492F        00 00 00 00               492 		nop : nop : nop : nop
+4930        ED 59                     493 		out(c), e
+0002 ????? <new iteration>
+4932        ED 51                     494 		out(c), d
+4937        00 00 00 00               491 		nop : nop : nop : nop
+493B        00 00 00 00               492 		nop : nop : nop : nop
+493C        ED 59                     493 		out(c), e
+0003 ????? <new iteration>
+493E        ED 51                     494 		out(c), d
+4943        00 00 00 00               491 		nop : nop : nop : nop
+4947        00 00 00 00               492 		nop : nop : nop : nop
+4948        ED 59                     493 		out(c), e
+0004 ????? <new iteration>
+494A        ED 51                     494 		out(c), d
+494F        00 00 00 00               491 		nop : nop : nop : nop
+4953        00 00 00 00               492 		nop : nop : nop : nop
+4954        ED 59                     493 		out(c), e
+0005 ????? <new iteration>
+4956        ED 51                     494 		out(c), d
+495B        00 00 00 00               491 		nop : nop : nop : nop
+495F        00 00 00 00               492 		nop : nop : nop : nop
+4960        ED 59                     493 		out(c), e
+0006 ????? <new iteration>
+4962        ED 51                     494 		out(c), d
+4967        00 00 00 00               491 		nop : nop : nop : nop
+496B        00 00 00 00               492 		nop : nop : nop : nop
+496C        ED 59                     493 		out(c), e
+0007 ????? <new iteration>
+496E        ED 51                     494 		out(c), d
+4973        00 00 00 00               491 		nop : nop : nop : nop
+4977        00 00 00 00               492 		nop : nop : nop : nop
+4978        ED 59                     493 		out(c), e
+0008 ????? <new iteration>
+497A        ED 51                     494 		out(c), d
+497F        00 00 00 00               491 		nop : nop : nop : nop
+4983        00 00 00 00               492 		nop : nop : nop : nop
+4984        ED 59                     493 		out(c), e
+0009 ????? <new iteration>
+4986        ED 51                     494 		out(c), d
+498B        00 00 00 00               491 		nop : nop : nop : nop
+498F        00 00 00 00               492 		nop : nop : nop : nop
+4990        ED 59                     493 		out(c), e
+000A ????? <new iteration>
+4992        ED 51                     494 		out(c), d
+4997        00 00 00 00               491 		nop : nop : nop : nop
+499B        00 00 00 00               492 		nop : nop : nop : nop
+499C        ED 59                     493 		out(c), e
+499E        ED 51                     494 		out(c), d
+49A0                                  496 	BUFFER_FILLER(3)
+Context: test3_code_generation.asm:398:2 > MACRO BUFFER_FILLER:
+49A2        ED 59 ED 51                 4 	out(c), e: out(c), d
+49A8        ED 59 ED 59 ED 51           5 	out(c), e: out (c), e : out(c), d
+49AC        ED 59 ED 51                 6 	out(c), e: out(c), d
+49B2        ED 59 ED 59 ED 51           7 	out(c), e: out (c), e  :out(c), d
+49B6        ED 59 ED 51                 9 	out(c), e: out(c), d
+49BA        ED 59 ED 51                10 	out(c), e: out(c), d
+49BE        ED 59 ED 51                11 	out(c), e: out(c), d
+49C3        ED 59 00 ED 51             12 	out(c), e: nop: out(c), d
+49C9        ED 59 00 00 ED 51          13 	out(c), e: nop: nop: out(c), d
+49D0        ED 59 00 00 00 ED 51       14 	out(c), e: nop: nop: nop : out(c), d
+49D2        ED 59                      16 	out (c), e
+0001 ????? <new iteration>
+49D4                                   17 repeat 3
+49D4                                   18 		nop
+49D4                                   19 	endr
+0002 ????? <new iteration>
+49D6        00 00 00                   18 		nop
+0003 ????? <new iteration>
+49D7        ED 51                      20 	out (c), d
+Context: test3_code_generation.asm
+49D9 049D9 .test_write                497 .test_write
+49D9        00 00 00 00 00 00 00 00   499 	align 256
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00          
+4A00 04A00 SCROLLER_RING_BUFFER_5     500 SCROLLER_RING_BUFFER_5
+4A00 04A00 .test_read                 501 .test_read
+4A00        00 00 00 00 00 00 00 00   502 	defs 10*4
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+0001 ????? <new iteration>
+4A28                                  503 repeat 10
+4A28                                  504 		nop : nop : nop : nop
+4A28                                  505 		nop : nop : nop : nop
+4A28                                  506 		out(c), e
+4A28                                  507 		out(c), d
+4A28                                  508 	endr
+4A2B        00 00 00 00               504 		nop : nop : nop : nop
+4A2F        00 00 00 00               505 		nop : nop : nop : nop
+4A30        ED 59                     506 		out(c), e
+0002 ????? <new iteration>
+4A32        ED 51                     507 		out(c), d
+4A37        00 00 00 00               504 		nop : nop : nop : nop
+4A3B        00 00 00 00               505 		nop : nop : nop : nop
+4A3C        ED 59                     506 		out(c), e
+0003 ????? <new iteration>
+4A3E        ED 51                     507 		out(c), d
+4A43        00 00 00 00               504 		nop : nop : nop : nop
+4A47        00 00 00 00               505 		nop : nop : nop : nop
+4A48        ED 59                     506 		out(c), e
+0004 ????? <new iteration>
+4A4A        ED 51                     507 		out(c), d
+4A4F        00 00 00 00               504 		nop : nop : nop : nop
+4A53        00 00 00 00               505 		nop : nop : nop : nop
+4A54        ED 59                     506 		out(c), e
+0005 ????? <new iteration>
+4A56        ED 51                     507 		out(c), d
+4A5B        00 00 00 00               504 		nop : nop : nop : nop
+4A5F        00 00 00 00               505 		nop : nop : nop : nop
+4A60        ED 59                     506 		out(c), e
+0006 ????? <new iteration>
+4A62        ED 51                     507 		out(c), d
+4A67        00 00 00 00               504 		nop : nop : nop : nop
+4A6B        00 00 00 00               505 		nop : nop : nop : nop
+4A6C        ED 59                     506 		out(c), e
+0007 ????? <new iteration>
+4A6E        ED 51                     507 		out(c), d
+4A73        00 00 00 00               504 		nop : nop : nop : nop
+4A77        00 00 00 00               505 		nop : nop : nop : nop
+4A78        ED 59                     506 		out(c), e
+0008 ????? <new iteration>
+4A7A        ED 51                     507 		out(c), d
+4A7F        00 00 00 00               504 		nop : nop : nop : nop
+4A83        00 00 00 00               505 		nop : nop : nop : nop
+4A84        ED 59                     506 		out(c), e
+0009 ????? <new iteration>
+4A86        ED 51                     507 		out(c), d
+4A8B        00 00 00 00               504 		nop : nop : nop : nop
+4A8F        00 00 00 00               505 		nop : nop : nop : nop
+4A90        ED 59                     506 		out(c), e
+000A ????? <new iteration>
+4A92        ED 51                     507 		out(c), d
+4A97        00 00 00 00               504 		nop : nop : nop : nop
+4A9B        00 00 00 00               505 		nop : nop : nop : nop
+4A9C        ED 59                     506 		out(c), e
+4A9E        ED 51                     507 		out(c), d
+4AA0                                  509 	BUFFER_FILLER(2)
+Context: test3_code_generation.asm:398:2 > MACRO BUFFER_FILLER:
+4AA2        ED 59 ED 51                 4 	out(c), e: out(c), d
+4AA8        ED 59 ED 59 ED 51           5 	out(c), e: out (c), e : out(c), d
+4AAC        ED 59 ED 51                 6 	out(c), e: out(c), d
+4AB2        ED 59 ED 59 ED 51           7 	out(c), e: out (c), e  :out(c), d
+4AB6        ED 59 ED 51                 9 	out(c), e: out(c), d
+4ABA        ED 59 ED 51                10 	out(c), e: out(c), d
+4ABE        ED 59 ED 51                11 	out(c), e: out(c), d
+4AC3        ED 59 00 ED 51             12 	out(c), e: nop: out(c), d
+4AC9        ED 59 00 00 ED 51          13 	out(c), e: nop: nop: out(c), d
+4AD0        ED 59 00 00 00 ED 51       14 	out(c), e: nop: nop: nop : out(c), d
+4AD2        ED 59                      16 	out (c), e
+0001 ????? <new iteration>
+4AD4                                   17 repeat 2
+4AD4                                   18 		nop
+4AD4                                   19 	endr
+0002 ????? <new iteration>
+4AD5        00 00                      18 		nop
+4AD6        ED 51                      20 	out (c), d
+Context: test3_code_generation.asm
+4AD8 04AD8 .test_write                510 .test_write
+4AD8        00 00 00 00 00 00 00 00   512 	align 256
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+4B00 04B00 SCROLLER_RING_BUFFER_6     513 SCROLLER_RING_BUFFER_6
+4B00 04B00 .test_read                 514 .test_read
+4B00        00 00 00 00 00 00 00 00   515 	defs 10*4
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+0001 ????? <new iteration>
+4B28                                  516 repeat 10
+4B28                                  517 		nop : nop : nop : nop
+4B28                                  518 		nop : nop : nop : nop
+4B28                                  519 		out(c), e
+4B28                                  520 		out(c), d
+4B28                                  521 	endr
+4B2B        00 00 00 00               517 		nop : nop : nop : nop
+4B2F        00 00 00 00               518 		nop : nop : nop : nop
+4B30        ED 59                     519 		out(c), e
+0002 ????? <new iteration>
+4B32        ED 51                     520 		out(c), d
+4B37        00 00 00 00               517 		nop : nop : nop : nop
+4B3B        00 00 00 00               518 		nop : nop : nop : nop
+4B3C        ED 59                     519 		out(c), e
+0003 ????? <new iteration>
+4B3E        ED 51                     520 		out(c), d
+4B43        00 00 00 00               517 		nop : nop : nop : nop
+4B47        00 00 00 00               518 		nop : nop : nop : nop
+4B48        ED 59                     519 		out(c), e
+0004 ????? <new iteration>
+4B4A        ED 51                     520 		out(c), d
+4B4F        00 00 00 00               517 		nop : nop : nop : nop
+4B53        00 00 00 00               518 		nop : nop : nop : nop
+4B54        ED 59                     519 		out(c), e
+0005 ????? <new iteration>
+4B56        ED 51                     520 		out(c), d
+4B5B        00 00 00 00               517 		nop : nop : nop : nop
+4B5F        00 00 00 00               518 		nop : nop : nop : nop
+4B60        ED 59                     519 		out(c), e
+0006 ????? <new iteration>
+4B62        ED 51                     520 		out(c), d
+4B67        00 00 00 00               517 		nop : nop : nop : nop
+4B6B        00 00 00 00               518 		nop : nop : nop : nop
+4B6C        ED 59                     519 		out(c), e
+0007 ????? <new iteration>
+4B6E        ED 51                     520 		out(c), d
+4B73        00 00 00 00               517 		nop : nop : nop : nop
+4B77        00 00 00 00               518 		nop : nop : nop : nop
+4B78        ED 59                     519 		out(c), e
+0008 ????? <new iteration>
+4B7A        ED 51                     520 		out(c), d
+4B7F        00 00 00 00               517 		nop : nop : nop : nop
+4B83        00 00 00 00               518 		nop : nop : nop : nop
+4B84        ED 59                     519 		out(c), e
+0009 ????? <new iteration>
+4B86        ED 51                     520 		out(c), d
+4B8B        00 00 00 00               517 		nop : nop : nop : nop
+4B8F        00 00 00 00               518 		nop : nop : nop : nop
+4B90        ED 59                     519 		out(c), e
+000A ????? <new iteration>
+4B92        ED 51                     520 		out(c), d
+4B97        00 00 00 00               517 		nop : nop : nop : nop
+4B9B        00 00 00 00               518 		nop : nop : nop : nop
+4B9C        ED 59                     519 		out(c), e
+4B9E        ED 51                     520 		out(c), d
+4BA0                                  522 	BUFFER_FILLER(1)
+Context: test3_code_generation.asm:398:2 > MACRO BUFFER_FILLER:
+4BA2        ED 59 ED 51                 4 	out(c), e: out(c), d
+4BA8        ED 59 ED 59 ED 51           5 	out(c), e: out (c), e : out(c), d
+4BAC        ED 59 ED 51                 6 	out(c), e: out(c), d
+4BB2        ED 59 ED 59 ED 51           7 	out(c), e: out (c), e  :out(c), d
+4BB6        ED 59 ED 51                 9 	out(c), e: out(c), d
+4BBA        ED 59 ED 51                10 	out(c), e: out(c), d
+4BBE        ED 59 ED 51                11 	out(c), e: out(c), d
+4BC3        ED 59 00 ED 51             12 	out(c), e: nop: out(c), d
+4BC9        ED 59 00 00 ED 51          13 	out(c), e: nop: nop: out(c), d
+4BD0        ED 59 00 00 00 ED 51       14 	out(c), e: nop: nop: nop : out(c), d
+4BD2        ED 59                      16 	out (c), e
+0001 ????? <new iteration>
+4BD4                                   17 repeat 1
+4BD4                                   18 		nop
+4BD4                                   19 	endr
+4BD4        00                         18 		nop
+4BD5        ED 51                      20 	out (c), d
+Context: test3_code_generation.asm
+4BD7 04BD7 .test_write                523 .test_write
+4BD7        00 00 00 00 00 00 00 00   525 	align 256
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00                            
+4C00 04C00 SCROLLER_RING_BUFFER_7     526 SCROLLER_RING_BUFFER_7
+4C00 04C00 .test_read                 527 .test_read
+4C00        00 00 00 00 00 00 00 00   528 	defs 10*4
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+            00 00 00 00 00 00 00 00       
+0001 ????? <new iteration>
+4C28                                  529 repeat 10
+4C28                                  530 		out(c), e
+4C28                                  531 		nop : nop : nop : nop
+4C28                                  532 		nop : nop : nop
+4C28                                  533 		out(c), d
+4C28                                  534 		nop
+4C28                                  535 	endr
+4C28        ED 59                     530 		out(c), e
+4C2D        00 00 00 00               531 		nop : nop : nop : nop
+4C30        00 00 00                  532 		nop : nop : nop
+4C31        ED 51                     533 		out(c), d
+0002 ????? <new iteration>
+4C33        00                        534 		nop
+4C34        ED 59                     530 		out(c), e
+4C39        00 00 00 00               531 		nop : nop : nop : nop
+4C3C        00 00 00                  532 		nop : nop : nop
+4C3D        ED 51                     533 		out(c), d
+0003 ????? <new iteration>
+4C3F        00                        534 		nop
+4C40        ED 59                     530 		out(c), e
+4C45        00 00 00 00               531 		nop : nop : nop : nop
+4C48        00 00 00                  532 		nop : nop : nop
+4C49        ED 51                     533 		out(c), d
+0004 ????? <new iteration>
+4C4B        00                        534 		nop
+4C4C        ED 59                     530 		out(c), e
+4C51        00 00 00 00               531 		nop : nop : nop : nop
+4C54        00 00 00                  532 		nop : nop : nop
+4C55        ED 51                     533 		out(c), d
+0005 ????? <new iteration>
+4C57        00                        534 		nop
+4C58        ED 59                     530 		out(c), e
+4C5D        00 00 00 00               531 		nop : nop : nop : nop
+4C60        00 00 00                  532 		nop : nop : nop
+4C61        ED 51                     533 		out(c), d
+0006 ????? <new iteration>
+4C63        00                        534 		nop
+4C64        ED 59                     530 		out(c), e
+4C69        00 00 00 00               531 		nop : nop : nop : nop
+4C6C        00 00 00                  532 		nop : nop : nop
+4C6D        ED 51                     533 		out(c), d
+0007 ????? <new iteration>
+4C6F        00                        534 		nop
+4C70        ED 59                     530 		out(c), e
+4C75        00 00 00 00               531 		nop : nop : nop : nop
+4C78        00 00 00                  532 		nop : nop : nop
+4C79        ED 51                     533 		out(c), d
+0008 ????? <new iteration>
+4C7B        00                        534 		nop
+4C7C        ED 59                     530 		out(c), e
+4C81        00 00 00 00               531 		nop : nop : nop : nop
+4C84        00 00 00                  532 		nop : nop : nop
+4C85        ED 51                     533 		out(c), d
+0009 ????? <new iteration>
+4C87        00                        534 		nop
+4C88        ED 59                     530 		out(c), e
+4C8D        00 00 00 00               531 		nop : nop : nop : nop
+4C90        00 00 00                  532 		nop : nop : nop
+4C91        ED 51                     533 		out(c), d
+000A ????? <new iteration>
+4C93        00                        534 		nop
+4C94        ED 59                     530 		out(c), e
+4C99        00 00 00 00               531 		nop : nop : nop : nop
+4C9C        00 00 00                  532 		nop : nop : nop
+4C9D        ED 51                     533 		out(c), d
+4C9F        00                        534 		nop
+4CA0                                  536 	BUFFER_FILLER(0)
+Context: test3_code_generation.asm:398:2 > MACRO BUFFER_FILLER:
+4CA2        ED 59 ED 51                 4 	out(c), e: out(c), d
+4CA8        ED 59 ED 59 ED 51           5 	out(c), e: out (c), e : out(c), d
+4CAC        ED 59 ED 51                 6 	out(c), e: out(c), d
+4CB2        ED 59 ED 59 ED 51           7 	out(c), e: out (c), e  :out(c), d
+4CB6        ED 59 ED 51                 9 	out(c), e: out(c), d
+4CBA        ED 59 ED 51                10 	out(c), e: out(c), d
+4CBE        ED 59 ED 51                11 	out(c), e: out(c), d
+4CC3        ED 59 00 ED 51             12 	out(c), e: nop: out(c), d
+4CC9        ED 59 00 00 ED 51          13 	out(c), e: nop: nop: out(c), d
+4CD0        ED 59 00 00 00 ED 51       14 	out(c), e: nop: nop: nop : out(c), d
+4CD2        ED 59                      16 	out (c), e
+4CD4                                   17 repeat 0
+4CD4                                   18 		nop
+4CD4                                   19 	endr

@@ -1,0 +1,21 @@
+
+- tgt: test1
+  phony: true
+  cmd:
+    - basm test1_shape.asm --snapshot -o test1.sna
+    - emu --snapshot test1.sna run
+
+- tgt: test2
+  phony: true
+  cmd:
+    - basm test2_shifting.asm --snapshot -o test2.sna --lst test2.lst
+    - emu --snapshot test2.sna  --emulator ace run
+
+
+- tgt: test3
+  phony: true
+  cmd:
+    - basm test3_code_generation.asm --snapshot -o test3.sna --lst test3.lst
+    - emu --snapshot test3.sna  --emulator ace run
+
+
