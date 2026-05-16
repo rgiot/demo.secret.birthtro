@@ -51,9 +51,8 @@ init
 
 
 		; for test purpose, directly fill the buffers
-		BREAKPOINT
 		repeat 10
-			ld hl, SCROLLER_FONT.letter_s_line_0
+			ld hl, letter_s_line_0
 			call scroller_write_char_fully
 		endr
 
@@ -138,7 +137,6 @@ scroller_generate_initial_code
 scroller_update_code_partially
 	; handle the scroll position
 	ld a, (scroller_show.left_shift)
-	BREAKPOINT
 	inc a
 	and %11
 	ld (scroller_show.left_shift), a
@@ -578,125 +576,120 @@ scroller_write_char_fully
 ; ...
 
 
+; Constraints
+; - the duration of each line of a char must be the same
+; - each char can have a various duration
+; - each line must finish in off mode
+
 
 	;; set the pixel for the font
-	macro FONT_ON
+	macro FONT_ON extra
+		assert {extra} >= 0
 		out (c), e
+		if {extra} > 0
+			FONT_WAIT({extra})
+		endif
 	endm
 
 	;; reset the pixel for the font
-	macro FONT_OFF
+	macro FONT_OFF extra
+		assert {extra} >= 0
 		out (c), d
+		if {extra} > 0
+			FONT_WAIT({extra})
+		endif
 	endm
 
+	;; Set waiting time
 	macro FONT_WAIT duration
 		defs {duration} ; TODO use out (c), d|e when possible to be more efficient
 	endm
 
 	macro FONT_START_LINE
+letter_{SELECTED_FONT_LETTER}_line_{CURRENT_FONT_LINE}
+	db letter_{SELECTED_FONT_LETTER}_line_{CURRENT_FONT_LINE}_size  ; the number of bytes to write for this line
+	TICKER START CHAR_{SELECTED_FONT_LETTER}_LINE_{CURRENT_FONT_LINE}_NOPS_COUNTER
 	endm
 	
 	macro FONT_FINISH_LINE
+		TICKER STOP
+letter_{SELECTED_FONT_LETTER}_line_{CURRENT_FONT_LINE}_size equ $ - letter_{SELECTED_FONT_LETTER}_line_{CURRENT_FONT_LINE} - 1
+
+		CURRENT_FONT_LINE = CURRENT_FONT_LINE + 1
 	endm
 	
 	macro FONT_START_LETTER name
-		SELECTED_FONT_LETTER = {name}
-.letter_{SELECTED_FONT_LETTER}
-.letter_{SELECTED_FONT_LETTER}_nb_nops db CHAR_S_LINE_0_NOPS_COUNTER ; same value for each line of the letter to ease the code generation
+		SELECTED_FONT_LETTER = "{name}"
+		CURRENT_FONT_LINE = 0
+
+letter_{SELECTED_FONT_LETTER}
+letter_{SELECTED_FONT_LETTER}_nb_nops db CHAR_{SELECTED_FONT_LETTER}_LINE_{CURRENT_FONT_LINE}_NOPS_COUNTER ; same value for each line of the letter to ease the code generation
 	endm
 
 	macro FONT_STOP_LETTER
+		; we want each line to strictly use the same number of nops 
+		assert CHAR_{SELECTED_FONT_LETTER}_LINE_0_NOPS_COUNTER == CHAR_{SELECTED_FONT_LETTER}_LINE_1_NOPS_COUNTER, SELECTED_FONT_LETTER, ": each line of the character must use the same number of nops"
+		assert CHAR_{SELECTED_FONT_LETTER}_LINE_0_NOPS_COUNTER == CHAR_{SELECTED_FONT_LETTER}_LINE_2_NOPS_COUNTER, SELECTED_FONT_LETTER, ": each line of the character must use the same number of nops"
+		assert CHAR_{SELECTED_FONT_LETTER}_LINE_0_NOPS_COUNTER == CHAR_{SELECTED_FONT_LETTER}_LINE_3_NOPS_COUNTER, SELECTED_FONT_LETTER, ": each line of the character must use the same number of nops"
+		assert CHAR_{SELECTED_FONT_LETTER}_LINE_0_NOPS_COUNTER == CHAR_{SELECTED_FONT_LETTER}_LINE_4_NOPS_COUNTER, SELECTED_FONT_LETTER, ": each line of the character must use the same number of nops"
+		assert CHAR_{SELECTED_FONT_LETTER}_LINE_0_NOPS_COUNTER == CHAR_{SELECTED_FONT_LETTER}_LINE_5_NOPS_COUNTER, SELECTED_FONT_LETTER, ": each line of the character must use the same number of nops"
+		assert CHAR_{SELECTED_FONT_LETTER}_LINE_0_NOPS_COUNTER == CHAR_{SELECTED_FONT_LETTER}_LINE_6_NOPS_COUNTER, SELECTED_FONT_LETTER, ": each line of the character must use the same number of nops"
+		assert CHAR_{SELECTED_FONT_LETTER}_LINE_0_NOPS_COUNTER == CHAR_{SELECTED_FONT_LETTER}_LINE_7_NOPS_COUNTER, SELECTED_FONT_LETTER, ": each line of the character must use the same number of nops"
 	endm
 
 
-SCROLLER_FONT
-	FONT_START_LETTER "S"
+SCROLLER_FONTS
 
-.letter_s_line_0
-	db .letter_s_line0_size  ; the number of bytes to write for this line
-	TICKER START CHAR_S_LINE_0_NOPS_COUNTER
-		FONT_WAIT(1)
-		FONT_ON()
-		FONT_WAIT(7)
-		FONT_OFF()
-	TICKER STOP
-.letter_s_line0_size equ $ - .letter_s_line_0 - 1
-
-.letter_s_line_1
-	db .letter_s_line1_size  
-	TICKER START CHAR_S_LINE_1_NOPS_COUNTER
-		FONT_ON()
-		FONT_OFF()
-		FONT_WAIT(8)
-	TICKER STOP
-.letter_s_line1_size equ $ - .letter_s_line_1 - 1
-
-.letter_s_line_2
-	db .letter_s_line2_size  
-	TICKER START CHAR_S_LINE_2_NOPS_COUNTER
-		FONT_ON()
-		FONT_OFF()
-		FONT_WAIT(8)
-	TICKER STOP
-.letter_s_line2_size equ $ - .letter_s_line_2 - 1
-
-.letter_s_line_3
-	db .letter_s_line3_size  
-	TICKER START CHAR_S_LINE_3_NOPS_COUNTER
-		FONT_WAIT(1)
-		FONT_ON()
-		FONT_WAIT(6)
-		FONT_OFF()
-		FONT_WAIT(1)
-	TICKER STOP
-.letter_s_line3_size equ $ - .letter_s_line_3 - 1
+	FONT_START_LETTER(s)
+	 	FONT_START_LINE()
+			FONT_WAIT(1) 	; 1 nop without pixel
+			FONT_ON(7)      ; 4+7 nops of pixels
+			FONT_OFF(0)     ; 4+0 nops without pixel. Minimum mandatory
+		FONT_FINISH_LINE()
 
 
-.letter_s_line_4
-	db .letter_s_line4_size  
-	TICKER START CHAR_S_LINE_4_NOPS_COUNTER
-		FONT_WAIT(8)
-		FONT_ON()
-		FONT_OFF()
-	TICKER STOP
-.letter_s_line4_size equ $ - .letter_s_line_4 - 1
+	 	FONT_START_LINE()
+			FONT_ON(0)         ; 4+0 on
+			FONT_OFF(8)        ; 4+8 off
+		FONT_FINISH_LINE()
 
-.letter_s_line_5
-	db .letter_s_line5_size  
-	TICKER START CHAR_S_LINE_5_NOPS_COUNTER
-		FONT_WAIT(8)
-		FONT_ON()
-		FONT_OFF()
-	TICKER STOP
-.letter_s_line5_size equ $ - .letter_s_line_5 - 1
+	 	FONT_START_LINE()
+			FONT_ON(0)         ; 4+0 on
+			FONT_OFF(8)        ; 4+8 off
+		FONT_FINISH_LINE()
 
-.letter_s_line_6
-	db .letter_s_line6_size		
-	TICKER START CHAR_S_LINE_6_NOPS_COUNTER
-		FONT_WAIT(8)
-		FONT_ON()
-		FONT_OFF()
-	TICKER STOP
-.letter_s_line6_size equ $ - .letter_s_line_6 - 1
+	 	FONT_START_LINE()
+			FONT_WAIT(1)    ; 1 off
+			FONT_ON(6)      ; 4+6 on
+			FONT_OFF(1)     ; 4+1 off
+		FONT_FINISH_LINE()
 
-.letter_s_line_7
-	db .letter_s_line7_size  
-	TICKER START CHAR_S_LINE_7_NOPS_COUNTER
-		FONT_ON()
-		FONT_WAIT(7)
-		FONT_OFF()	
-		FONT_WAIT(1)
-	TICKER STOP
-.letter_s_line7_size equ $ - .letter_s_line_7 - 1
 
-	; we want each line to strictly use the same number of nops 
-	assert CHAR_S_LINE_0_NOPS_COUNTER == CHAR_S_LINE_1_NOPS_COUNTER, "each line of the character must use the same number of nops"
-	assert CHAR_S_LINE_0_NOPS_COUNTER == CHAR_S_LINE_2_NOPS_COUNTER, "each line of the character must use the same number of nops"
-	assert CHAR_S_LINE_0_NOPS_COUNTER == CHAR_S_LINE_3_NOPS_COUNTER, "each line of the character must use the same number of nops"
-	assert CHAR_S_LINE_0_NOPS_COUNTER == CHAR_S_LINE_4_NOPS_COUNTER, "each line of the character must use the same number of nops"
-	assert CHAR_S_LINE_0_NOPS_COUNTER == CHAR_S_LINE_5_NOPS_COUNTER, "each line of the character must use the same number of nops"
-	assert CHAR_S_LINE_0_NOPS_COUNTER == CHAR_S_LINE_6_NOPS_COUNTER, "each line of the character must use the same number of nops"
-	assert CHAR_S_LINE_0_NOPS_COUNTER == CHAR_S_LINE_7_NOPS_COUNTER, "each line of the character must use the same number of nops"
+	 	FONT_START_LINE()
+			FONT_WAIT(8)
+			FONT_ON(0)      ; 4+0 on
+			FONT_OFF(0)     ; 4+0 off
+		FONT_FINISH_LINE()
+
+		FONT_START_LINE()
+			FONT_WAIT(8)
+			FONT_ON(0)
+			FONT_OFF(0)
+		FONT_FINISH_LINE()
+
+	 	FONT_START_LINE()
+			FONT_WAIT(8)
+			FONT_ON(0)
+			FONT_OFF(0)
+		FONT_FINISH_LINE()
+
+		FONT_START_LINE()
+			FONT_ON(7)
+			FONT_OFF(1)	
+		FONT_FINISH_LINE()
+
+	FONT_STOP_LETTER()
+
 
 
 
