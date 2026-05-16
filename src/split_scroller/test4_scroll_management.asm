@@ -602,6 +602,7 @@ scroller_write_char_fully
 	macro FONT_START_LETTER name
 		SELECTED_FONT_LETTER = {name}
 .letter_{SELECTED_FONT_LETTER}
+.letter_{SELECTED_FONT_LETTER}_nb_nops db CHAR_S_LINE_0_NOPS_COUNTER ; same value for each line of the letter to ease the code generation
 	endm
 
 	macro FONT_STOP_LETTER
@@ -610,8 +611,6 @@ scroller_write_char_fully
 
 SCROLLER_FONT
 	FONT_START_LETTER "S"
-.letter_s
-.letter_s_nb_nops db CHAR_S_LINE_0_NOPS_COUNTER ; same value for each line of the letter to ease the code generation
 
 .letter_s_line_0
 	db .letter_s_line0_size  ; the number of bytes to write for this line
