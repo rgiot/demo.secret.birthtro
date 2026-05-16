@@ -16,6 +16,13 @@
   phony: true
   cmd:
     - basm test3_code_generation.asm --snapshot -o test3.sna --lst test3.lst
-    - emu --snapshot test3.sna --crtc 1 --emulator ace run
+    - emu --snapshot test3.sna --emulator ace run
+
+
+- tgt: test4
+  phony: true
+  cmd:
+    - basm test4_scroll_management.asm --snapshot -o test4.sna --lst test4.lst
+    - emu --snapshot test4.sna  --emulator ace run
 
 
