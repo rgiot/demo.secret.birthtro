@@ -51,10 +51,55 @@ init
 
 
 		; for test purpose, directly fill the buffers
-		repeat 10
+			ld hl, letter_ipmt_line_0
+			call scroller_write_char_fully
+
+			ld hl, letter_ipmh_line_0
+			call scroller_write_char_fully
+
+			ld hl, letter_ipmi_line_0
+			call scroller_write_char_fully
+
+			ld hl, letter_ipms_line_0
+			call scroller_write_char_fully
+
+			ld hl, letter_ipmsp_line_0
+			call scroller_write_char_fully
+
+			ld hl, letter_ipma_line_0
+			call scroller_write_char_fully
+
+			ld hl, letter_ipmr_line_0
+			call scroller_write_char_fully
+
+			ld hl, letter_ipmt_line_0
+			call scroller_write_char_fully
+
+				; ------
+
+			ld hl, letter_t_line_0
+			call scroller_write_char_fully
+
+			ld hl, letter_h_line_0
+			call scroller_write_char_fully
+
+			ld hl, letter_i_line_0
+			call scroller_write_char_fully
+
 			ld hl, letter_s_line_0
 			call scroller_write_char_fully
-		endr
+
+			ld hl, letter_sp_line_0
+			call scroller_write_char_fully
+
+			ld hl, letter_a_line_0
+			call scroller_write_char_fully
+
+			ld hl, letter_r_line_0
+			call scroller_write_char_fully
+
+			ld hl, letter_t_line_0
+			call scroller_write_char_fully
 
 		call scroller_generate_initial_code
 	ei
@@ -551,6 +596,7 @@ scroller_write_char_line
 ; Write a whole character in the ring buffer of a given line.
 ; Input:
 ;  - HL: address of the character data (the first line data, so the number of nops kept)
+; TODO: remove this piece of code, because there is no reason to write a whole character in a whole. it is too slow and we can do it in 8 frames without any issues
 scroller_write_char_fully
 	; TODO get the address of the character data to write in HL
 	; write the 8 lines of the character in the ring buffer
@@ -602,12 +648,19 @@ scroller_write_char_fully
 
 	;; Set waiting time
 	macro FONT_WAIT duration
-		defs {duration} ; TODO use out (c), d|e when possible to be more efficient
+		; TODO use out (c), d|e when possible to be more efficient
+		if {duration} > 0
+		;	repeat {duration}
+		;		nop
+		;	endr
+			defs {duration}
+		endif
 	endm
 
 	macro FONT_START_LINE
 letter_{SELECTED_FONT_LETTER}_line_{CURRENT_FONT_LINE}
 	db letter_{SELECTED_FONT_LETTER}_line_{CURRENT_FONT_LINE}_size  ; the number of bytes to write for this line
+	
 	TICKER START CHAR_{SELECTED_FONT_LETTER}_LINE_{CURRENT_FONT_LINE}_NOPS_COUNTER
 	endm
 	
@@ -638,58 +691,288 @@ letter_{SELECTED_FONT_LETTER}_nb_nops db CHAR_{SELECTED_FONT_LETTER}_LINE_{CURRE
 	endm
 
 
+	;; Generate the necessary code for a line stored within an array of ' ' and '.'
+	macro FONT_CREATE_LINE line
+		FONT_START_LINE()
+		
+		PREVIOUS_PIXEL = '.'
+		PREVIOUS_PIXEL_COUNT = 0
+		CURRENT_LINE = {line}
+		CURRENT_LINE_SIZE = list_len(CURRENT_LINE)
+		CURRENT_PIXEL_INDEX = 0
+		FIRST_OPCODE_EMITTED = false
+
+		while CURRENT_PIXEL_INDEX < CURRENT_LINE_SIZE
+			CURRENT_PIXEL = list_get(CURRENT_LINE, CURRENT_PIXEL_INDEX)
+
+			if CURRENT_PIXEL != '.' && CURRENT_PIXEL != '#'
+				fail "Invalid pixel value. Only ' ' and '#' are allowed"
+			endif
+
+			if CURRENT_PIXEL == PREVIOUS_PIXEL
+				; we have the same pixel as before, we just need to increase the counter
+				PREVIOUS_PIXEL_COUNT = PREVIOUS_PIXEL_COUNT + 1
+			else
+				if !FIRST_OPCODE_EMITTED
+					; here we can safely emit the wait
+					FONT_WAIT(PREVIOUS_PIXEL_COUNT)
+				else
+					if PREVIOUS_PIXEL_COUNT < 4
+						fail "We need at least 4 pixels. The minimum handled by OUT"
+					endif
+					if PREVIOUS_PIXEL = '.'
+						FONT_OFF(PREVIOUS_PIXEL_COUNT - 4) ; we handle the first 4 nops with the previous out (c), e|d
+					else
+						FONT_ON(PREVIOUS_PIXEL_COUNT - 4) ; we handle the first 4 nops with the previous out (c), e|d
+					endif
+				endif
+
+
+				PREVIOUS_PIXEL_COUNT = 1
+				PREVIOUS_PIXEL = CURRENT_PIXEL
+				FIRST_OPCODE_EMITTED = true
+
+			endif
+
+
+			CURRENT_PIXEL_INDEX = CURRENT_PIXEL_INDEX + 1
+		wend
+
+		if PREVIOUS_PIXEL_COUNT < 4
+			fail "We need at least 4 pixels. The minimum handled by OUT"
+		endif
+		if PREVIOUS_PIXEL = '.'
+			FONT_OFF(PREVIOUS_PIXEL_COUNT - 4) ; we handle the first 4 nops with the previous out (c), e|d
+		else
+			fail "the line must end without pixels"
+		endif
+
+		FONT_FINISH_LINE()
+	endm
+
+	macro FONT_CREATE_CHAR char, line1, line2, line3, line4, line5, line6, line7, line8
+		FONT_START_LETTER({char})
+
+		FONT_CREATE_LINE({line1})
+		FONT_CREATE_LINE({line2})
+		FONT_CREATE_LINE({line3})
+		FONT_CREATE_LINE({line4})
+		FONT_CREATE_LINE({line5})
+		FONT_CREATE_LINE({line6})
+		FONT_CREATE_LINE({line7})
+		FONT_CREATE_LINE({line8})
+
+		FONT_STOP_LETTER()
+
+	endm
+
+	macro FONT_CREATE_IPM_LINE line
+
+		IPM_LINE_PIXEL_0 = list_get({line}, 0)
+		IPM_LINE_PIXEL_1 = list_get({line}, 1)
+		IPM_LINE_PIXEL_2 = list_get({line}, 2)
+		IPM_LINE_PIXEL_3 = list_get({line}, 3)
+
+		FONT_CREATE_LINE([
+			IPM_LINE_PIXEL_0, IPM_LINE_PIXEL_0, IPM_LINE_PIXEL_0, IPM_LINE_PIXEL_0,
+			IPM_LINE_PIXEL_1, IPM_LINE_PIXEL_1, IPM_LINE_PIXEL_1, IPM_LINE_PIXEL_1,
+			IPM_LINE_PIXEL_2, IPM_LINE_PIXEL_2, IPM_LINE_PIXEL_2, IPM_LINE_PIXEL_2,
+			IPM_LINE_PIXEL_3, IPM_LINE_PIXEL_3, IPM_LINE_PIXEL_3, IPM_LINE_PIXEL_3
+		])
+
+	endm
+
+	macro FONT_CREATE_IPM_CHAR char, line1, line2, line3, line4, line5, line6, line7, line8
+		FONT_START_LETTER(ipm{char})
+
+		FONT_CREATE_IPM_LINE({line1})
+		FONT_CREATE_IPM_LINE({line2})
+		FONT_CREATE_IPM_LINE({line3})
+		FONT_CREATE_IPM_LINE({line4})
+		FONT_CREATE_IPM_LINE({line5})
+		FONT_CREATE_IPM_LINE({line6})
+		FONT_CREATE_IPM_LINE({line7})
+		FONT_CREATE_IPM_LINE({line8})
+
+		FONT_STOP_LETTER()
+	endm
+
+	macro FONT_SAME_AS_IPM char
+letter_{char} equ letter_ipm{char}
+letter_{char}_line_0 equ letter_ipm{char}_line_0
+	endm
+
 SCROLLER_FONTS
 
-	FONT_START_LETTER(s)
-	 	FONT_START_LINE()
-			FONT_WAIT(1) 	; 1 nop without pixel
-			FONT_ON(7)      ; 4+7 nops of pixels
-			FONT_OFF(0)     ; 4+0 nops without pixel. Minimum mandatory
-		FONT_FINISH_LINE()
+		FONT_CREATE_IPM_CHAR( sp,
+			"....",
+			"....",
+			"....",
+			"....",
+			"....",
+			"....",
+			"....",
+			"...."
+		)
+		FONT_SAME_AS_IPM(sp)
 
 
-	 	FONT_START_LINE()
-			FONT_ON(0)         ; 4+0 on
-			FONT_OFF(8)        ; 4+8 off
-		FONT_FINISH_LINE()
+		FONT_CREATE_IPM_CHAR( a,
+			".#..",
+			"#.#.",
+			"#.#.",
+			"###.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#."
+		)
+		; our nop resolution font
+		FONT_CREATE_CHAR( a,
+			"....####........",
+			".##########.....",
+			"####....####....",
+			"####....####....",
+			"############....",
+			"####....####....",
+			"####....####....",
+			"####....####...."
+		)
 
-	 	FONT_START_LINE()
-			FONT_ON(0)         ; 4+0 on
-			FONT_OFF(8)        ; 4+8 off
-		FONT_FINISH_LINE()
 
-	 	FONT_START_LINE()
-			FONT_WAIT(1)    ; 1 off
-			FONT_ON(6)      ; 4+6 on
-			FONT_OFF(1)     ; 4+1 off
-		FONT_FINISH_LINE()
+		FONT_CREATE_IPM_CHAR( h,
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"###.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#."
+		)
+		FONT_SAME_AS_IPM(h)
 
 
-	 	FONT_START_LINE()
-			FONT_WAIT(8)
-			FONT_ON(0)      ; 4+0 on
-			FONT_OFF(0)     ; 4+0 off
-		FONT_FINISH_LINE()
+		FONT_CREATE_IPM_CHAR( i,
+			"###.",
+			".#..",
+			".#..",
+			".#..",
+			".#..",
+			".#..",
+			".#..",
+			"###."
+		)
+		FONT_CREATE_CHAR( i,  /*Here we use only one out column instead of 3 in the origial font*/
+			"####.....",
+			"####.....",
+			"####.....",
+			"####.....",
+			"####.....",
+			"####.....",
+			"####.....",
+			"####....."
+		)
 
-		FONT_START_LINE()
-			FONT_WAIT(8)
-			FONT_ON(0)
-			FONT_OFF(0)
-		FONT_FINISH_LINE()
 
-	 	FONT_START_LINE()
-			FONT_WAIT(8)
-			FONT_ON(0)
-			FONT_OFF(0)
-		FONT_FINISH_LINE()
+		FONT_CREATE_IPM_CHAR( r,
+			"###.",
+			"#.#.",
+			"#.#.",
+			"##..",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#."
+		)
 
-		FONT_START_LINE()
-			FONT_ON(7)
-			FONT_OFF(1)	
-		FONT_FINISH_LINE()
+		FONT_CREATE_CHAR( r,
+			"###########.....",
+			"####....####....",
+			"####....####....",
+			"#########.......",
+			"####....####....",
+			"####....####....",
+			"####....####....",
+			"####....####...."
+		)
 
-	FONT_STOP_LETTER()
 
+
+
+		; our nop resolution font
+		FONT_CREATE_CHAR( s,
+			".###########....",
+			"####............",
+			"####............",
+			".##########.....",
+			"........####....",
+			"........####....",
+			"........####....",
+			"###########....."
+		)
+
+		; ipm cult out resolution font
+		FONT_CREATE_IPM_CHAR( s,
+			"###.",
+			"#...",
+			"#...",
+			"###.",
+			"..#.",
+			"..#.",
+			"..#.",
+			"###."
+		)
+
+		FONT_CREATE_IPM_CHAR( t,
+			"###.",
+            ".#..",
+            ".#..",
+            ".#..",
+            ".#..",
+            ".#..",
+            ".#..",
+            ".#.."
+		)
+		FONT_SAME_AS_IPM(t)
+
+
+
+
+; for the char encoding, we consider lower case to be IPM font and UPPER case to be our updated font
+charset "aAhHiIrRsStT", 0
+
+
+	macro FONT_MAPPING_ENTRY(char)
+		@letter={char}
+		dw letter_{@letter} ; XXX we cannot directly use {char} because it is replaced with surroundings ''
+		dw letter_ipm{@letter}
+	endm
+
+	;; Macro to generate the table that map a char to is font data
+	;; take as input a lowercase string and generate the charset command and the table with the mapping for each char to its font data
+	macro FONT_MAPPING_GENERATE lowercase_chars
+complete_charset = " " ; very first char is space
+
+		; generate the string to provide to charset directive
+		repeat string_len({lowercase_chars}), i, 0
+			complete_charset = string_concat(complete_charset, list_get({lowercase_chars}, {i}))
+			complete_charset = string_concat(complete_charset, char(int(list_get({lowercase_chars}, {i}))+('A'-'a'))) ; add the upper case version of the char to the charset
+		endr
+
+		; execute charset_directive
+		charset complete_charset, 0
+
+		; generate the table of correspondance of each char
+		dw letter_sp
+		repeat string_len({lowercase_chars}), i, 0
+			FONT_MAPPING_ENTRY({eval}list_get({lowercase_chars}, {i}))
+		endr
+	endm
+
+FONT_MAPPING
+	print("XXXX")
+	FONT_MAPPING_GENERATE("ahirst")
 
 
 
