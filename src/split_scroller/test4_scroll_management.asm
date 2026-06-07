@@ -347,7 +347,8 @@ init
 			call scroller_write_char_fully
 
 */
-		else
+		else if false
+
 			; Here, we automatically retrieve the letter data from the scroller
 			ld hl, scroller_text
 repeat 10 ; not all of them because it would be bigger than the buffer		
@@ -361,7 +362,6 @@ repeat 10 ; not all of them because it would be bigger than the buffer
 				add hl, de ; get the address of the char data in the table
 				add hl, de ; get the address of the char data in the table
 				
-				BREAKPOINT
 				ld e, (hl) : inc hl : ld d, (hl) ; get char font address
 
 				
@@ -377,6 +377,13 @@ repeat 10 ; not all of them because it would be bigger than the buffer
 			inc hl
 endr
 
+		else if false
+
+			repeat 10
+				call scroller_select_new_char
+			endr
+		else
+			; in this current test, we do not prefill the buffer
 		endif
 
 
@@ -399,9 +406,12 @@ frame
 	ld bc, 0x7f00 : out(c), c
 	ld bc, 0x7f4b : out(c), c
 	call scroller_handle_scrolling
+	ld bc, 0x7f45 : out(c), c
+	call scroller_handle_char_update
 	ld bc, 0x7f54 : out(c), c
 
 	ei
+
 	jp frame
 
 
@@ -894,6 +904,58 @@ scroller_write_char_fully
 
 
 ;;
+;; Orchestrate the update of the char.
+;; This has to be done every N nops, with N depending on the previous char
+;; by construction N cannot be smaller than 4, so we can update each char in 4 frames. Also each char has a displacement of 4 nops, so with still have this securoty with chars of width 0
+
+scroller_handle_char_update
+	BREAKPOINT
+	ld a, 1
+.previous_char_duration equ $-1
+
+	dec a : ld (.previous_char_duration), a
+	ret nz ; this is not time to update the char
+
+	; but to select a new char
+
+scroller_select_new_char
+
+	; Read the char code
+	ld hl, scroller_text
+.text_location equ $-2
+	ld a, (hl)
+
+	cp 255 : jr nz, .save_next_char_position
+
+	ld hl, scroller_text
+	ld a,(hl)
+	
+
+.save_next_char_position
+
+	inc hl
+	ld (.text_location), hl
+
+
+
+	; read the char data
+.read_char_data
+	add a
+	ld e, a : ld d, 0
+	ld hl, FONT_CHAR_TABLE
+	add hl, de
+	ld e, (hl) : inc hl : ld d, (hl) ; get char font address
+
+	; handle the char duration
+	ld a, (de) : ld (scroller_handle_char_update.previous_char_duration), a
+	add 3 ; add the 3 extra steps for a nop precise scroller
+	inc de 
+
+	ex de, hl
+	call scroller_write_char_fully
+	ret
+
+;;
 ; Each letter has a variable number of bytes to represent a line.
 ; So we need to encode the number of bytes to write in the ring buffer for each line of the letter.
 ; db <nb nops to draw the letter> 
@@ -1289,7 +1351,7 @@ scroller_text2
 	align 256
 SCROLLER_RING_BUFFER_{{line}}
 .test_read
-	defs 10*4
+	defs 64
 .test_write
 	endr
 
