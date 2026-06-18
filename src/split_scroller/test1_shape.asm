@@ -157,4 +157,3 @@ vsync
 	rra
 	jr nc, .loop
 	ret
-

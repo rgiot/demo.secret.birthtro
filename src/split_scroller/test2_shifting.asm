@@ -5,8 +5,12 @@
 ; April 2026
 
 
+
 BLOC_HEIGHT equ 8
 MAXIMUM_LINE_SIZE equ 64; TODO really find the minimum value
+
+
+
 
 SHIFT_STEP_FRAMES_DURATION equ 25
 
@@ -121,7 +125,7 @@ scroller_show
 
 	;split border
 	ld bc, 0xbc00+8 : out (c), c ; (6 on CRTC 1)
-	ld de, 0x0000 + %110000     ; 0x0000 + height on CRTC1 
+	ld de, 0x0000 + %110000     ; 0x0000 + height on CRTC1
 	inc b
 
 	jr .wait4
@@ -265,7 +269,7 @@ scroller_line_left3_0
 	defs 64 - duration(ret) - duration(out(c), d)*13+4+4+4
 	ret
 
-	org scroller_line_left3_0 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_left3_0 + MAXIMUM_LINE_SIZE ;
 scroller_line_left3_1
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -294,7 +298,7 @@ scroller_line_left3_1
 
 
 
-	org scroller_line_left3_1 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_left3_1 + MAXIMUM_LINE_SIZE ;
 scroller_line_left3_2
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -321,7 +325,7 @@ scroller_line_left3_2
 	defs 64 - duration(ret) - duration(out(c), d)*13+4+4+4
 	ret
 
-	org scroller_line_left3_2 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_left3_2 + MAXIMUM_LINE_SIZE ;
 scroller_line_left3_3
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -334,7 +338,7 @@ scroller_line_left3_3
 
 	;nop
 	;out(c), e
-	
+
 	nop : nop : nop
 	nop
 
@@ -355,7 +359,7 @@ scroller_line_left3_3
 
 
 
-	org scroller_line_left3_3 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_left3_3 + MAXIMUM_LINE_SIZE ;
 scroller_line_left3_4
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -504,7 +508,7 @@ scroller_line_left2_0
 	defs 64 - duration(ret) - duration(out(c), d)*13+4+4
 	ret
 
-	org scroller_line_left2_0 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_left2_0 + MAXIMUM_LINE_SIZE ;
 scroller_line_left2_1
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -534,7 +538,7 @@ scroller_line_left2_1
 
 
 
-	org scroller_line_left2_1 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_left2_1 + MAXIMUM_LINE_SIZE ;
 scroller_line_left2_2
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -562,7 +566,7 @@ scroller_line_left2_2
 	defs 64 - duration(ret) - duration(out(c), d)*13+4+4
 	ret
 
-	org scroller_line_left2_2 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_left2_2 + MAXIMUM_LINE_SIZE ;
 scroller_line_left2_3
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -575,7 +579,7 @@ scroller_line_left2_3
 
 	;nop
 	;out(c), e
-	
+
 	nop : nop : nop
 	out(c), d
 	nop
@@ -596,7 +600,7 @@ scroller_line_left2_3
 
 
 
-	org scroller_line_left2_3 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_left2_3 + MAXIMUM_LINE_SIZE ;
 scroller_line_left2_4
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -752,7 +756,7 @@ scroller_line_left1_0
 	defs 64 - duration(ret) - duration(out(c), d)*13+4
 	ret
 
-	org scroller_line_left1_0 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_left1_0 + MAXIMUM_LINE_SIZE ;
 scroller_line_left1_1
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -783,7 +787,7 @@ scroller_line_left1_1
 
 
 
-	org scroller_line_left1_1 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_left1_1 + MAXIMUM_LINE_SIZE ;
 scroller_line_left1_2
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -812,7 +816,7 @@ scroller_line_left1_2
 	defs 64 - duration(ret) - duration(out(c), d)*13+4
 	ret
 
-	org scroller_line_left1_2 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_left1_2 + MAXIMUM_LINE_SIZE ;
 scroller_line_left1_3
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -825,7 +829,7 @@ scroller_line_left1_3
 
 	;nop
 	;out(c), e
-	nop 
+	nop
 
 	nop : nop: nop : nop : nop : nop
 	out(c), d
@@ -846,7 +850,7 @@ scroller_line_left1_3
 
 
 
-	org scroller_line_left1_3 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_left1_3 + MAXIMUM_LINE_SIZE ;
 scroller_line_left1_4
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -857,7 +861,7 @@ scroller_line_left1_4
 
 .first_column
 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -886,7 +890,7 @@ scroller_line_left1_5
 
 .first_column
 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -918,7 +922,7 @@ scroller_line_left1_6
 
 .first_column
 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -1008,7 +1012,7 @@ scroller_line_full_left0
 	defs 64 - duration(ret) - duration(out(c), d)*13
 	ret
 
-	org scroller_line_full_left0 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_full_left0 + MAXIMUM_LINE_SIZE ;
 scroller_line_full_left1
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1040,7 +1044,7 @@ scroller_line_full_left1
 
 
 
-	org scroller_line_full_left1 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_full_left1 + MAXIMUM_LINE_SIZE ;
 scroller_line_full_left2
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1070,7 +1074,7 @@ scroller_line_full_left2
 	defs 64 - duration(ret) - duration(out(c), d)*13
 	ret
 
-	org scroller_line_full_left2 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_full_left2 + MAXIMUM_LINE_SIZE ;
 scroller_line_full_left3
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1102,7 +1106,7 @@ scroller_line_full_left3
 
 
 
-	org scroller_line_full_left3 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_full_left3 + MAXIMUM_LINE_SIZE ;
 scroller_line_full_left4
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1113,8 +1117,8 @@ scroller_line_full_left4
 
 .first_column
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -1143,8 +1147,8 @@ scroller_line_full_left5
 
 .first_column
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -1176,8 +1180,8 @@ scroller_line_full_left6
 
 .first_column
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -1267,7 +1271,7 @@ scroller_line_right1_0
 	defs 64 - duration(ret) - duration(out(c), d)*13-4+1-4
 	ret
 
-	org scroller_line_right1_0 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right1_0 + MAXIMUM_LINE_SIZE ;
 scroller_line_right1_1
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1301,7 +1305,7 @@ scroller_line_right1_1
 	ret
 
 
-	org scroller_line_right1_1 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right1_1 + MAXIMUM_LINE_SIZE ;
 scroller_line_right1_2
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1334,7 +1338,7 @@ scroller_line_right1_2
 	ret
 
 
-	org scroller_line_right1_2 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right1_2 + MAXIMUM_LINE_SIZE ;
 scroller_line_right1_3
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1372,7 +1376,7 @@ scroller_line_right1_3
 
 
 
-	org scroller_line_right1_3 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right1_3 + MAXIMUM_LINE_SIZE ;
 scroller_line_right1_4
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1395,8 +1399,8 @@ scroller_line_right1_4
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -1416,7 +1420,7 @@ scroller_line_right1_5
 	out(c), d ; hidden in the left part of monitor. Encodes the 1st visible color
 
 .first_column
-	
+
 	out (c), d
 	out (c), d
 	out (c), d
@@ -1424,13 +1428,13 @@ scroller_line_right1_5
 	out (c), d
 	out (c), d
 	nop:nop:nop
-	
+
 	out (c), d
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -1466,8 +1470,8 @@ scroller_line_right1_6
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -1554,10 +1558,10 @@ scroller_line_right2_0
 
 .after_last_instruction
 
-	defs 64 - duration(ret) - duration(out(c), d)*13-4+1-4 
+	defs 64 - duration(ret) - duration(out(c), d)*13-4+1-4
 	ret
 
-	org scroller_line_right2_0 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right2_0 + MAXIMUM_LINE_SIZE ;
 scroller_line_right2_1
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1594,7 +1598,7 @@ scroller_line_right2_1
 
 
 
-	org scroller_line_right2_1 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right2_1 + MAXIMUM_LINE_SIZE ;
 scroller_line_right2_2
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1627,7 +1631,7 @@ scroller_line_right2_2
 	defs 64 - duration(ret) - duration(out(c), d)*13-4+1-4
 	ret
 
-	org scroller_line_right2_2 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right2_2 + MAXIMUM_LINE_SIZE ;
 scroller_line_right2_3
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1666,7 +1670,7 @@ scroller_line_right2_3
 
 
 
-	org scroller_line_right2_3 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right2_3 + MAXIMUM_LINE_SIZE ;
 scroller_line_right2_4
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1690,8 +1694,8 @@ scroller_line_right2_4
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	;out(c), d ;<= impact ?
 
@@ -1711,7 +1715,7 @@ scroller_line_right2_5
 	out(c), d ; hidden in the left part of monitor. Encodes the 1st visible color
 
 .first_column
-	
+
 	out (c), d
 	out (c), d
 	out (c), d
@@ -1720,13 +1724,13 @@ scroller_line_right2_5
 	out (c), d
 	out (c), d
 	nop:nop:nop
-	
+
 	out (c), d
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	;out(c), d <= impact ?
 
@@ -1763,8 +1767,8 @@ scroller_line_right2_6
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	;out(c), d <= impact ?
 
@@ -1847,10 +1851,10 @@ scroller_line_right4_0
 
 .after_last_instruction
 
-	defs 64 - duration(ret) - duration(out(c), d)*13-4+1-4 
+	defs 64 - duration(ret) - duration(out(c), d)*13-4+1-4
 	ret
 
-	org scroller_line_right4_0 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right4_0 + MAXIMUM_LINE_SIZE ;
 scroller_line_right4_1
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1887,7 +1891,7 @@ scroller_line_right4_1
 
 
 
-	org scroller_line_right4_1 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right4_1 + MAXIMUM_LINE_SIZE ;
 scroller_line_right4_2
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1920,7 +1924,7 @@ scroller_line_right4_2
 	defs 64 - duration(ret) - duration(out(c), d)*13-4+1-4
 	ret
 
-	org scroller_line_right4_2 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right4_2 + MAXIMUM_LINE_SIZE ;
 scroller_line_right4_3
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1948,7 +1952,7 @@ scroller_line_right4_3
 	out (c), d
 
 	nop
-	nop : nop: nop 
+	nop : nop: nop
 	;out(c), d ;<= impact ?
 
 .after_last_instruction
@@ -1959,7 +1963,7 @@ scroller_line_right4_3
 
 
 
-	org scroller_line_right4_3 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right4_3 + MAXIMUM_LINE_SIZE ;
 scroller_line_right4_4
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -1985,7 +1989,7 @@ scroller_line_right4_4
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
 	;out(c), d ;<= impact ?
 
 .after_last_instruction
@@ -2004,7 +2008,7 @@ scroller_line_right4_5
 	out(c), d ; hidden in the left part of monitor. Encodes the 1st visible color
 
 .first_column
-	
+
 	out (c), d
 	out (c), d
 	out (c), d
@@ -2015,12 +2019,12 @@ scroller_line_right4_5
 	out (c), d
 	out (c), d
 	nop:nop:nop
-	
+
 	out (c), d
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
 	;out(c), d <= impact ?
 
 
@@ -2060,7 +2064,7 @@ scroller_line_right4_6
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
 	;out(c), d <= impact ?
 
 .after_last_instruction
@@ -2145,10 +2149,10 @@ scroller_line_right3_0
 
 .after_last_instruction
 
-	defs 64 - duration(ret) - duration(out(c), d)*13-4+1-4 
+	defs 64 - duration(ret) - duration(out(c), d)*13-4+1-4
 	ret
 
-	org scroller_line_right3_0 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right3_0 + MAXIMUM_LINE_SIZE ;
 scroller_line_right3_1
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -2185,7 +2189,7 @@ scroller_line_right3_1
 
 
 
-	org scroller_line_right3_1 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right3_1 + MAXIMUM_LINE_SIZE ;
 scroller_line_right3_2
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -2218,7 +2222,7 @@ scroller_line_right3_2
 	defs 64 - duration(ret) - duration(out(c), d)*13-4+1-4
 	ret
 
-	org scroller_line_right3_2 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right3_2 + MAXIMUM_LINE_SIZE ;
 scroller_line_right3_3
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -2257,7 +2261,7 @@ scroller_line_right3_3
 
 
 
-	org scroller_line_right3_3 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right3_3 + MAXIMUM_LINE_SIZE ;
 scroller_line_right3_4
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -2282,8 +2286,8 @@ scroller_line_right3_4
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	;out(c), d ;<= impact ?
 
 .after_last_instruction
@@ -2302,7 +2306,7 @@ scroller_line_right3_5
 	out(c), d ; hidden in the left part of monitor. Encodes the 1st visible color
 
 .first_column
-	
+
 	out (c), d
 	out (c), d
 	out (c), d
@@ -2312,13 +2316,13 @@ scroller_line_right3_5
 	out (c), d
 	out (c), d
 	nop:nop:nop
-	
+
 	out (c), d
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	;out(c), d <= impact ?
 
 
@@ -2356,8 +2360,8 @@ scroller_line_right3_6
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	;out(c), d <= impact ?
 
 .after_last_instruction
@@ -2444,7 +2448,7 @@ scroller_line_right0
 	defs 64 - duration(ret) - duration(out(c), d)*13-4+1
 	ret
 
-	org scroller_line_right0 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right0 + MAXIMUM_LINE_SIZE ;
 scroller_line_right1
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -2478,7 +2482,7 @@ scroller_line_right1
 
 
 
-	org scroller_line_right1 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right1 + MAXIMUM_LINE_SIZE ;
 scroller_line_right2
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -2511,7 +2515,7 @@ scroller_line_right2
 	defs 64 - duration(ret) - duration(out(c), d)*13-4+1
 	ret
 
-	org scroller_line_right2 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right2 + MAXIMUM_LINE_SIZE ;
 scroller_line_right3
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -2547,7 +2551,7 @@ scroller_line_right3
 
 
 
-	org scroller_line_right3 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_right3 + MAXIMUM_LINE_SIZE ;
 scroller_line_right4
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -2569,8 +2573,8 @@ scroller_line_right4
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -2590,20 +2594,20 @@ scroller_line_right5
 	out(c), d ; hidden in the left part of monitor. Encodes the 1st visible color
 
 .first_column
-	
+
 	out (c), d
 	out (c), d
 	out (c), d
 	out (c), d
 	out (c), d
 	nop:nop:nop
-	
+
 	out (c), d
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -2638,8 +2642,8 @@ scroller_line_right6
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -2724,7 +2728,7 @@ scroller_line_full0
 	defs 64 - duration(ret) - duration(out(c), d)*13
 	ret
 
-	org scroller_line_full0 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_full0 + MAXIMUM_LINE_SIZE ;
 scroller_line_full1
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -2756,7 +2760,7 @@ scroller_line_full1
 
 
 
-	org scroller_line_full1 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_full1 + MAXIMUM_LINE_SIZE ;
 scroller_line_full2
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -2786,7 +2790,7 @@ scroller_line_full2
 	defs 64 - duration(ret) - duration(out(c), d)*13
 	ret
 
-	org scroller_line_full2 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_full2 + MAXIMUM_LINE_SIZE ;
 scroller_line_full3
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -2818,7 +2822,7 @@ scroller_line_full3
 
 
 
-	org scroller_line_full3 + MAXIMUM_LINE_SIZE ; 
+	org scroller_line_full3 + MAXIMUM_LINE_SIZE ;
 scroller_line_full4
 .last_column_pos
 	db .after_last_instruction-.last_column_pos ; position of the last column instruction
@@ -2832,8 +2836,8 @@ scroller_line_full4
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -2862,8 +2866,8 @@ scroller_line_full5
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -2895,8 +2899,8 @@ scroller_line_full6
 	out (c), d
 	out (c), d
 
-	nop : nop : nop : nop 
-	nop : nop : nop : nop 
+	nop : nop : nop : nop
+	nop : nop : nop : nop
 	out(c), e
 	out(c), d
 
@@ -2956,4 +2960,3 @@ vsync
 	rra
 	jr nc, .loop
 	ret
-

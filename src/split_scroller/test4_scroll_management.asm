@@ -389,12 +389,12 @@ endr
 
 
 		call scroller_generate_initial_code
-	ei
 
 frame
 
 	call secure_vsync
 
+	ei : nop
 	halt
 
 
@@ -410,7 +410,6 @@ frame
 	call scroller_handle_char_update
 	ld bc, 0x7f54 : out(c), c
 
-	ei
 
 	jp frame
 
@@ -909,7 +908,6 @@ scroller_write_char_fully
 ;; by construction N cannot be smaller than 4, so we can update each char in 4 frames. Also each char has a displacement of 4 nops, so with still have this securoty with chars of width 0
 
 scroller_handle_char_update
-	BREAKPOINT
 	ld a, 1
 .previous_char_duration equ $-1
 
@@ -919,6 +917,8 @@ scroller_handle_char_update
 	; but to select a new char
 
 scroller_select_new_char
+
+	BREAKPOINT
 
 	; Read the char code
 	ld hl, scroller_text
@@ -1319,6 +1319,18 @@ scroller_text
 	db "this is art "
 scroller_text2
 	db "THIS IS ART "
+	db "tTtTtTtTtTtTtTtTtTtTt" 
+	db "hHhHhHhHhHhHhHhHhHhHhH"
+	db "iIiIiIiIiIiIiIiIiIiIiI"
+	db "sSsSsSsSsSsSsSsSsSsSsS"
+	db " "
+	db "iIiIiIiIiIiIiIiIiIiIiI"
+	db "sSsSsSsSsSsSsSsSsSsSsS"
+	db " "
+	db "aAaAaAaAaAaAaAaAaAaAaA"
+	db "rRrRrRrRrRrRrRrRrRrRrR"
+	db "tTtTtTtTtTtTtTtTtTtTtT"
+	db "  "
 	db 255
 
 	macro BUFFER_FILLER pos

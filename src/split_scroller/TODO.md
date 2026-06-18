@@ -1,0 +1,1 @@
+- Generate the new char data in 4 steps (I'm pretty sure it could be 8)

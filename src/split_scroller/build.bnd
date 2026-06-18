@@ -1,3 +1,6 @@
+{% set EMU="winape" %}
+
+
 
 - tgt: test1
   phony: true
@@ -23,6 +26,6 @@
   phony: true
   cmd:
     - basm test4_scroll_management.asm --snapshot -o test4.sna --lst test4.html
-    - emu --snapshot test4.sna  --emulator ace run
+    - emu --snapshot test4.sna  --emulator {{EMU}} run
 
 
