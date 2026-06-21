@@ -1,0 +1,18 @@
+
+{% set EMU="ace" %}
+
+- tgt: test2
+  phony: true
+  cmd:
+    - basm test2_animate.asm --snapshot -o test2.sna 
+    - emu --snapshot test2.sna  --emulator {{EMU}} run
+
+
+
+- tgt: test1
+  phony: true
+  cmd:
+    - basm test1_background.asm --snapshot -o test1.sna --lst test1.html
+    - emu --snapshot test1.sna  --emulator {{EMU}} run
+
+

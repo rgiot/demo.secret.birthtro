@@ -50,343 +50,6 @@ init
 		ld sp, $
 
 
-		; for test purpose, directly fill the buffers
-		if false
-			; Here we hard code the letter data access
-			ld hl, letter_ipmt_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_ipmh_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_ipmi_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_ipms_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_ipmsp_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_ipma_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_ipmr_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_ipmt_line_0
-			call scroller_write_char_fully
-
-				; ------
-
-			ld hl, letter_t_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_h_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_i_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_s_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_sp_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_a_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_r_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_t_line_0
-			call scroller_write_char_fully
-		else if false
-			; Here we hard code the letter
-			ld e, 0xb ; code for 't' in current sample
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-			ld e, 0x03 ; code for 'h' in current sample
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-			ld e, 0x05 ; code for 'i' in current sample
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-			ld e, 0x09 ; code for 's' in current sample
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-
-
-			ld hl, letter_ipmsp_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_ipma_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_ipmr_line_0
-			call scroller_write_char_fully
-
-			ld hl, letter_ipmt_line_0
-			call scroller_write_char_fully
-
-				; ------
-
-			ld hl, scroller_text2+0
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-			ld hl, scroller_text2+1
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-			ld hl, scroller_text2+2
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-			ld hl, scroller_text2+3
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-			ld hl, scroller_text2+4
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-
-			ld hl, scroller_text2+5
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-			ld hl, scroller_text2+6
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-
-
-			ld hl, scroller_text2+7
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-			ld hl, scroller_text2+8
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-
-
-			ld hl, scroller_text2+9
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-/*	
-
-		; we cannot set all of them it is bigger than the buffer
-
-			ld hl, scroller_text2+10
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-			ld hl, scroller_text2+11
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-			ld hl, scroller_text2+12
-			ld e, (hl)
-			ld d, 0
-			ld hl, FONT_CHAR_TABLE
-			add hl, de ; get the address of the char data in the table
-			add hl, de ; get the address of the char data in the table
-			ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-			inc de ; skip the number of nops
-					; and goes to the char_line_0
-			; request the drawing
-			ex de, hl
-			call scroller_write_char_fully
-
-*/
-		else if false
-
-			; Here, we automatically retrieve the letter data from the scroller
-			ld hl, scroller_text
-repeat 10 ; not all of them because it would be bigger than the buffer		
-			push hl
-				; get char index
-				ld e, (hl) 
-
-				; compute the position in the char table
-				ld d, 0
-				ld hl, FONT_CHAR_TABLE
-				add hl, de ; get the address of the char data in the table
-				add hl, de ; get the address of the char data in the table
-				
-				ld e, (hl) : inc hl : ld d, (hl) ; get char font address
-
-				
-				inc de ; skip the number of nops
-				       ; and goes to the char_line_0
-
-				; request the drawing
-				ex de, hl
-				call scroller_write_char_fully
-
-
-			pop hl
-			inc hl
-endr
-
-		else if false
-
-			repeat 10
-				call scroller_select_new_char
-			endr
-		else
-			; in this current test, we do not prefill the buffer
-		endif
-
-
 
 		call scroller_generate_initial_code
 
@@ -1139,24 +802,26 @@ letter_{SELECTED_FONT_LETTER}_nb_nops db CHAR_{SELECTED_FONT_LETTER}_LINE_{CURRE
 		FONT_STOP_LETTER()
 	endm
 
-	macro FONT_SAME_AS_IPM char
+	macro NOP_FONT_SAME_AS_IPM char
 letter_{char} equ letter_ipm{char}
 letter_{char}_line_0 equ letter_ipm{char}_line_0
 	endm
 
+
 SCROLLER_FONTS
 
-		FONT_CREATE_IPM_CHAR( sp,
-			"....",
-			"....",
-			"....",
-			"....",
-			"....",
-			"....",
-			"....",
-			"...."
+		; Space has a width that corresponds to the duration of a out
+		FONT_CREATE_CHAR( sp,
+			".........",
+			".........",
+			".........",
+			".........",
+			".........",
+			".........",
+			".........",
+			"........."
 		)
-		FONT_SAME_AS_IPM(sp)
+letter_impsp equ letter_sp
 
 
 		FONT_CREATE_IPM_CHAR( a,
@@ -1192,7 +857,7 @@ SCROLLER_FONTS
 			"#.#.",
 			"#.#."
 		)
-		FONT_SAME_AS_IPM(h)
+		NOP_FONT_SAME_AS_IPM(h)
 
 
 		FONT_CREATE_IPM_CHAR( i,
@@ -1276,7 +941,7 @@ SCROLLER_FONTS
             ".#..",
             ".#.."
 		)
-		FONT_SAME_AS_IPM(t)
+		NOP_FONT_SAME_AS_IPM(t)
 
 
 
@@ -1284,12 +949,13 @@ SCROLLER_FONTS
 
 	macro FONT_MAPPING_ENTRY(char)
 		@letter={char}
-		dw letter_{@letter} ; XXX we cannot directly use {char} because it is replaced with surroundings ''
 		dw letter_ipm{@letter}
+		dw letter_{@letter} ; XXX we cannot directly use {char} because it is replaced with surroundings ''
 	endm
 
-	;; Macro to generate the table that map a char to is font data
+	;; Macro to generate the table that maps chars to their font data
 	;; take as input a lowercase string and generate the charset command and the table with the mapping for each char to its font data
+	;; Generation order space, lower1, upper1, lower2, upper2, ...
 	macro FONT_MAPPING_GENERATE lowercase_chars
 complete_charset = " " ; very first char is space
 
@@ -1299,7 +965,7 @@ complete_charset = " " ; very first char is space
 			complete_charset = string_concat(complete_charset, char(int(list_get({lowercase_chars}, {i}))+('A'-'a'))) ; add the upper case version of the char to the charset
 		endr
 
-		; execute charset_directive
+		; really execute charset_directive
 		charset complete_charset, 0
 
 		; generate the table of correspondance of each char
@@ -1310,15 +976,24 @@ FONT_CHAR_TABLE
 		endr
 	endm
 
+
+; Generate the data for the mapping beteen a char and its code
 FONT_MAPPING
-	print("XXXX")
 	FONT_MAPPING_GENERATE("ahirst")
 
 
+; Scroller text data : lower case correspond to IPM font and upper case to the nop resolution font
 scroller_text
 	db "this is art "
 scroller_text2
 	db "THIS IS ART "
+
+	repeat 10
+		db "this is art "
+		db "THIS IS ART "
+	endr
+
+
 	db "tTtTtTtTtTtTtTtTtTtTt" 
 	db "hHhHhHhHhHhHhHhHhHhHhH"
 	db "iIiIiIiIiIiIiIiIiIiIiI"
@@ -1333,31 +1008,10 @@ scroller_text2
 	db "  "
 	db 255
 
-	macro BUFFER_FILLER pos
 
-
-	out(c), e: out(c), d
-	out(c), e: out (c), e : out(c), d
-	out(c), e: out(c), d
-	out(c), e: out (c), e  :out(c), d
-
-	out(c), e: out(c), d
-	out(c), e: out(c), d
-	out(c), e: out(c), d
-	out(c), e: nop: out(c), d
-	out(c), e: nop: nop: out(c), d
-	out(c), e: nop: nop: nop : out(c), d
-
-	out (c), e
-	repeat {pos}
-		nop
-	endr
-	out (c), d
-	endm
-
+; Generate the buffers
 ; Buffers start empty.
 ; they are programmatically filled
-
 
 	repeat SCROLLER_NB_VERTICAL_BLOCS, line, 0
 	align 256
