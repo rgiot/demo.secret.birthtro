@@ -76,7 +76,7 @@ init
 
     call show_static_sprite
 
-
+/*
     repeat SPECTRAL_SPRITE_WIDTH, colid, 0
 
         ; Test move of the 1st column of the picture
@@ -86,12 +86,62 @@ init
         endr
 
     endr
+*/
 
+
+    ei
 
 frame
+    ld b, 0xf5
+    in a, (c)
+    RRA
+    jr nc, frame
+
+
+    halt
+    halt
+    halt
+    halt
+    halt
+    halt
+    ld bc, 0x7f00 + 0x10 : out (c), c : ld bc, 0x7f00 + 0x40 : out (c), c
+    call spectral_sprite_move_along_curve
+    ld bc, 0x7f00 + 0x10 : out (c), c : ld bc, 0x7f00 + 0x54 : out (c), c
+
+
+
     jp frame
 
+spectral_sprite_move_along_curve
+    BREAKPOINT
 
+    ld hl, delta_x_curve
+.curve_pos equ $-2
+    ld a, (hl) : inc l 
+    ld (.curve_pos), hl
+
+    repeat SPECTRAL_SPRITE_WIDTH, colid, 0
+    push hl
+        ld hl, spectral_sprite_column{colid}_table
+        ld d, 0 : ld e, a
+        add hl, de
+        ld e, (hl) : inc hl : ld d, (hl)
+        ex de, hl
+        ld a, SPECTRAL_START_LINE
+.col{colid}_pos equ $-1
+        call call_hl
+        ld (.col{colid}_pos), a
+    pop hl
+    inc l : inc l : ld a, (hl)
+    endrepeat
+
+    ret
+
+call_hl jp hl
+
+
+;;
+;; Draw the static sprite in the middle of the screen
 show_static_sprite
     ; compute the start line to display the logo
     ld hl, screen_table
@@ -269,6 +319,7 @@ print spectral_sprites_down_actions
         RIGHT_TO_LEFT = opcode(dec hl)
     endenum
 
+
     ;; Generate the code that moves a column of the picture by one pixel, up or down.
     ;; A column spans on several bytes. So when there is a modification, it has to be done on all bytes of the column.
     ;; Modifications are done from left to right then right to left at the next line. This allows to reduce the number of instructions.
@@ -424,21 +475,27 @@ spectral_sprite_down_column_{colid}
 
     ; Generate the code to move up all columns of the picture.
     repeat SPECTRAL_SPRITE_WIDTH, colid, 0
-    SPECTRAL_SPRITE_UP_COLUMN_CODE(
-        {colid},
-        {eval}list_get(spectral_sprites_up_actions, {colid})
-    )
+        SPECTRAL_SPRITE_UP_COLUMN_CODE(
+            {colid},
+            {eval}list_get(spectral_sprites_up_actions, {colid})
+        )
+        SPECTRAL_SPRITE_DOWN_COLUMN_CODE(
+            {colid},
+            {eval}list_get(spectral_sprites_down_actions, {colid})
+        )
 
     endrepeat
+spectral_sprite_any_column_do_nothing
+    ret
 
-    ; Generate the code to move down all columns of the picture.
+
     repeat SPECTRAL_SPRITE_WIDTH, colid, 0
-    SPECTRAL_SPRITE_DOWN_COLUMN_CODE(
-        {colid},
-        {eval}list_get(spectral_sprites_down_actions, {colid})
-    )
-
+spectral_sprite_column{colid}_table
+    dw spectral_sprite_down_column_{colid}
+    dw spectral_sprite_any_column_do_nothing
+    dw spectral_sprite_up_column_{colid}
     endrepeat
+
 
 
     assert list_len(spectral_sprites_model) = SPECTRAL_SPRITE_HEIGHT, "spectral_sprites_model must have {SPECTRAL_SPRITE_HEIGHT} lines"
@@ -479,6 +536,18 @@ screen_table
     assert peek(screen_table + 1) == 0xc0
     assert peek(screen_table + 2) == 0x00
     assert peek(screen_table + 3) == 0xc8
+
+
+    align 256
+; spectra lcurve
+; 0 => decrease
+; 2=> nothing
+;  4=> increase
+delta_x_curve
+
+        ;db 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 2, 4, 2, 4, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 2, 4, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 0, 2, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 2,0, 2, 0, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 2, 0, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 4, 2, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 4, 2, 4, 2, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+
+        db 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 4, 4, 2, 4, 2, 4, 2, 4, 2, 2, 2, 2, 2, 4, 0, 2, 2, 2, 2, 2, 0, 2, 0, 2, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 4, 4, 2, 4, 2, 4, 2, 4, 2, 2, 2, 2, 2, 4, 0, 2, 2, 2, 2, 2, 0, 2, 0, 2, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 
 ;SPECTRAL_START_ADDRESS equ peek(screen_table + 2*SPECTRAL_START_LINE + 0) \
