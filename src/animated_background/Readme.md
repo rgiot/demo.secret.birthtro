@@ -1,0 +1,3 @@
+- The background uses 4 colors in pens 0,1,2,3
+- The eyes are animated (SIZE TO BE DETERMINATED DEPENDING on other effects)
+- a yee sprites must start/end at the boundary of a byte (and there are 2 pixels per bytes). As there are 2 pixels per byte and mode0 puxiels are doubled in mode 0 screen, limits of spirtes NEED to be at multiple of 4 positions 
