@@ -82,7 +82,7 @@ init
         ; Test move of the 1st column of the picture
         ld a, SPECTRAL_START_LINE
         repeat {colid}*2+1
-            call spectral_sprite_up_column_{colid}
+            call spectral_sprite_down_column_{colid}
         endr
 
     endr
@@ -194,18 +194,38 @@ spectral_sprites_model equ [
 
 
 ;; XXX Written by claude !
-;; Compute the up_actions table (one entry per column of {model}) so the assembler
-;; can recompute it automatically whenever the graphist edits spectral_sprites_model.
+;; Compute the action (NONE/DRAW/ERASE) needed at a boundary where the fill-state goes
+;; from {previous_filled} to {filled}. When {invert} is true, DRAW and ERASE are swapped:
+;; this is exactly what moving down needs at that very same boundary, since going down is
+;; the time-mirror of going up (whatever slides into view when scrolling one way slides
+;; out when scrolling the other way).
+function spectral_sprites_boundary_action, previous_filled, filled, invert
+    if {previous_filled} == {filled}
+        return SPECTRAL_SPRITE_BLOC_ACTION_NONE
+    endif
+
+    becomes_filled = {filled}
+    if {invert}
+        becomes_filled = !becomes_filled
+    endif
+
+    if becomes_filled
+        return SPECTRAL_SPRITE_BLOC_ACTION_DRAW
+    endif
+    return SPECTRAL_SPRITE_BLOC_ACTION_ERASE
+endfunction
+
+;; Compute the up_actions/down_actions table (one entry per column of {model}) so the
+;; assembler can recompute it automatically whenever the graphist edits spectral_sprites_model.
 ;; {model} is a list of same-length strings using '#' for a filled pixel and ' ' for an empty one.
 ;;
-;; For a given column, each action tells what happens to the fill-state between one
-;; model row and the next (an implicit blank row is assumed above the first and below
-;; the last row, since the sprite keeps scrolling through emptiness above/below it):
-;;   NONE  : fill-state unchanged
-;;   DRAW  : becomes filled
-;;   ERASE : becomes empty
+;; For a given column, each action tells what happens to the fill-state at a boundary
+;; between one model row and the next (an implicit blank row is assumed above the first
+;; and below the last row, since the sprite keeps scrolling through emptiness above/below it).
 ;; So a column of {model} with H rows produces H+1 actions.
-function spectral_sprites_compute_up_actions, model
+;; {down} selects the direction: false computes the up_actions table, true computes the
+;; down_actions table (see spectral_sprites_boundary_action).
+function spectral_sprites_compute_actions, model, down
     width = string_len(list_get({model}, 0))
     height = list_len({model})
 
@@ -215,36 +235,31 @@ function spectral_sprites_compute_up_actions, model
         previous_filled = false
         repeat height, row, 0
             filled = string_get(list_get({model}, {row}), {col}) == "#"
-            if filled == previous_filled
-                action = SPECTRAL_SPRITE_BLOC_ACTION_NONE
-            else
-                if filled
-                    action = SPECTRAL_SPRITE_BLOC_ACTION_DRAW
-                else
-                    action = SPECTRAL_SPRITE_BLOC_ACTION_ERASE
-                endif
-            endif
-            actions = list_push(actions, action)
+            actions = list_push(actions, spectral_sprites_boundary_action(previous_filled, filled, {down}))
             previous_filled = filled
         endrepeat
 
-        if previous_filled
-            action = SPECTRAL_SPRITE_BLOC_ACTION_ERASE
-        else
-            action = SPECTRAL_SPRITE_BLOC_ACTION_NONE
-        endif
-        actions = list_push(actions, action)
-
+        actions = list_push(actions, spectral_sprites_boundary_action(previous_filled, false, {down}))
         columns = list_push(columns, actions)
     endrepeat
 
     return columns
 endfunction
 
-;; The list of actions to execute for each column of the picture to make move it up
+function spectral_sprites_compute_up_actions, model
+    return spectral_sprites_compute_actions({model}, false)
+endfunction
+
+function spectral_sprites_compute_down_actions, model
+    return spectral_sprites_compute_actions({model}, true)
+endfunction
+
+;; The list of actions to execute for each column of the picture to make it move up/down
 spectral_sprites_up_actions equ spectral_sprites_compute_up_actions(spectral_sprites_model)
+spectral_sprites_down_actions equ spectral_sprites_compute_down_actions(spectral_sprites_model)
 
 print spectral_sprites_up_actions
+print spectral_sprites_down_actions
 
 
     ;; Enumeration that encodes the drawing movement.
@@ -254,36 +269,45 @@ print spectral_sprites_up_actions
         RIGHT_TO_LEFT = opcode(dec hl)
     endenum
 
-
-    ;; Generate the code to move up a column of the picture.
+    ;; Generate the code that moves a column of the picture by one pixel, up or down.
     ;; A column spans on several bytes. So when there is a modification, it has to be done on all bytes of the column.
     ;; Modifications are done from left to right then right to left at the next line. This allows to reduce the number of instructions.
     ;; As we work with block of height 8 to move to the next line consist in adding screen width to the screen address
+    ;;
+    ;; The boundary actions are drawn relative to a single anchor address, walked downward in
+    ;; fixed BLOC_HEIGHT steps (see the iterate loop below). Only ONE raster line changes state
+    ;; at each boundary when the sprite shifts by 1 pixel, and it must always be the one at the
+    ;; TOPMOST of the "current line" (a) and "new line" (a+/-1): moving up, that's the new
+    ;; (decremented) line, so we must decrement BEFORE computing the anchor; moving down, that's
+    ;; still the current (not yet incremented) line, so we must only increment AFTER drawing, once
+    ;; the anchor has already been used. Hence "adjust_before" below picks when the single
+    ;; {move_direction} opcode (dec a / inc a) is applied.
     ;; Parameters:
-    ;;  - label: the label to use for the generated code
-    ;;  - column: the list of actions to execute for each line of the column
+    ;;  - colid: the column index (used to compute the column's screen address)
+    ;;  - column: the list of actions to execute for each boundary of the column, as produced by
+    ;;            spectral_sprites_compute_up_actions/spectral_sprites_compute_down_actions
+    ;;  - move_direction: opcode (via `opcode(...)`) that adjusts the "current line" register (a):
+    ;;            dec a to move up, inc a to move down
+    ;;  - adjust_before: true applies {move_direction} before the anchor address is computed
+    ;;            (moving up), false applies it after drawing, right before "a" is returned to the
+    ;;            caller (moving down)
     ;; TODO remove the zigazag is serves for nothing as the line change can handle that. It would crunch better for the same executaion time
     assert BLOC_HEIGHT%8 == 0, "BLOC_HEIGHT must be a multiple of 8 for the spectral sprites. Otherwise the code to move up a column is not correct"
-    macro SPECTRAL_SPRITE_UP_COLUMN_CODE, colid, column
+    macro SPECTRAL_SPRITE_MOVE_COLUMN_CODE_BODY, colid, column, move_direction, adjust_before
         CURRENT_DIRECTION = DRAW_DIRECTION_LEFT_TO_RIGHT
         NB_LINES_TO_JUMP=0
-    ;; Make move the column of one pixel
-    ;; Input:
-    ;;  - a: line of the column to move up
-    ;; Ouptut
-    ;;  - a = new line of the moved column
-spectral_sprite_up_column_{colid}
 
-        print "Handle spectral_sprite_up_column_", {colid}
-
-        dec a : push af
+        if {adjust_before}
+            db {move_direction}
+        endif
+        push af
         add a
         ; TODO use 8bits manipulations with a modified table
         ld d, 0 : ld e, a
         ld hl, screen_table
         add hl, de
-        ld e, (hl) : inc hl : ld d, (hl) ; get the current line of the column to move up
-        ld hl, SPECTRAL_START_COLUMN + ({colid}*BLOC_WIDTH) ; get the screen address of the column to move up
+        ld e, (hl) : inc hl : ld d, (hl) ; get the current line of the column to move
+        ld hl, SPECTRAL_START_COLUMN + ({colid}*BLOC_WIDTH) ; get the screen address of the column to move
         add hl, de
 
         ld de, SPECTRAL_SPRITE_DRAW_MASK_BOTH_POS*256 + SPECTRAL_SPRITE_ERASE_MASK_BOTH_POS
@@ -367,8 +391,33 @@ spectral_sprite_up_column_{colid}
             endif
 
         enditerate
-        pop af ; restore the new line of the moved column
+        pop af ; restore the line used as anchor
+        if !{adjust_before}
+            db {move_direction} ; turn it into the new line of the moved column
+        endif
         ret
+    endm
+
+    ;; Make move up the column of one pixel
+    ;; Input:
+    ;;  - a: line of the column to move up
+    ;; Ouptut
+    ;;  - a = new line of the moved column
+    macro SPECTRAL_SPRITE_UP_COLUMN_CODE, colid, column
+spectral_sprite_up_column_{colid}
+        print "Handle spectral_sprite_up_column_", {colid}
+        SPECTRAL_SPRITE_MOVE_COLUMN_CODE_BODY({colid}, {eval}{column}, opcode(dec a), true)
+    endm
+
+    ;; Make move down the column of one pixel
+    ;; Input:
+    ;;  - a: line of the column to move down
+    ;; Ouptut
+    ;;  - a = new line of the moved column
+    macro SPECTRAL_SPRITE_DOWN_COLUMN_CODE, colid, column
+spectral_sprite_down_column_{colid}
+        print "Handle spectral_sprite_down_column_", {colid}
+        SPECTRAL_SPRITE_MOVE_COLUMN_CODE_BODY({colid}, {eval}{column}, opcode(inc a), false)
     endm
 
 
@@ -378,6 +427,15 @@ spectral_sprite_up_column_{colid}
     SPECTRAL_SPRITE_UP_COLUMN_CODE(
         {colid},
         {eval}list_get(spectral_sprites_up_actions, {colid})
+    )
+
+    endrepeat
+
+    ; Generate the code to move down all columns of the picture.
+    repeat SPECTRAL_SPRITE_WIDTH, colid, 0
+    SPECTRAL_SPRITE_DOWN_COLUMN_CODE(
+        {colid},
+        {eval}list_get(spectral_sprites_down_actions, {colid})
     )
 
     endrepeat
