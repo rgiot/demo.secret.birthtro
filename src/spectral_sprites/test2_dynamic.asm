@@ -2,7 +2,7 @@
 ;; Krusty/Benediction
 ;; Start to work on the background display.
 ;; Nothing fancy here : there is a 4 colors background.
-;;                      idealy it will have some animated parts
+;;                      ideally it will have some animated parts
 
 
 
@@ -22,6 +22,10 @@ MODE0_RIGHT_PIXEL_BIT3_POS equ 0
 SPECTRAL_SPRITE_LEFT_BIT_POS equ  MODE0_LEFT_PIXEL_BIT2_POS      ; used for even lines
 SPECTRAL_SPRITE_RIGHT_BIT_POS equ  MODE0_RIGHT_PIXEL_BIT2_POS    ; used for odd lines
 
+SPECTRAL_SPRITE_DRAW_MASK_BOTH_POS equ (1 << SPECTRAL_SPRITE_LEFT_BIT_POS) | (1 << SPECTRAL_SPRITE_RIGHT_BIT_POS)
+SPECTRAL_SPRITE_ERASE_MASK_BOTH_POS equ (~(SPECTRAL_SPRITE_DRAW_MASK_BOTH_POS)) & 0xff
+
+SCREEN_WIDTH equ 96
 SCREEN_HEIGHT_CHARS equ 21
 SPECTRAL_SPRITE_WIDTH equ 11
 SPECTRAL_SPRITE_HEIGHT equ 5
@@ -29,7 +33,10 @@ SPECTRAL_SPRITE_HEIGHT equ 5
 BLOC_HEIGHT equ 16
 BLOC_WIDTH equ 8
 
-SPECTRAL_START_ADDRESS equ 0xc000 + 3 + 96*5
+
+
+SPECTRAL_START_LINE equ 5*8+3
+SPECTRAL_START_COLUMN equ 4
 
 
 	org 0x4000
@@ -38,7 +45,7 @@ init
 	run $
 	di
 
-        ; set up the screen
+        ; setup the screen
 
 		ld hl, 0xc9fb : ld (0x38), hl
 		ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00 + 96/2 : out (c), c
@@ -69,12 +76,40 @@ init
 
     call show_static_sprite
 
+    ; Test move of the 1st column of the picture
+    ld a, SPECTRAL_START_LINE
+    repeat 16
+        call spectral_sprite_up_column_0
+    endr
+    
+
+    ld a, SPECTRAL_START_LINE
+    repeat 12
+        call spectral_sprite_up_column_1
+    endr
+    
+
+
+    ld a, SPECTRAL_START_LINE
+    repeat 8
+        call spectral_sprite_up_column_2
+    endr
+    
+
 frame
     jp frame
 
 
 show_static_sprite
-    ld hl, SPECTRAL_START_ADDRESS
+    ; compute the start line to display the logo
+    ld hl, screen_table
+    ld de, SPECTRAL_START_LINE*2
+    add hl, de
+    ld e, (hl) : inc hl
+    ld d, (hl) : inc hl
+    ld hl, SPECTRAL_START_COLUMN
+    add hl, de
+
     ld de, spectral_sprites_matrix
 
     ld b, SPECTRAL_SPRITE_HEIGHT
@@ -196,9 +231,11 @@ spectral_sprites_up_actions equ [
 print spectral_sprites_up_actions
 
 
+    ;; Enumeration that encodes the drawing movement.
+    ;; the associated value is the corresponding opcode
     enum DRAW_DIRECTION
-        LEFT_TO_RIGHT
-        RIGHT_TO_LEFT
+        LEFT_TO_RIGHT = opcode(inc hl)
+        RIGHT_TO_LEFT = opcode(dec hl)
     endenum
 
 
@@ -209,26 +246,125 @@ print spectral_sprites_up_actions
     ;; Parameters:
     ;;  - label: the label to use for the generated code
     ;;  - column: the list of actions to execute for each line of the column
-    assert BLOC_HEIGHT == 8, "BLOC_HEIGHT must be 8 for the spectral sprites. Otherwise the code to move up a column is not correct"
-    macro SPECTRAL_SPRITE_UP_COLUMN_CODE, label, column
+    ;; TODO remove the zigazag is serves for nothing as the line change can handle that. It would crunch better for the same executaion time
+    assert BLOC_HEIGHT%8 == 0, "BLOC_HEIGHT must be a multiple of 8 for the spectral sprites. Otherwise the code to move up a column is not correct"
+    macro SPECTRAL_SPRITE_UP_COLUMN_CODE, colid, column
         CURRENT_DIRECTION = DRAW_DIRECTION_LEFT_TO_RIGHT
         NB_LINES_TO_JUMP=0
     ;; Make move the column of one pixel
     ;; Input:
-    ;;  - HL: screen adresse where to to write (1 pixel line upper than before)
-{label}
+    ;;  - a: line of the column to move up
+    ;; Ouptut
+    ;;  - a = new line of the moved column
+spectral_sprite_up_column_{colid}
+
+        print "Handle spectral_sprite_up_column_", {colid}
+
+        dec a : push af
+        add a
+        ; TODO use 8bits manipulations with a modified table
+        ld d, 0 : ld e, a
+        ld hl, screen_table
+        add hl, de
+        ld e, (hl) : inc hl : ld d, (hl) ; get the current line of the column to move up
+        ld hl, SPECTRAL_START_COLUMN + ({colid}*BLOC_WIDTH) ; get the screen address of the column to move up
+        add hl, de
+
+        ld de, SPECTRAL_SPRITE_DRAW_MASK_BOTH_POS*256 + SPECTRAL_SPRITE_ERASE_MASK_BOTH_POS
+
+        ld d, SPECTRAL_SPRITE_DRAW_MASK_BOTH_POS
+
+
+    BREAKPOINT
+        FIRST_ROW = true
         iterate action in {column}
+
+            print "action = ", {action}
+
+
             NB_LINES_TO_JUMP = NB_LINES_TO_JUMP + 1
-            
+
+            ; Change of line because we will draw
+            if {action} != SPECTRAL_SPRITE_BLOC_ACTION_NONE
+                if FIRST_ROW
+                    NB_LINES_TO_JUMP = 0
+                    FIRST_ROW = false
+                else
+                    print "Jump ", NB_LINES_TO_JUMP, " blocs"
+                    ; we have to jump to the next line of the column
+                    ld bc, SCREEN_WIDTH*NB_LINES_TO_JUMP*(BLOC_HEIGHT>>3) ; 1 pixel line = 1/8 of a bloc height
+                    add hl, bc
+                    NB_LINES_TO_JUMP = 0
+                endif
+                HAS_DRAWN = true
+            else
+                if FIRST_ROW
+                    NB_LINES_TO_JUMP = 0
+                    FIRST_ROW = false
+                endif
+                HAS_DRAWN = false
+            endif
+
+            ; Generate the code if any
+            switch {action}
+                case SPECTRAL_SPRITE_BLOC_ACTION_NONE
+                    break
+                case SPECTRAL_SPRITE_BLOC_ACTION_DRAW
+                    repeat BLOC_WIDTH, step, 1
+                        ; ok but too slow, not retained (8 nops)
+                        ;set SPECTRAL_SPRITE_LEFT_BIT_POS, (hl) ; 4 nops
+                        ;set SPECTRAL_SPRITE_RIGHT_BIT_POS, (hl) ; 4 nops
+
+                        ; ok but too slow, not retained (8 nops)
+                        ;ld a, (hl) ; 2nops
+                        ;set SPECTRAL_SPRITE_LEFT_BIT_POS, a ; 2 nops
+                        ;set SPECTRAL_SPRITE_RIGHT_BIT_POS, a ; 2nops
+                        ;ld (hl), a ; 2 nops
+
+                        ; ok, but too slow (6nops)
+                        ;ld a, (hl) : or %00110000 : ld (hl), a 
+
+                        ld a, (hl) : or d : ld (hl), a ; 5 nops
+                        
+                        if {step} != BLOC_WIDTH
+                            db CURRENT_DIRECTION
+                        endif
+                    endrepeat
+                    break
+                case SPECTRAL_SPRITE_BLOC_ACTION_ERASE
+                    repeat BLOC_WIDTH, step, 1
+                        ld a, (hl) : and e : ld (hl), a ; 5 nops
+                        if {step} != BLOC_WIDTH
+                           db CURRENT_DIRECTION
+                        endif
+                    endrepeat
+                    break
+            endswitch
+
+
+            ; direction changes only if there was drawing or erasing
+            if HAS_DRAWN
+                ; we change of direction for next drawing
+                if DRAW_DIRECTION_LEFT_TO_RIGHT == CURRENT_DIRECTION
+                    CURRENT_DIRECTION = DRAW_DIRECTION_RIGHT_TO_LEFT
+                else
+                    CURRENT_DIRECTION = DRAW_DIRECTION_LEFT_TO_RIGHT
+                endif
+            endif
+
         enditerate
-
-
+        pop af ; restore the new line of the moved column
+        ret
     endm
 
 
+
+    ; Generate the code to move up all columns of the picture.
     repeat /*SPECTRAL_SPRITE_WIDTH*/3, colid, 0
-spectral_sprite_up_column_{colid}
-    CURRENT_COLUMN = list_get(spectral_sprites_up_actions, {colid})
+    SPECTRAL_SPRITE_UP_COLUMN_CODE(
+        {colid},
+        {eval}list_get(spectral_sprites_up_actions, {colid})
+    )
 
     endrepeat
 
@@ -261,6 +397,7 @@ spectral_palette
 
 ;;
 ;; Generate the screen table
+;; TODO align on 256 bytes to avoif 16 bits manpuations when reading
 screen_table
     repeat 8*SCREEN_HEIGHT_CHARS, lineid, 0
         dw compute_screen_address(0xc000, 96, 0, {lineid})
@@ -270,6 +407,13 @@ screen_table
     assert peek(screen_table + 1) == 0xc0
     assert peek(screen_table + 2) == 0x00
     assert peek(screen_table + 3) == 0xc8
+
+
+;SPECTRAL_START_ADDRESS equ peek(screen_table + 2*SPECTRAL_START_LINE + 0) \
+;                        + (peek(screen_table + 2*SPECTRAL_START_LINE + 1) << 8);\
+;                        + SPECTRAL_START_COLUMN
+
+ ;   print {hex}SPECTRAL_START_ADDRESS
     ; screen
     org 0xc000
     incbin "../../data/face0_cpc.scr"
