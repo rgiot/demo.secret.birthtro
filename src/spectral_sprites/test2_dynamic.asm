@@ -76,25 +76,17 @@ init
 
     call show_static_sprite
 
-    ; Test move of the 1st column of the picture
-    ld a, SPECTRAL_START_LINE
-    repeat 16
-        call spectral_sprite_up_column_0
-    endr
-    
 
-    ld a, SPECTRAL_START_LINE
-    repeat 12
-        call spectral_sprite_up_column_1
-    endr
-    
+    repeat SPECTRAL_SPRITE_WIDTH, colid, 0
 
+        ; Test move of the 1st column of the picture
+        ld a, SPECTRAL_START_LINE
+        repeat {colid}*2+1
+            call spectral_sprite_up_column_{colid}
+        endr
 
-    ld a, SPECTRAL_START_LINE
-    repeat 8
-        call spectral_sprite_up_column_2
     endr
-    
+
 
 frame
     jp frame
@@ -200,33 +192,57 @@ spectral_sprites_model equ [
         DRAW    ; Current line has to be drawned
     endenum
 
+
+;; XXX Written by claude !
+;; Compute the up_actions table (one entry per column of {model}) so the assembler
+;; can recompute it automatically whenever the graphist edits spectral_sprites_model.
+;; {model} is a list of same-length strings using '#' for a filled pixel and ' ' for an empty one.
+;;
+;; For a given column, each action tells what happens to the fill-state between one
+;; model row and the next (an implicit blank row is assumed above the first and below
+;; the last row, since the sprite keeps scrolling through emptiness above/below it):
+;;   NONE  : fill-state unchanged
+;;   DRAW  : becomes filled
+;;   ERASE : becomes empty
+;; So a column of {model} with H rows produces H+1 actions.
+function spectral_sprites_compute_up_actions, model
+    width = string_len(list_get({model}, 0))
+    height = list_len({model})
+
+    columns = []
+    repeat width, col, 0
+        actions = []
+        previous_filled = false
+        repeat height, row, 0
+            filled = string_get(list_get({model}, {row}), {col}) == "#"
+            if filled == previous_filled
+                action = SPECTRAL_SPRITE_BLOC_ACTION_NONE
+            else
+                if filled
+                    action = SPECTRAL_SPRITE_BLOC_ACTION_DRAW
+                else
+                    action = SPECTRAL_SPRITE_BLOC_ACTION_ERASE
+                endif
+            endif
+            actions = list_push(actions, action)
+            previous_filled = filled
+        endrepeat
+
+        if previous_filled
+            action = SPECTRAL_SPRITE_BLOC_ACTION_ERASE
+        else
+            action = SPECTRAL_SPRITE_BLOC_ACTION_NONE
+        endif
+        actions = list_push(actions, action)
+
+        columns = list_push(columns, actions)
+    endrepeat
+
+    return columns
+endfunction
+
 ;; The list of actions to execute for each column of the picture to make move it up
-spectral_sprites_up_actions equ [
-    [
-        SPECTRAL_SPRITE_BLOC_ACTION_DRAW,
-        SPECTRAL_SPRITE_BLOC_ACTION_NONE,
-        SPECTRAL_SPRITE_BLOC_ACTION_NONE,
-        SPECTRAL_SPRITE_BLOC_ACTION_NONE,
-        SPECTRAL_SPRITE_BLOC_ACTION_NONE,
-        SPECTRAL_SPRITE_BLOC_ACTION_ERASE
-    ],
-    [
-        SPECTRAL_SPRITE_BLOC_ACTION_DRAW,
-        SPECTRAL_SPRITE_BLOC_ACTION_ERASE,
-        SPECTRAL_SPRITE_BLOC_ACTION_DRAW,
-        SPECTRAL_SPRITE_BLOC_ACTION_ERASE,
-        SPECTRAL_SPRITE_BLOC_ACTION_DRAW,
-        SPECTRAL_SPRITE_BLOC_ACTION_ERASE
-    ],
-    [ 
-        SPECTRAL_SPRITE_BLOC_ACTION_NONE,
-        SPECTRAL_SPRITE_BLOC_ACTION_DRAW,
-        SPECTRAL_SPRITE_BLOC_ACTION_ERASE,
-        SPECTRAL_SPRITE_BLOC_ACTION_DRAW,
-        SPECTRAL_SPRITE_BLOC_ACTION_ERASE,
-        SPECTRAL_SPRITE_BLOC_ACTION_NONE
-    ]
-]
+spectral_sprites_up_actions equ spectral_sprites_compute_up_actions(spectral_sprites_model)
 
 print spectral_sprites_up_actions
 
@@ -274,8 +290,6 @@ spectral_sprite_up_column_{colid}
 
         ld d, SPECTRAL_SPRITE_DRAW_MASK_BOTH_POS
 
-
-    BREAKPOINT
         FIRST_ROW = true
         iterate action in {column}
 
@@ -360,7 +374,7 @@ spectral_sprite_up_column_{colid}
 
 
     ; Generate the code to move up all columns of the picture.
-    repeat /*SPECTRAL_SPRITE_WIDTH*/3, colid, 0
+    repeat SPECTRAL_SPRITE_WIDTH, colid, 0
     SPECTRAL_SPRITE_UP_COLUMN_CODE(
         {colid},
         {eval}list_get(spectral_sprites_up_actions, {colid})
