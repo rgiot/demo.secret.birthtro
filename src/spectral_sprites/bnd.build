@@ -13,5 +13,6 @@
   cmd:
     - basm test1_static.asm --snapshot -o test1.sna --lst test1.html
     - emu --snapshot test1.sna  --emulator {{EMU}} run
+    - ace: 
 
 
