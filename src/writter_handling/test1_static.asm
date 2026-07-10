@@ -1,8 +1,7 @@
 ;; June 2026
 ;; Krusty/Benediction
-;; Start to work on the background display.
-;; Nothing fancy here : there is a 4 colors background.
-;;                      idealy it will have some animated parts
+;; Start to work on the writter display.
+;; We test how to print a char at char prcision veritcally and pixel precision horizontally
 
 
 
