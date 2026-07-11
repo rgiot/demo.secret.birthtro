@@ -579,25 +579,44 @@ scroller_write_char_line
 	ret
 
 
+;; State of the progressive (8 frames) character drawing
+scroller_pending_char
+.line_data dw 0 ; pointer to the data of the next char line to write
+.next_line db 8 ; next line to write (0-7); 8 = nothing pending
+
 ;;
-; Write a whole character in the ring buffer of a given line.
-; Input:
-;  - HL: address of the character data (the first line data, so the number of nops kept)
-; TODO: remove this piece of code, because there is no reason to write a whole character in a whole. it is too slow and we can do it in 8 frames without any issues
-scroller_write_char_fully
-	; TODO get the address of the character data to write in HL
-	; write the 8 lines of the character in the ring buffer
+; Write at most ONE line of the pending char per frame (instead of all 8 in
+; a burst). Selection guarantees >= 8 frames between two chars (min char =
+; 4 nops of a single out + 4 frames of 1-nop-precision scroll), so the 8
+; steps always complete before the next char is selected.
+scroller_write_char_step
+	ld a, (scroller_pending_char.next_line)
+	cp 8 : ret nc ; nothing (left) to draw
+	inc a : ld (scroller_pending_char.next_line), a
+	dec a
+	; jump to the unrolled writer for this line
+	add a : ld e, a : ld d, 0
+	ld hl, .jump_table
+	add hl, de
+	ld a, (hl) : inc hl : ld h, (hl) : ld l, a
+	jp (hl)
+
+.jump_table
 	repeat 8, line, 0
-		; Get the buffer write position for this line in DE
-		ld a, (SCROLLER_CONFIG_{{line}}  + SCROLLER_LINE_DATA.ring_buffer_write_pos) : ld e, a ; get the write position in the ring buffer for this line
-		ld d, high(SCROLLER_RING_BUFFER_{{line}})
-
-		call scroller_write_char_line
-
-		ld a, e : ld (SCROLLER_CONFIG_{{line}}  + SCROLLER_LINE_DATA.ring_buffer_write_pos), a ; save the write position in the ring buffer for this line
-
+		dw .write_line_{{line}}
 	endr
+
+	repeat 8, line, 0
+.write_line_{{line}}
+	ld hl, (scroller_pending_char.line_data)
+	; Get the buffer write position for this line in DE
+	ld a, (SCROLLER_CONFIG_{{line}} + SCROLLER_LINE_DATA.ring_buffer_write_pos) : ld e, a
+	ld d, high(SCROLLER_RING_BUFFER_{{line}})
+	call scroller_write_char_line
+	ld a, e : ld (SCROLLER_CONFIG_{{line}} + SCROLLER_LINE_DATA.ring_buffer_write_pos), a ; save the write position in the ring buffer for this line
+	ld (scroller_pending_char.line_data), hl ; HL was advanced to the next line data
 	ret
+	endr
 
 
 ;;
@@ -610,9 +629,8 @@ scroller_handle_char_update
 .previous_char_duration equ $-1
 
 	dec a : ld (.previous_char_duration), a
-	ret nz ; this is not time to update the char
-
-	; but to select a new char
+	call z, scroller_select_new_char ; time to select a new char (sets the pending drawing state)
+	jp scroller_write_char_step      ; and each frame, write at most one pending line
 
 scroller_select_new_char
 
@@ -649,8 +667,9 @@ scroller_select_new_char
 	add 3 ; add the 3 extra steps for a nop precise scroller
 	inc de 
 
-	ex de, hl
-	call scroller_write_char_fully
+	; defer the actual writing: one line per frame via scroller_write_char_step
+	ld (scroller_pending_char.line_data), de ; DE already points to the first line data
+	xor a : ld (scroller_pending_char.next_line), a
 	ret
 
 ;;
@@ -728,6 +747,8 @@ letter_{SELECTED_FONT_LETTER}_nb_nops db CHAR_{SELECTED_FONT_LETTER}_LINE_{CURRE
 		assert CHAR_{SELECTED_FONT_LETTER}_LINE_0_NOPS_COUNTER == CHAR_{SELECTED_FONT_LETTER}_LINE_5_NOPS_COUNTER, SELECTED_FONT_LETTER, ": each line of the character must use the same number of nops"
 		assert CHAR_{SELECTED_FONT_LETTER}_LINE_0_NOPS_COUNTER == CHAR_{SELECTED_FONT_LETTER}_LINE_6_NOPS_COUNTER, SELECTED_FONT_LETTER, ": each line of the character must use the same number of nops"
 		assert CHAR_{SELECTED_FONT_LETTER}_LINE_0_NOPS_COUNTER == CHAR_{SELECTED_FONT_LETTER}_LINE_7_NOPS_COUNTER, SELECTED_FONT_LETTER, ": each line of the character must use the same number of nops"
+		; the progressive drawing writes one line per frame, so a char must last at least 8 frames
+		assert CHAR_{SELECTED_FONT_LETTER}_LINE_0_NOPS_COUNTER >= 8, SELECTED_FONT_LETTER, ": chars must be at least 8 nops wide so the 8-step drawing finishes before the next char"
 	endm
 
 
