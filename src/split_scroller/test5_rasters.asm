@@ -18,6 +18,9 @@
 
 SNASET CRTC_SEL, 0
 
+SCREEN_WIDTH equ 96
+SCREEN_HEIGHT_CHARS equ 21
+
 SCROLLER_NB_VERTICAL_BLOCS equ 8
 ;; The number of times a routine is dulicated
 BLOC_HEIGHT equ 8
@@ -42,18 +45,22 @@ init
 		ld hl, 0xc9fb : ld (0x38), hl
 		ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00 + 96/2 : out (c), c
 		ld bc, 0xbc00 + 2 : out (c), c : ld bc, 0xbd00 + 50 : out (c), c
-		ld bc, 0xbc00 + 7 : out (c), c : ld bc, 0xbd00 : out (c), c
-		ld bc, 0xbc00 + 6 : out (c), c : ld bc, 0xbd00 + 38 : out (c), c
-		ld hl, 0x1000
-		ld bc, 0xbc00 + 12 : out (c),c : ld bc, 0xbd00 : out (c), h
-		ld bc, 0xbc00 + 13 : out (c),c : ld bc, 0xbd00 : out (c), l
+		ld bc, 0xbc00 + 7 : out (c), c : ld bc, 0xbd00 + 29 : out (c), c
+		ld bc, 0xbc00 + 6 : out (c), c : ld bc, 0xbd00 + SCREEN_HEIGHT_CHARS : out (c), c
+		ld bc, 0xbc00 + 12 : out (c),c : ld bc, 0xbd00 + 0x30 : out (c), c
+		ld bc, 0xbc00 + 13 : out (c),c : ld bc, 0xbd00 : out (c), c
 		ld bc, 0x7f8c : out (c), c
 
-		ld bc, 0x7f10 : out (c), c
-		ld bc, 0x7f40 : out (c), c
+
+        ; set up the background_palette for the background
+        ld bc, 0x7f00 : out (c), c : ld a, (background_palette+0) : out (c), a
+        ld bc, 0x7f01 : out (c), c : ld a, (background_palette+1) : out (c), a
+        ld bc, 0x7f02 : out (c), c : ld a, (background_palette+2) : out (c), a
+        ld bc, 0x7f03 : out (c), c : ld a, (background_palette+3) : out (c), a
+
+        ; set up the background_palette for the background
+		ld bc, 0x7f10 : out (c), c : ld bc, 0x7f54 : out (c), c
 		ld sp, $
-
-
 
 		call scroller_generate_initial_code
 
@@ -1043,21 +1050,23 @@ SCROLLER_RASTERS_DATA
 .start
 	; TODO write the real values of interest for the scroller raster
 
-	repeat SCROLLER_NB_VERTICAL_BLOCS
-		db GA_RED
-		db GA_MAGENTA
-		db GA_BLUE
-		db GA_CYAN
-		db GA_GREEN
-		db GA_YELLOW
-		db GA_WHITE
-		db GA_PURPLE
-	endr
+		db GA_COL_09
+		db GA_COL_10
+		db GA_COL_18
+		db GA_COL_20
+		db GA_COL_20
+		db GA_COL_18
+		db GA_COL_10
+		db GA_COL_09
 .stop
 	db GA_BLACK ; The very last one is black to hide everything
 
-	assert .stop - .start == SCROLLER_NB_VERTICAL_BLOCS * BLOC_HEIGHT, "The number of rasters must be equal to the height of the scroller"
 
+
+
+    ; background_palette
+background_palette
+    incbin "../../data/face0_cpc.pal"
 
 ; Generate the buffers
 ; Buffers start empty.
