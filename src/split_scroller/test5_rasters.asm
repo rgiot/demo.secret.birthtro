@@ -341,11 +341,8 @@ scroller_generate_line_code
 	ld a, list_get(opcode(out (c), d), 0) ; set the first byte of any out
 	CODE_WRITE_BYTE() ; and write it to the generated code
 
-	; set up a nop counter in af'
-	; on the 64 available nops, remove duration of first out and the end code to know how many nops we can have in the middle to handle the scroll and the split start
-	ld a, 64 - (SCROLLER_TEMPLATE_START_CODE_DURATION + SCROLLER_TEMPLATE_END_CODE_DURATION)
-	ex af, af'
-
+	; The nop budget of the middle section is a compile-time constant:
+	; it is loaded directly in C at .add_instructions instead of transiting through af'
 
 	; Get the true start of the split raster code
 	ld l, (ix + SCROLLER_LINE_DATA.ring_buffer_read_pos) ; => HL=buffer location to read
@@ -353,7 +350,7 @@ scroller_generate_line_code
 
 	; Handle first out and first 4 nops column
 	ld b, 0 ; counter number of nops met before out
-	ld c, 0 ; presence of out. is it usefull ? remove ?
+	        ; (the out-presence counter that was in C was never read: removed)
 
 	; Duplicate this code for the potential 4 nops positions
 	repeat 4, nb_nops, 0
@@ -361,7 +358,6 @@ scroller_generate_line_code
 		or a
 		jr z, .has_nops{{nb_nops}}
 	.no_nops{{nb_nops}}
-		inc c ; we have a out, so increase the counter
 ; XXX I comment the code because I do not understand why I handled 2 cases
 ;		if {nb_nops} == 0
 ;			; there was no nop at all
@@ -444,66 +440,74 @@ scroller_generate_line_code
 	;jr .add_instructions ; this is already the next instruction
 
 	; HL points on the buffer start
-	; af' contains the number of remaining nops
 .add_instructions
-	ex af, af'
-	ld c, a
-	ex af, af'
-	; c is used a nop counter to avoid switching with af' in the loop
+	; C = nop budget of the middle section: on the 64 available nops, remove
+	;     the duration of the first out and of the end code
+	; B = first byte of any out (c), e|d opcode, kept there for the whole loop
+	ld bc, list_get(opcode(out (c), d), 0)*256 + 64 - (SCROLLER_TEMPLATE_START_CODE_DURATION + SCROLLER_TEMPLATE_END_CODE_DURATION)
 
 .add_instruction_loop
 
 	BUFFER_READ_BYTE() ; get the first byte of the next instruction to add
 	or a
-	jr z, .try_handle_nop
+	jr z, .start_nop_run
 
 .try_handle_out
-	ld a, c : cp duration(out (c), d) ; check if we have enough time to inject the out instruction
-	jr nc, .really_handle_out
-.unable_to_handle_out
-	dec l ; move back to the start of instruction to treat it later
-	jr .stabilize_code
+	ld a, c : sub duration(out (c), d) ; carry if we do not have enough time to inject the out instruction
+	jr c, .unable_to_handle_out
 .really_handle_out
-	ld a, list_get(opcode(out (c), d), 0) ; set the first byte of out (we've lost this value previouslly read)
+	ld c, a ; consume the out from the nop counter
+	ld a, b ; set the first byte of out (we've lost this value previouslly read)
 	CODE_WRITE_BYTE() ; write the 1srt byte of the out instruction
 	BUFFER_READ_BYTE() ; get the register of out (c), e|d
 	CODE_WRITE_BYTE() ; write the out register
-	ld a, 0-duration(out (c), d) : add c : ld c, a ; consume out
 	jr .add_instruction_loop
 
-.try_handle_nop
-	ld a, c : cp 1 ;duration(nop) ; check if we have enough time to inject nop instruction
-	jr nc, .really_handle_nop
-.unable_to_handle_nop
-	dec l ; move back to the nop to treat it later
-	jr .stabilize_code
-.really_handle_nop
-	xor a ; NOP instruction
+	; nops are the most frequent content: once one is met, stay in a
+	; tight loop as long as nops follow and the counter allows it
+.start_nop_run
+	; A is already 0, ie a NOP instruction
+	inc c : dec c ; check the nop counter without destroying A
+	jr z, .unable_to_handle_nop
+.nop_run
 	CODE_WRITE_BYTE() ; write the nop
 	dec c ; we consume one nop from the counter
-	jr .add_instruction_loop
+	jr z, .finalize_code ; counter exhausted: nothing else can fit and there
+	                     ; is no nop left for the stabilization
+	                     ; (L already points on the next unread instruction)
+	BUFFER_READ_BYTE() ; get the first byte of the next instruction to add
+	or a
+	jr z, .nop_run
+	jr .try_handle_out ; a non null byte is a out to handle (or to postpone)
 
-	; Stabilize the code to be sure it takes exactly 64 nops
-	; af' is not up to date, the real value is in c
+.unable_to_handle_nop
+	dec l ; move back to the nop to treat it later
+	jr .finalize_code ; the counter is 0: no stabilization nop to write
+
+.unable_to_handle_out
+	dec l ; move back to the start of instruction to treat it later
+	; and fall through the stabilization
+
+	; Stabilize the code to be sure it takes exactly 64 nops.
+	; Here C < duration(out (c), d): there are 0 to 3 nops to write
 .stabilize_code
-	ex af, af'
-	ld a, c ; restore the real value that was in c
-	or a : jr z, .finalize_code
-	ld b, a
-	xor a ; NOP
-.stabilize_loop
-		CODE_WRITE_BYTE() ; write nop
-	djnz .stabilize_loop
+	xor a ; NOP instruction
+	inc c : dec c : jr z, .finalize_code
+	CODE_WRITE_BYTE() ; write nop
+	dec c : jr z, .finalize_code
+	CODE_WRITE_BYTE() ; write nop
+	dec c : jr z, .finalize_code
+	CODE_WRITE_BYTE() ; write nop
+	; C cannot exceed 3 here: fall through
 
 	; Here we want to add the instructions at the end of the line
 	; at least a nop, but maybe something to play with rasters too
 .finalize_code
 	ld hl, scroller_template_end_code_even
-	ld b, SCROLLER_TEMPLATE_END_CODE_EVEN_SIZE
-.finalize_loop
+	repeat SCROLLER_TEMPLATE_END_CODE_EVEN_SIZE
 		BUFFER_READ_BYTE()
 		CODE_WRITE_BYTE()
-	djnz .finalize_loop
+	endr
 
 	ret
 
