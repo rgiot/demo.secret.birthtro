@@ -14,6 +14,7 @@
 ; IDEA: by also using a ring buffer for the scroller routines, we could allow a horizontal translation of the text
 ; IDEA it is probably possible to have a zooming scroller too by generating zoomed version of the splits 
 ;
+; Sadly it does not work to change the color each line, it does not even work one line out of two (in fact, out itself is too much)
 
 SNASET CRTC_SEL, 0
 
@@ -68,7 +69,8 @@ frame
 
 	
 	di
-	defs 64 - (3+4+3+4+1+1) + 1 +  13 - 1 ; ensure proper alignement
+	defs 64 - (3+4+3+4+1+1) + 1 +  13 - 1  -1 -1-1; ensure proper alignement
+	                                              ; Sadly, it is properly aligned on the left but not the right
 	call scroller_show
 
 	ld bc, 0x7f00 : out(c), c
@@ -218,17 +220,19 @@ scroller_configuration_table
 
 scroller_show_routine_table_a
 	repeat SCROLLER_NB_VERTICAL_BLOCS, line, 0
-		repeat BLOC_HEIGHT
+		repeat BLOC_HEIGHT-1
 			dw SCROLLER_CODE_{{line}}_a
 		endr
+		dw scroller_change_color
 	endr
 	dw scroller_show.continue
 
 scroller_show_routine_table_b
 	repeat SCROLLER_NB_VERTICAL_BLOCS, line, 0
-		repeat BLOC_HEIGHT
+		repeat BLOC_HEIGHT-1
 			dw SCROLLER_CODE_{{line}}_b
 		endr
+		dw scroller_change_color
 	endr
 	dw scroller_show.continue
 
@@ -258,24 +262,33 @@ SCROLLER_TEMPLATE_START_CODE_DURATION equ duration(out (c), d); The first fir op
 	align 256
 ;; The code at the very end of the display routine.
 ;; we must use inc l to copy it. But in fact it is not mandatory to be aligned
-scroller_template_end_code
-TICKER START SCROLLER_TEMPLATE_END_CODE_DURATION
+scroller_template_end_code_even
+TICKER START SCROLLER_TEMPLATE_END_CODE_DURATION_EVEN
 .start
-	; handle the color of the next line
-	exx
-		outi
-		inc b
-	exx
-	; call the next method
+
 	ret
 .end
 TICKER STOP
 
 
+scroller_change_color
+TICKER START SCROLLER_COLOR_CHANGE_DURATION
+	out (c), d
+    exx
+		outi 
+		inc b
+	exx
+TICKER STOP
+	defs 64 - duration(ret) - SCROLLER_COLOR_CHANGE_DURATION
+	ret
+
+
+
 ;; The number of bytes to copy to generate the end of the display routine
-SCROLLER_TEMPLATE_END_CODE_SIZE equ scroller_template_end_code.end - scroller_template_end_code.start
+SCROLLER_TEMPLATE_END_CODE_EVEN_SIZE equ scroller_template_end_code_even.end - scroller_template_end_code_even.start
 
-
+;assert SCROLLER_TEMPLATE_END_CODE_DURATION_ODD == SCROLLER_TEMPLATE_END_CODE_DURATION_EVEN, "the duration of the end code must be the same for odd and even lines"
+SCROLLER_TEMPLATE_END_CODE_DURATION equ SCROLLER_TEMPLATE_END_CODE_DURATION_EVEN
 
 	struct SCROLLER_LINE_DATA
 		; the position to feed the next column of char
@@ -478,8 +491,8 @@ scroller_generate_line_code
 	; Here we want to add the instructions at the end of the line
 	; at least a nop, but maybe something to play with rasters too
 .finalize_code
-	ld hl, scroller_template_end_code
-	ld b, SCROLLER_TEMPLATE_END_CODE_SIZE
+	ld hl, scroller_template_end_code_even
+	ld b, SCROLLER_TEMPLATE_END_CODE_EVEN_SIZE
 .finalize_loop
 		BUFFER_READ_BYTE()
 		CODE_WRITE_BYTE()
@@ -1025,6 +1038,7 @@ scroller_text2
 
 
 
+	align 256
 SCROLLER_RASTERS_DATA
 .start
 	; TODO write the real values of interest for the scroller raster
@@ -1057,3 +1071,6 @@ SCROLLER_RING_BUFFER_{{line}}
 .test_write
 	endr
 
+    ; screen
+    org 0xc000
+    incbin "../../data/face0_cpc.scr"
