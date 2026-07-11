@@ -1,5 +1,14 @@
 {% set EMU="ace" %}
 
+
+
+- tgt: test5
+  phony: true
+  cmd:
+    - basm test5_rasters.asm --snapshot -o test5.sna
+    - emu --snapshot test5.sna  --emulator {{EMU}} run
+
+
 - tgt: test4
   phony: true
   cmd:
