@@ -1017,7 +1017,7 @@ scroller_text2
 	align 256
 SCROLLER_RING_BUFFER_{{line}}
 .test_read
-	defs 64
+	defs 200
 .test_write
 	endr
 
