@@ -239,7 +239,7 @@ spectral_sprite_move_along_curve
     ; Scroll the curve read position by ONE entry for the next frame (the wave travels one
     ; curve entry per frame). delta_x_curve is page-aligned, so only the low byte moves and it
     ; wraps within the 256-entry table. hl itself is left on this frame's start position.
-    ld a, l : inc a : ld (.curve_pos), a
+    ld a, l : inc a : ld (.curve_pos), a ; XXX why not inc l : ld (.curve_pos), hl ?
 
     ; Walk the non-blank columns. Each consecutive one samples the curve SPECTRAL_CURVE_STEPX
     ; entries further along (a uniform phase stride) and starts pre-biased by the curve integral
@@ -273,37 +273,52 @@ spectral_sprite_move_along_curve
 call_hl jp hl
 
 
-;;
-;; Draw the static sprite in the middle of the screen.
-;; It is drawn COLUMN by column (not row by row) because each column starts at a different
-;; line: SPECTRAL_START_LINE + spectral_curve_integral(...) - the very same pre-shift the move
-;; routine applies. This way the static picture already matches the animated baseline and the
-;; first frame of movement has no discontinuity.
-show_static_sprite
-    SPECTRAL_DRAW_K = 0
-    repeat SPECTRAL_SPRITE_WIDTH, colid, 0
-        if !spectral_sprites_column_is_blank(list_get(spectral_sprites_up_actions, {colid}))
-            ; screen address of this column's top: line (START + bias), column x
-            ld hl, screen_table
-            ld de, (SPECTRAL_START_LINE + spectral_curve_integral(SPECTRAL_DELTA_CURVE, SPECTRAL_DRAW_K*SPECTRAL_CURVE_STEPX)) * 2
-            add hl, de
-            ld e, (hl) : inc hl : ld d, (hl) ; de = base screen address of that line
-            ld hl, SPECTRAL_START_COLUMN + {colid}*BLOC_WIDTH
-            add hl, de                        ; hl = screen address of the column top
+;; Address delta to move a bloc down to the next one. A bloc is BLOC_HEIGHT lines tall and
+;; BLOC_HEIGHT is a multiple of 8, so moving down one bloc is (BLOC_HEIGHT/8) char rows: on the
+;; CPC layout moving down 8 lines is always +SCREEN_WIDTH (the sub-line offset is unchanged),
+;; so no per-line bc26_hl is needed between blocs. When BLOC_HEIGHT==8 this is a single +SCREEN_WIDTH.
+SPECTRAL_BLOC_STRIDE equ (BLOC_HEIGHT/8)*SCREEN_WIDTH
+    assert BLOC_HEIGHT % 8 == 0, "BLOC_HEIGHT must be a multiple of 8 for SPECTRAL_BLOC_STRIDE"
 
-            ; draw the column's blocs, one per model row that holds a '#'
-            repeat SPECTRAL_SPRITE_HEIGHT, row, 0
-                if string_get(list_get(spectral_sprites_model, {row}), {colid}) == "#"
-                    call show_bloc ; draws the bloc AND leaves hl BLOC_HEIGHT lines lower
-                else
-                    repeat BLOC_HEIGHT
-                        call bc26_hl ; nothing to draw: just step down one bloc
-                    endr
-                endif
-            endr
-            SPECTRAL_DRAW_K = SPECTRAL_DRAW_K + 1
-        endif
-    endrepeat
+;; XXX Claude written from initial handwritten done
+;; Draw the static sprite in the middle of the screen.
+;; Drawn COLUMN by column (runtime loop, kept compact rather than unrolled): each column starts
+;; at its own line spectral_column_top_line[col] = SPECTRAL_START_LINE + curve bias, the very same
+;; pre-shift the move routine applies, so the static picture already matches the animated baseline.
+;; The model is read from spectral_sprites_matrix (row-major, so a column is walked with stride
+;; SPECTRAL_SPRITE_WIDTH).
+show_static_sprite
+    ld ix, spectral_column_top_line     ; per-column top raster line (START + curve bias)
+    ld iy, spectral_sprites_matrix      ; model, base cell of the current column
+    ld c, SPECTRAL_START_COLUMN         ; byte x of the current column within a line
+    ld b, SPECTRAL_SPRITE_WIDTH         ; number of columns to walk
+.col_loop
+    push bc
+        ; screen address of this column's top = base(top line) + x
+        ld a, (ix + 0)
+        ld h, high(screen_table_hi) : ld l, a : ld d, (hl) ; d = high byte of the line base
+        ld h, high(screen_table_lo)             : ld e, (hl) ; e = low  byte of the line base
+        ld l, c : ld h, 0 : add hl, de          ; hl = column top screen address
+
+        ; walk the column's model rows, drawing a bloc wherever there is a '#'
+        push iy
+        ld b, SPECTRAL_SPRITE_HEIGHT
+.row_loop
+        push bc
+            ld a, (iy + 0) : cp '#'
+            jr nz, .empty
+            push hl : call show_bloc : pop hl   ; draw; keep hl on this bloc's top
+.empty
+            ld de, SPECTRAL_BLOC_STRIDE  : add hl, de  ; down to the next bloc
+            ld de, SPECTRAL_SPRITE_WIDTH : add iy, de  ; next model row of this column
+            pop bc
+        djnz .row_loop
+        pop iy
+        inc iy                                  ; next model column
+        pop bc
+    ld a, c : add BLOC_WIDTH : ld c, a          ; next column x
+    inc ix                                      ; next column top line
+    djnz .col_loop
     ret
 
 
@@ -548,6 +563,20 @@ spectral_sprite_column{colid}_table
     assert list_len(list_get(spectral_sprites_model, 0)) = SPECTRAL_SPRITE_WIDTH, "spectral_sprites_model first line must have {SPECTRAL_SPRITE_WIDTH} characters"
 
 spectral_sprites_matrix db spectral_sprites_model
+
+;; Top raster line of each column of the sprite: SPECTRAL_START_LINE plus the curve integral up
+;; to that column's phase (blank columns draw nothing, so their entry is a harmless placeholder).
+;; Consumed by show_static_sprite; kept in step with the move routine's per-column init.
+spectral_column_top_line
+    SPECTRAL_TOP_K = 0
+    repeat SPECTRAL_SPRITE_WIDTH, colid, 0
+        if spectral_sprites_column_is_blank(list_get(spectral_sprites_up_actions, {colid}))
+            db SPECTRAL_START_LINE ; blank column: value unused
+        else
+            db SPECTRAL_START_LINE + spectral_curve_integral(SPECTRAL_DELTA_CURVE, SPECTRAL_TOP_K*SPECTRAL_CURVE_STEPX)
+            SPECTRAL_TOP_K = SPECTRAL_TOP_K + 1
+        endif
+    endrepeat
 
 
 
