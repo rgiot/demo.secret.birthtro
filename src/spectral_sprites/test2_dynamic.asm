@@ -34,6 +34,9 @@ BLOC_HEIGHT equ 16
 BLOC_WIDTH equ 8
 
 
+SPECTRAL_DELTA_CURVE equ [ 2, 4, 4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 2, 4, 4, 2, 4, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 2, 4, 2,2, 4, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 2, 4, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 0, 2, 2, 0, 2, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 2, 0, 2, 2, 0, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 4, 2,2, 4, 2, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 4, 2, 4, 4, 2, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4]
+SPECTRAL_CURVE_STEPX equ 3
+
 
 SPECTRAL_START_LINE equ SCREEN_HEIGHT_CHARS*8/2 - BLOC_HEIGHT*SPECTRAL_SPRITE_HEIGHT/2 - 7
 SPECTRAL_START_COLUMN equ 4
@@ -130,6 +133,24 @@ function spectral_sprites_column_is_blank, actions
     return true
 endfunction
 
+;; XXX Copilot edited
+;; Compile-time running integral of the delta curve, from entry 0 up to (but excluding)
+;; {offset}. Curve values encode a per-frame vertical move: 0 => down (+1 line), 2 => nothing,
+;; 4 => up (-1 line), so each entry contributes (2 - value)/2 lines.
+;; This is C(offset): the vertical bias that a column sampling the curve at phase {offset}
+;; accumulates relative to a column sampling at phase 0. Consecutive non-blank columns are
+;; SPECTRAL_CURVE_STEPX entries apart, so column k (in non-blank order) needs the bias
+;; spectral_curve_integral(SPECTRAL_DELTA_CURVE, k*SPECTRAL_CURVE_STEPX). Pre-shifting every
+;; column by its own bias (both when drawn statically and when moved) makes them all oscillate
+;; around SPECTRAL_START_LINE instead of drifting into a per-column tilt.
+function spectral_curve_integral, curve, offset
+    acc = 0
+    repeat {offset}, i, 0
+        acc = acc + (2 - list_get({curve}, {i})) / 2
+    endrepeat
+    return acc
+endfunction
+
 ;; The list of actions to execute for each column of the picture to make it move up/down
 spectral_sprites_up_actions equ spectral_sprites_compute_up_actions(spectral_sprites_model)
 spectral_sprites_down_actions equ spectral_sprites_compute_down_actions(spectral_sprites_model)
@@ -212,31 +233,38 @@ frame
     jp frame
 
 spectral_sprite_move_along_curve
-    BREAKPOINT
-
     ld hl, delta_x_curve
 .curve_pos equ $-2
-    ld a, (hl) : inc l 
-    ld (.curve_pos), hl
 
+    ; Scroll the curve read position by ONE entry for the next frame (the wave travels one
+    ; curve entry per frame). delta_x_curve is page-aligned, so only the low byte moves and it
+    ; wraps within the 256-entry table. hl itself is left on this frame's start position.
+    ld a, l : inc a : ld (.curve_pos), a
+
+    ; Walk the non-blank columns. Each consecutive one samples the curve SPECTRAL_CURVE_STEPX
+    ; entries further along (a uniform phase stride) and starts pre-biased by the curve integral
+    ; up to its own phase, so they all oscillate around SPECTRAL_START_LINE (no per-column tilt).
+    SPECTRAL_MOVE_K = 0
     repeat SPECTRAL_SPRITE_WIDTH, colid, 0
         ; Blank columns (see spectral_sprites_column_is_blank) have no move routine, no jump
-        ; table, and nothing to draw: skip both the dispatch AND the delta_x_curve phase
-        ; advance for them entirely (the next real column simply reuses whatever phase was
-        ; already fetched - this shifts the wave stride, which is expected/accepted).
+        ; table, and nothing to draw: skip both the dispatch AND their curve phase entirely.
         if !spectral_sprites_column_is_blank(list_get(spectral_sprites_up_actions, {colid}))
+    ld a, (hl) ; curve value that drives this column this frame
     push hl
         ld hl, spectral_sprite_column{colid}_table
         ld d, 0 : ld e, a
         add hl, de
         ld e, (hl) : inc hl : ld d, (hl)
         ex de, hl
-        ld a, SPECTRAL_START_LINE
+        ld a, SPECTRAL_START_LINE + spectral_curve_integral(SPECTRAL_DELTA_CURVE, SPECTRAL_MOVE_K*SPECTRAL_CURVE_STEPX)
 .col{colid}_pos equ $-1
         call call_hl
         ld (.col{colid}_pos), a
     pop hl
-    inc l : inc l : ld a, (hl)
+    repeat SPECTRAL_CURVE_STEPX
+        inc l ; advance to the next column's curve phase
+    endr
+    SPECTRAL_MOVE_K = SPECTRAL_MOVE_K + 1
         endif
     endrepeat
 
@@ -246,44 +274,36 @@ call_hl jp hl
 
 
 ;;
-;; Draw the static sprite in the middle of the screen
+;; Draw the static sprite in the middle of the screen.
+;; It is drawn COLUMN by column (not row by row) because each column starts at a different
+;; line: SPECTRAL_START_LINE + spectral_curve_integral(...) - the very same pre-shift the move
+;; routine applies. This way the static picture already matches the animated baseline and the
+;; first frame of movement has no discontinuity.
 show_static_sprite
-    ; compute the start line to display the logo
-    ld hl, screen_table
-    ld de, SPECTRAL_START_LINE*2
-    add hl, de
-    ld e, (hl) : inc hl
-    ld d, (hl) : inc hl
-    ld hl, SPECTRAL_START_COLUMN
-    add hl, de
+    SPECTRAL_DRAW_K = 0
+    repeat SPECTRAL_SPRITE_WIDTH, colid, 0
+        if !spectral_sprites_column_is_blank(list_get(spectral_sprites_up_actions, {colid}))
+            ; screen address of this column's top: line (START + bias), column x
+            ld hl, screen_table
+            ld de, (SPECTRAL_START_LINE + spectral_curve_integral(SPECTRAL_DELTA_CURVE, SPECTRAL_DRAW_K*SPECTRAL_CURVE_STEPX)) * 2
+            add hl, de
+            ld e, (hl) : inc hl : ld d, (hl) ; de = base screen address of that line
+            ld hl, SPECTRAL_START_COLUMN + {colid}*BLOC_WIDTH
+            add hl, de                        ; hl = screen address of the column top
 
-    ld de, spectral_sprites_matrix
-
-    ld b, SPECTRAL_SPRITE_HEIGHT
-.loopy
-    push bc, hl
-
-        ld b, SPECTRAL_SPRITE_WIDTH
-.loopx
-        push bc
-            ld a, (de) : inc de
-            cp '#'
-            jp nz, .skip
-            push de, hl : call show_bloc : pop hl, de
-.skip
-            repeat BLOC_WIDTH
-                inc hl
-            endrepeat
-
-            pop bc
-        djnz .loopx
-
-        pop hl
-        repeat BLOC_HEIGHT
-            call bc26_hl
-        endrepeat
-        pop bc
-    djnz .loopy
+            ; draw the column's blocs, one per model row that holds a '#'
+            repeat SPECTRAL_SPRITE_HEIGHT, row, 0
+                if string_get(list_get(spectral_sprites_model, {row}), {colid}) == "#"
+                    call show_bloc ; draws the bloc AND leaves hl BLOC_HEIGHT lines lower
+                else
+                    repeat BLOC_HEIGHT
+                        call bc26_hl ; nothing to draw: just step down one bloc
+                    endr
+                endif
+            endr
+            SPECTRAL_DRAW_K = SPECTRAL_DRAW_K + 1
+        endif
+    endrepeat
     ret
 
 
@@ -593,13 +613,8 @@ screen_table_lo
 ; 0 => decrease
 ; 2=> nothing
 ;  4=> increase
-delta_x_curve
-
-        ;db 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 2, 4, 2, 4, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 2, 4, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 0, 2, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 2,0, 2, 0, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 2, 0, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 4, 2, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 4, 2, 4, 2, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
-
-  ; db 2, 4, 4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 2, 4, 4, 2, 4, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 2, 4, 2, 2, 4, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 2, 4, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 0, 2, 2, 0, 2, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 2, 0, 2, 2, 0, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 4, 2,2, 4, 2, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 4, 2, 4, 4, 2, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4
-
-        db 2, 4, 4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 2, 4, 4, 2, 4, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 2, 4, 2,2, 4, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 2, 4, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 0, 2, 2, 0, 2, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 2, 0, 2, 2, 0, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 4, 2,2, 4, 2, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 4, 2, 4, 4, 2, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4
+; XXX limitation Needs to be setup in memory BEF
+delta_x_curve db SPECTRAL_DELTA_CURVE
 
 ;SPECTRAL_START_ADDRESS equ peek(screen_table + 2*SPECTRAL_START_LINE + 0) \
 ;                        + (peek(screen_table + 2*SPECTRAL_START_LINE + 1) << 8);\
