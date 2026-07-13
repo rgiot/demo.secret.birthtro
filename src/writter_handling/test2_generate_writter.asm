@@ -43,6 +43,13 @@ WRITTER_GRID_HEIGHT equ 10
 WRITTER_GRID_WIDTH_APPROXIMATE equ 24 ; as char are supposed to be propotional, we can only have an approximate number of char per line
 WRITTER_GRID_WIDTH_PIXELS equ SCREEN_WDITH*2  ; TODO remove few pixels to be sure to not have hidden chars
 
+; the writter grid is shorter than the screen, so it is vertically centered
+; by starting a few char lines below the top of the screen
+; NB: this must stay a whole number of char lines (8 scanlines) since it is
+;     used as a row index into screen_table - "/2" would yield a .5 result
+;     for an odd difference and misalign every row lookup, hence the ">>1"
+WRITTER_GRID_START_ROW equ (SCREEN_HEIGHT_CHARS - WRITTER_GRID_HEIGHT) >> 1
+
 
 	org 0x4000
 
@@ -157,12 +164,22 @@ init
         ld de, writter_char_a    ; Address of the character data
         call print_one_char_left
 frame
+
+    call writter_draw_page
+
     jp frame
 
 
 
+; state kept while a line is being drawn (writter_draw_line clobbers every
+; register but ix/iy while calling print_one_char_left/print_one_char_right,
+; so it cannot be kept in registers alone)
+writter_side db 0             ; 0 => next char starts left-aligned ; 1 => next char starts mid-byte
+writter_chars_left db 0        ; number of chars still to draw on the current line
+writter_pixels_pending db 0     ; nb of pixels of the char being drawn (stashed across the print call)
+
 ;;
-;; To draw a frame, we need to 
+;; To draw a frame, we need to
 ;;  - clear the writter area by removing the writter bits from the screen part dedicated to the writter
 ;;  - for each line of the writter
 ;;    - get the address of the line to draw
@@ -172,8 +189,81 @@ frame
 ;;       - draw   char by selecting the right function print_one_char_left or print_one_char_right
 ;;       - compute the next char address (it depends on the previous one and the number of bytes drawn)
 ;;       - get the number of pixels to skip (it depends on the last pixel posiiton (right or left))
+
+;; Removes the writter bits from every byte of the screen area dedicated to the writter,
+;; so a shorter/moved line does not leave leftover pixels from the previous draw.
+writter_clear_page
+    ld hl, screen_table + WRITTER_GRID_START_ROW*16   ; skip the rows above the vertically centered writter grid
+    ld b, WRITTER_GRID_HEIGHT*8        ; b = number of scanlines used by the writter
+.scanline_loop
+        push bc
+
+        ld a, (hl) : ld e, a
+        inc hl
+        ld a, (hl) : ld d, a             ; de = scanline address
+        inc hl                             ; hl = next screen_table entry
+
+        push hl                             ; keep the screen_table ptr safe (hl reused below)
+        ex de, hl                            ; hl = scanline address to clear
+        ld b, SCREEN_WDITH
+.byte_loop
+            ld a, (hl)
+            and WRITTER_CLEAR_MASK
+            ld (hl), a
+            inc hl
+            djnz .byte_loop
+        pop hl                                ; hl = screen_table ptr (restored)
+
+        pop bc
+        dec b
+        jr nz, .scanline_loop
+    ret
+
 writter_draw_page
-    ld ix, WRITTER_PAGE0
+    call writter_clear_page
+
+    ld hl, WRITTER_PAGE0            ; hl = current line record in the page
+    ld de, screen_table + WRITTER_GRID_START_ROW*16   ; de = current row entry in screen_table, starting on the vertically centered row
+    ld b, WRITTER_GRID_HEIGHT         ; b = number of lines still to draw
+.row_loop
+        ; keep everything safe across the call: writter_draw_line (through
+        ; print_one_char_left/right) clobbers af, bc, de and hl
+        push bc
+        push hl                        ; line record ptr
+        push de                        ; screen_table row ptr
+
+        ; resolve the screen address of this row (word stored at (de))
+        ld a, (de) : ld c, a
+        inc de
+        ld a, (de) : ld b, a            ; bc = resolved row screen address
+
+        ld d, h : ld e, l                ; de = line record ptr (writter_draw_line input)
+        ld h, b : ld l, c                ; hl = resolved screen address (writter_draw_line input)
+
+        call writter_draw_line
+
+        pop de                           ; de = screen_table row ptr (restored)
+        pop hl                           ; hl = line record ptr (restored)
+        pop bc                           ; b = lines still to draw (restored)
+
+        ; advance the line record ptr past this line (3 header bytes + its chars)
+        ; (bc is used as scratch here, so the rows counter in b is protected on the stack)
+        push bc
+        push hl
+        inc hl : inc hl
+        ld a, (hl)                       ; a = nb chars of the line just drawn
+        pop hl
+        add a, 3
+        ld c, a : ld b, 0
+        add hl, bc                       ; hl = next line record
+        pop bc                           ; b = lines still to draw (restored again)
+
+        ; advance the screen_table ptr by 16 bytes (8 scanlines) to reach the next row
+        ld a, e : add a, 16 : ld e, a
+        ld a, d : adc a, 0 : ld d, a
+
+        dec b
+        jr nz, .row_loop
     ret
 
 
@@ -306,12 +396,61 @@ draw_pixel_line_start_left
     ;; - de = address of the writter data line to draw
     ;; - hl = address of the screen to draw the writter line
 writter_draw_line
+    ld a, (de) : inc de          ; a = nb bytes to skip
+    ld c, a : ld b, 0
+    add hl, bc                     ; hl = screen address of the first char of the line
 
-    ; TODO always mainain the number of pixels handled to be sure to call
-    ;      call the appropriate function
-    ; TODO comoute the very first address for display the first char
-    ; TODO display each char
-    ret
+    push hl : pop iy                ; iy = running cursor (screen address of the next char to draw)
+
+    ld a, (de) : inc de           ; a = nb pixels to skip (0 or 1)
+    ld (writter_side), a
+
+    ld a, (de) : inc de            ; a = nb chars in the line
+    ld (writter_chars_left), a
+    push de : pop ix                ; ix = pointer to the char codes still to draw
+
+.char_loop
+        ld a, (writter_chars_left)
+        or a
+        ret z                          ; line fully drawn
+
+        ld a, (ix+0) : inc ix            ; a = char code of the next char
+        add a, a                          ; *2: each WRITTER_MAPPING entry is a word
+        ld l, a : ld h, 0
+        ld bc, WRITTER_MAPPING
+        add hl, bc
+        ld e, (hl) : inc hl : ld d, (hl)   ; de = address of the char data to draw
+
+        ld a, (de)                          ; a = nb of pixels of the char
+        ld (writter_pixels_pending), a
+
+        push iy : pop hl                     ; hl = screen address to draw the char
+
+        ld a, (writter_side)
+        or a
+        jr nz, .draw_right
+            call print_one_char_left
+            jr .drawn
+.draw_right
+            call print_one_char_right
+.drawn
+
+        ; move the cursor past the char and update the current side
+        ; total = side + nb_pixels ; bytes advanced = total>>1 ; new side = total&1
+        ld a, (writter_side)
+        ld b, a
+        ld a, (writter_pixels_pending)
+        add a, b
+        srl a                                ; a = bytes to advance ; carry = new side
+        ld c, a : ld b, 0
+        add iy, bc
+        ld a, 0 : adc a, 0
+        ld (writter_side), a
+
+        ld a, (writter_chars_left)
+        dec a
+        ld (writter_chars_left), a
+        jr .char_loop
 
     ;; The pixels drawned from left to right are produced from a byte from right to left
     function writter_string_to_bitvalues content 
@@ -404,32 +543,25 @@ writter_complete_charset = " "
     ;; - Number of bytes to skip in the line (1 byte)
     ;; - Number of pixels to skip in the line (0 or 1) (1 byte)
     ;; - Number of chars in the line (1 byte)
-    ;; - For each char its code (1 byte/char)
+    ;; - For each char its code (1 byte/char, mapped through the writter charset, see WRITTER_MAPPING_GENERATE)
     macro WRITTER_ENCODE_LINE content
         ; Compute the total number of pixels in the string
         CURRENT_TOTAL_PIXELS_SIZE = 0
-        named_chars = []
         repeat string_len({content}), i, 0
             current_char = string_get({content}, {i})
             if current_char == ' '
                 current_char = 'sp'
             endif
-            CURRENT_TOTAL_PIXELS_SIZE += writter_char_{current_char}_length 
-            named_chars = list_push(named_chars, string_concat("writter_char_", current_char))
+            CURRENT_TOTAL_PIXELS_SIZE += writter_char_{current_char}_length
         endrepeat
 
         assert CURRENT_TOTAL_PIXELS_SIZE <= WRITTER_GRID_WIDTH_PIXELS, "Line is too long for the writter grid"
-        db CURRENT_TOTAL_PIXELS_SIZE>>1 ; nb bytes to skip
-        db CURRENT_TOTAL_PIXELS_SIZE&1  ; nb pixels to skip
+        ; centering offset: half of the unused pixels of the grid
+        CURRENT_SKIP_PIXELS_SIZE = (WRITTER_GRID_WIDTH_PIXELS - CURRENT_TOTAL_PIXELS_SIZE) / 2
+        db CURRENT_SKIP_PIXELS_SIZE>>1 ; nb bytes to skip
+        db CURRENT_SKIP_PIXELS_SIZE&1  ; nb pixels to skip
         db string_len({content})       ; nb chars
-        nb_chars_in_line = list_len(named_chars)
-        repeat nb_chars_in_line, i, 0
-            GENERATE_DB {eval}list_get(named_chars, {i})
-        endrepeat
-    endm
-
-    macro GENERATE_DB content
-        db {content}
+        db {content}                    ; char codes, mapped through the currently active charset
     endm
 
     ;; A page is build with 10 lines.
