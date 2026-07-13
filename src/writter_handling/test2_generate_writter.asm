@@ -9,6 +9,7 @@
 SPECTRAL_PLAIN = false
 
 SCREEN_WDITH equ 96 ; number of bytes
+SCREEN_HEIGHT_CHARS equ 21
 
 
 MODE0_LEFT_PIXEL_BIT0_POS equ 7
@@ -85,22 +86,28 @@ init
     
     if true
     ld hl, 0xC000   + 10 + 96         ; Screen address
+        ld de, writter_char_a    ; Address of the character data
     call print_one_char_left
 
     ld hl, 0xC000   + 10 + 96  + 96        ; Screen address
+        ld de, writter_char_a    ; Address of the character data
     call print_one_char_left
 
     ld hl, 0xC000   + 10 + 96  + 96  + 96      ; Screen address
+        ld de, writter_char_a    ; Address of the character data
     call print_one_char_left
 
 
     ld hl, 0xC000   + 10 + 96  +4       ; Screen address
+        ld de, writter_char_a    ; Address of the character data
     call print_one_char_left
 
     ld hl, 0xC000   + 10 + 96  + 96 +4       ; Screen address
+        ld de, writter_char_a    ; Address of the character data
     call print_one_char_left
 
     ld hl, 0xC000   + 10 + 96  + 96  + 96  +4      ; Screen address
+        ld de, writter_char_a    ; Address of the character data
     call print_one_char_left
     endif
 
@@ -110,44 +117,72 @@ init
 
     if true
 
-    BREAKPOINT
     ld hl, 0xC000   + 10 + 96  + 40       ; Screen address
+        ld de, writter_char_a    ; Address of the character data
     call print_one_char_right
 
     ld hl, 0xC000   + 10 + 96  + 96  + 40      ; Screen address
+        ld de, writter_char_a    ; Address of the character data
     call print_one_char_right
 
     ld hl, 0xC000   + 10 + 96  + 96  + 96    + 40    ; Screen address
+        ld de, writter_char_a    ; Address of the character data
     call print_one_char_right
 
 
     ld hl, 0xC000   + 10 + 96  +4    + 40     ; Screen address
+        ld de, writter_char_a    ; Address of the character data
     call print_one_char_right
 
     ld hl, 0xC000   + 10 + 96  + 96 +4    + 40     ; Screen address
+        ld de, writter_char_a    ; Address of the character data
     call print_one_char_right
 
     ld hl, 0xC000   + 10 + 96  + 96  + 96  +4   + 40     ; Screen address
+        ld de, writter_char_a    ; Address of the character data
     call print_one_char_right
     endif
 
 
 
         ld hl, 0xC000   + 10 + 96  + 40  + 4*96     ; Screen address
+        ld de, writter_char_a    ; Address of the character data
         call print_one_char_left
 
         ld hl, 0xC000   + 10 + 96  + 40  + 5*96     ; Screen address
+        ld de, writter_char_a    ; Address of the character data
         call print_one_char_right
 
         ld hl, 0xC000   + 10 + 96  + 40  + 6*96 + 1    ; Screen address
+        ld de, writter_char_a    ; Address of the character data
         call print_one_char_left
 frame
     jp frame
 
 
+
+;;
+;; To draw a frame, we need to 
+;;  - clear the writter area by removing the writter bits from the screen part dedicated to the writter
+;;  - for each line of the writter
+;;    - get the address of the line to draw
+;;    - get the number of bytes to skip
+;;    - get the number of pixels to skip (0 or 1 in fact)
+;;    - For each char
+;;       - draw   char by selecting the right function print_one_char_left or print_one_char_right
+;;       - compute the next char address (it depends on the previous one and the number of bytes drawn)
+;;       - get the number of pixels to skip (it depends on the last pixel posiiton (right or left))
+writter_draw_page
+    ld ix, WRITTER_PAGE0
+    ret
+
+
     macro PRINT_ONE_CHAR_GENERATOR(direction)
+    ;; Draw the given char on screen at the given position
+    ;; Input
+    ;; - hl = address of the screen to draw the char
+    ;; - de = address of the char data to draw (nb bits + the 8 bytes)
 print_one_char_{direction}
-        ld de, writter_char_a    ; Address of the character data
         ld a, (de) : inc de      ; get the number of pixels in the character
                         ; store the number of pixels in b
 
@@ -373,20 +408,28 @@ writter_complete_charset = " "
     macro WRITTER_ENCODE_LINE content
         ; Compute the total number of pixels in the string
         CURRENT_TOTAL_PIXELS_SIZE = 0
+        named_chars = []
         repeat string_len({content}), i, 0
             current_char = string_get({content}, {i})
             if current_char == ' '
                 current_char = 'sp'
             endif
             CURRENT_TOTAL_PIXELS_SIZE += writter_char_{current_char}_length 
-        
+            named_chars = list_push(named_chars, string_concat("writter_char_", current_char))
         endrepeat
 
         assert CURRENT_TOTAL_PIXELS_SIZE <= WRITTER_GRID_WIDTH_PIXELS, "Line is too long for the writter grid"
         db CURRENT_TOTAL_PIXELS_SIZE>>1 ; nb bytes to skip
         db CURRENT_TOTAL_PIXELS_SIZE&1  ; nb pixels to skip
-        db string_len({content})       ; nb bytes
-        db {content}                   ; chars
+        db string_len({content})       ; nb chars
+        nb_chars_in_line = list_len(named_chars)
+        repeat nb_chars_in_line, i, 0
+            GENERATE_DB {eval}list_get(named_chars, {i})
+        endrepeat
+    endm
+
+    macro GENERATE_DB content
+        db {content}
     endm
 
     ;; A page is build with 10 lines.
@@ -496,6 +539,26 @@ background_palette
     ; there is only one color for the writter
 writter_palette
     db 0x4A
+
+
+    ;; BUG: there are bug in the computation when using {var} instead of var.
+    ;;      needto find why
+    function compute_screen_address base, width, char_x, line_y
+        pixel_y = {line_y}%8
+        ;char_y = {line_y}/8 ; BUG => result is a float !!!
+        char_y = {line_y}>>3 ; OK => real /8 ...
+
+        address = {base} + char_y*{width} + pixel_y*0x800 + {char_x}
+        return address
+    endfunction
+
+;;
+;; Generate the screen table
+;; TODO align on 256 bytes to avoif 16 bits manpuations when reading
+screen_table
+    repeat 8*SCREEN_HEIGHT_CHARS, lineid, 0
+        dw compute_screen_address(0xc000, 96, 0, {lineid})
+    endr
 
 
     ; screen
