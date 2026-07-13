@@ -27,7 +27,7 @@ SPECTRAL_SPRITE_ERASE_MASK_BOTH_POS equ (~(SPECTRAL_SPRITE_DRAW_MASK_BOTH_POS)) 
 
 SCREEN_WIDTH equ 96
 SCREEN_HEIGHT_CHARS equ 21
-SPECTRAL_SPRITE_WIDTH equ 22
+SPECTRAL_SPRITE_WIDTH equ 22 ; more columns is too slow
 SPECTRAL_SPRITE_HEIGHT equ 5
 
 BLOC_HEIGHT equ 16
@@ -41,13 +41,28 @@ SPECTRAL_CURVE_STEPX equ 3
 SPECTRAL_START_LINE equ SCREEN_HEIGHT_CHARS*8/2 - BLOC_HEIGHT*SPECTRAL_SPRITE_HEIGHT/2 
 SPECTRAL_START_COLUMN equ 4
 
+
+;; XXX not used anumore, cannot handle so much columns
+;; Each char is duplicated
+function double_columns column
+    return {column}
+    duplicated = ""
+   ; iterate value in {column} ; BUG does not assemble
+   repeat string_len({column}), i, 0
+        value = string_get({column}, {i})
+        duplicated = string_concat(duplicated, value, value)
+    endrepeat
+    ;enditerate
+    return duplicated
+endfunction
+
 ;; Texture in the background
 spectral_sprites_model equ [
-    "####    ####    ####  ",
-    "##  ##  ##  ##  ##  ##",
-    "####    ##  ##  ##  ##",
-    "##  ##  ##  ##  ##  ##",
-    "####    ##  ##  ####  "
+    double_columns("####    ####    ####  "),
+    double_columns("##  ##  ##  #   ##  ##"),
+    double_columns("####    ##  ##  ##  ##"),
+    double_columns("##  ##  ##  ##  ##  ##"),
+    double_columns("####    ##  ##  ####  ")
 ]
 
 
