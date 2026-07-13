@@ -27,15 +27,15 @@ SPECTRAL_SPRITE_ERASE_MASK_BOTH_POS equ (~(SPECTRAL_SPRITE_DRAW_MASK_BOTH_POS)) 
 
 SCREEN_WIDTH equ 96
 SCREEN_HEIGHT_CHARS equ 21
-SPECTRAL_SPRITE_WIDTH equ 11
+SPECTRAL_SPRITE_WIDTH equ 22
 SPECTRAL_SPRITE_HEIGHT equ 5
 
 BLOC_HEIGHT equ 16
-BLOC_WIDTH equ 8
+BLOC_WIDTH equ 4
 
 
 SPECTRAL_DELTA_CURVE equ [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 2, 4, 2, 4, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 2, 4, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 0, 2, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 2, 0, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 2, 0, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 4, 2, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 4, 2, 4, 2, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
-SPECTRAL_CURVE_STEPX equ 5
+SPECTRAL_CURVE_STEPX equ 3
 
 
 SPECTRAL_START_LINE equ SCREEN_HEIGHT_CHARS*8/2 - BLOC_HEIGHT*SPECTRAL_SPRITE_HEIGHT/2 
@@ -43,11 +43,11 @@ SPECTRAL_START_COLUMN equ 4
 
 ;; Texture in the background
 spectral_sprites_model equ [
-    "##  ##  ## ",
-    "# # # # # #",
-    "##  # # # #",
-    "# # # # # #",
-    "##  # # ## "
+    "####    ####    ####  ",
+    "##  ##  ##  ##  ##  ##",
+    "####    ##  ##  ##  ##",
+    "##  ##  ##  ##  ##  ##",
+    "####    ##  ##  ####  "
 ]
 
 
@@ -218,14 +218,12 @@ frame
     jr nc, frame
 
 
-    halt
-    halt
-    halt
-    halt
-    halt
+
     halt
     ld bc, 0x7f00 + 0x10 : out (c), c : ld bc, 0x7f00 + 0x40 : out (c), c
     call spectral_sprite_move_along_curve
+    ld bc, 0x7f00 + 0x10 : out (c), c : ld bc, 0x7f00 + 0x45 : out (c), c
+    halt
     ld bc, 0x7f00 + 0x10 : out (c), c : ld bc, 0x7f00 + 0x54 : out (c), c
 
 
