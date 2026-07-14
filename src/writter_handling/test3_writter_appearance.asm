@@ -422,44 +422,41 @@ writter_start_line
 
 ;; Erase previous char
 copy_one_block_step_erase1
-    ld ix, writter_transition_table0 : .copy_table_position equ $-2
-
     ld hl, (.copy_amount)
     ld a, h : or l : ret z
 
-    ld c, WRITTER_RIGHT_CLEAR_MASK
-    ld b, WRITTER_LEFT_CLEAR_MASK
+    ld hl, writter_transition_table0 : .copy_table_position equ $-2
+    ld bc, WRITTER_RIGHT_CLEAR_MASK*256 + 8
 
-.copy_loop
         ; get source
-        ld l, (ix+0) : inc ix
-        ld h, (ix+0) : inc ix
-        ld (.copy_table_position), ix
+        ld e, (hl) : inc hl
+        ld d, (hl) : inc hl
+        ld (.copy_table_position), hl
+        ex de, hl
 
         ; get destination
-        ld a, 0x40 : add h : ld d, a
-        ld e, l
+        ld a, 0x40 : add h : ld h, a
         
         ; copy top 8 lines
         assert WRITTER_TRANSITION_ATOMIC_UNIT_WIDTH_IN_PIXELS == 4
         assert WRITTER_TRANSITION_ATOMIC_UNIT_HEIGHT_IN_PIXELS
 
         repeat 4, i, 0
-            ld a, (de) : and WRITTER_RIGHT_CLEAR_MASK : ld (de), a : inc de
+            ld a, b : and  (hl): ld (hl), a : inc hl
 
-            ld a, 8 : add d : ld d, a
+            ld a, c : add h : ld h, a
 
-            ld a, (de) : and WRITTER_LEFT_CLEAR_MASK : ld (de), a : dec de
-
+            ld a, b : and (hl) : ld (hl), a : dec hl
 
             if {i} != 4
-                ld a, 8 : add d : ld d, a
+                ld a, c : add h : ld h, a
             endif
         endr
 
     ld bc, WRITTER_TRANSITION_NB_STEPS : .copy_amount equ $-2
     dec bc
     ld (.copy_amount), bc
+    ld a, b : or c
     ret
 
 
@@ -510,23 +507,22 @@ copy_one_block_step1
 
 
 copy_one_block_step_erase2
-    ld ix, writter_transition_table0 : .copy_table_position equ $-2
-
     ld hl, (.copy_amount)
     ld a, h : or l : ret z
 
-    ld c, WRITTER_RIGHT_CLEAR_MASK
-    ld b, WRITTER_LEFT_CLEAR_MASK
 
-.copy_loop
+    ld hl, writter_transition_table0 : .copy_table_position equ $-2
+    ld bc, WRITTER_RIGHT_CLEAR_MASK*256 + 8
+
+
         ; get source
-        ld l, (ix+0) : inc ix
-        ld h, (ix+0) : inc ix
-        ld (.copy_table_position), ix
-
+        ld e, (hl) : inc hl
+        ld d, (hl) : inc hl
+        ld (.copy_table_position), hl
+        ex de, hl
+        
         ; get destination
-        ld a, 0x40 : add h : ld d, a
-        ld e, l
+        ld a, 0x40 : add h : ld h, a
         
         ; copy top 8 lines
         assert WRITTER_TRANSITION_ATOMIC_UNIT_WIDTH_IN_PIXELS == 4
@@ -535,22 +531,23 @@ copy_one_block_step_erase2
         repeat 4, i, 0
             ;ld a, (hl) : /*and b :*/ inc hl : ld (de), a : inc de
             ;
-            inc de 
-            ld a, (de) : and  WRITTER_CLEAR_MASK : ld (de), a : dec de
+            inc hl 
+            ld a, b : and  (hl) : ld (hl), a : dec hl
 
-            ld a, 8 : add d : ld d, a
+            ld a, c : add h : ld h, a
 
-            ld a, (de) :  and WRITTER_CLEAR_MASK :  ld (de), a 
+            ld a, b :  and (hl) :  ld (hl), a 
 
 
             if {i} != 4
-                ld a, 8 : add d : ld d, a
+                ld a, c : add h : ld h, a
             endif
         endr
 
     ld bc, WRITTER_TRANSITION_NB_STEPS : .copy_amount equ $-2
     dec bc
     ld (.copy_amount), bc
+    ld a, b : or c
     ret
 
 
