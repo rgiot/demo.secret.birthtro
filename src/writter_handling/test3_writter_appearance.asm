@@ -461,19 +461,18 @@ copy_one_block_step_erase1
 
 
 copy_one_block_step1
-    ld ix, writter_transition_table0 : .copy_table_position equ $-2
-
     ld hl, (.copy_amount)
     ld a, h : or l : ret z
 
-    ld c, WRITTER_RIGHT_CLEAR_MASK
-    ld b, WRITTER_LEFT_CLEAR_MASK
+    ld hl, writter_transition_table0 : .copy_table_position equ $-2
+    ld bc, 8*256 + 0X40
 
 .copy_loop
         ; get source
-        ld l, (ix+0) : inc ix
-        ld h, (ix+0) : inc ix
-        ld (.copy_table_position), ix
+        ld e, (hl) : inc hl
+        ld d, (hl) : inc hl
+        ld (.copy_table_position), hl
+        ex de, hl
 
         ; get destination
         ld a, 0x40 : add h : ld d, a
@@ -487,21 +486,22 @@ copy_one_block_step1
             ld a, (hl) : /*and b :*/ inc hl : ld (de), a : inc de
             ;ld a, (hl) : /*and c :*/ dec hl : ld (de), a : dec de
 
-            ld a, 8 : add d : ld d, a
-            ld a, 8 : add h : ld h, a
+            ld a, b : add h : ld h, a
+            add c : ld d, a
 
             ld a, (hl) : /*and c :*/ dec hl : ld (de), a : dec de
 
 
-            if {i} != 4
-                ld a, 8 : add d : ld d, a
-                ld a, 8 : add h : ld h, a
+            if {i} != 3
+                ld a, b : add h : ld h, a
+                add c : ld d, a
             endif
         endr
 
     ld bc, WRITTER_TRANSITION_NB_STEPS : .copy_amount equ $-2
     dec bc
     ld (.copy_amount), bc
+    ld a, b : or c
     ret
 
 
@@ -552,19 +552,18 @@ copy_one_block_step_erase2
 
 
 copy_one_block_step2
-    ld ix, writter_transition_table0 : .copy_table_position equ $-2
-
     ld hl, (.copy_amount)
     ld a, h : or l : ret z
 
-    ld c, WRITTER_RIGHT_CLEAR_MASK
-    ld b, WRITTER_LEFT_CLEAR_MASK
+    ld hl, writter_transition_table0 : .copy_table_position equ $-2
+    ld bc, 8*256 + 0X40
 
 .copy_loop
         ; get source
-        ld l, (ix+0) : inc ix
-        ld h, (ix+0) : inc ix
-        ld (.copy_table_position), ix
+        ld e, (hl) : inc hl
+        ld d, (hl) : inc hl
+        ld (.copy_table_position), hl
+        ex de, hl
 
         ; get destination
         ld a, 0x40 : add h : ld d, a
@@ -580,15 +579,15 @@ copy_one_block_step2
             inc hl : inc de 
             ld a, (hl) : dec hl : ld (de), a : dec de
 
-            ld a, 8 : add d : ld d, a
-            ld a, 8 : add h : ld h, a
+            ld a, b : add h : ld h, a
+            add c : ld d, a
 
             ld a, (hl) :  ld (de), a 
 
 
-            if {i} != 4
-                ld a, 8 : add d : ld d, a
-                ld a, 8 : add h : ld h, a
+            if {i} != 3
+                ld a, b : add h : ld h, a
+                add c : ld d, a
             endif
         endr
 
@@ -598,7 +597,7 @@ copy_one_block_step2
     ld a, b : or c
     ret nz
 
-
+    ; select next state
     ld a, WRITTER_PAGE_WAIT_FRAMES
     ld (writter_wait_left), a
     ld a, WRITTER_STATE_WAIT
