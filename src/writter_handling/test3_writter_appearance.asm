@@ -374,12 +374,22 @@ writter_advance_to_next_row
     ld (copy_one_block_step1.copy_amount), hl
     ld (copy_one_block_step2.copy_amount), hl
     ld (copy_one_block_step_erase2.copy_amount), hl
-    ld hl, writter_transition_table0
-    ld (copy_one_block_step_erase1.copy_table_position), hl
-    ld (copy_one_block_step1.copy_table_position), hl
-    ld (copy_one_block_step2.copy_table_position), hl
-    ld (copy_one_block_step_erase2.copy_table_position), hl
-    ld a, 25
+
+
+    ld hl, transition_tables : .transtion_ptr equ $-2
+.restart_transition_tables
+    ld c, (hl) : inc hl : ld b, (hl) : inc hl
+    ld a, b : or c : jr nz, .setup_transition_tables
+    ld hl, transition_tables : jr .restart_transition_tables
+    
+.setup_transition_tables
+    ld (.transtion_ptr), hl
+    ld (copy_one_block_step_erase1.copy_table_position), bc
+    ld (copy_one_block_step1.copy_table_position), bc
+    ld (copy_one_block_step2.copy_table_position), bc
+    ld (copy_one_block_step_erase2.copy_table_position), bc
+    
+    ld a, 3
     ld (writter_draw_page_step.delay_step1), a
     ld (writter_draw_page_step.delay_erase2), a
     ld (writter_draw_page_step.delay_step2), a
@@ -1016,7 +1026,12 @@ writter_transition_table{table_code}
     BUILD_WRITTER_TRANSITION_TABLE(2)
     BUILD_WRITTER_TRANSITION_TABLE(3)
     
-
+transition_tables
+    dw writter_transition_table0
+    dw writter_transition_table1
+    dw writter_transition_table2
+    dw writter_transition_table3
+    dw 0
 
 
 
