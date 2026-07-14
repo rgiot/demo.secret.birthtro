@@ -1,6 +1,14 @@
 
 {% set EMU="ace" %}
 
+
+- tgt: test3
+  phony: true
+  cmd:
+    - basm test3_writter_appearance.asm --snapshot -o test3.sna
+    - emu --snapshot test3.sna  --emulator {{EMU}} run
+
+
 - tgt: test2
   phony: true
   cmd:
