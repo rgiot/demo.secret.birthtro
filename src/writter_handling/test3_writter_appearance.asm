@@ -64,7 +64,13 @@ WRITTER_TRANSITION_TABLE3 equ [[46,40], [8,72], [44,40], [64,72], [66,72], [10,7
 WRITTER_TRANSITION_NB_STEPS equ 480
 print "WRITTER_TRANSITION_NB_STEPS: ", WRITTER_TRANSITION_NB_STEPS
 
-WRITTER_TRANSITION_NB_PARALLEL equ 3
+WRITTER_TRANSITION_NB_PARALLEL equ 4
+
+; each transition stage handles WRITTER_TRANSITION_NB_PARALLEL blocks per call,
+; so its counter counts calls, not blocks (fits in one byte)
+WRITTER_TRANSITION_NB_CALLS equ WRITTER_TRANSITION_NB_STEPS / WRITTER_TRANSITION_NB_PARALLEL
+    assert WRITTER_TRANSITION_NB_CALLS * WRITTER_TRANSITION_NB_PARALLEL == WRITTER_TRANSITION_NB_STEPS
+    assert WRITTER_TRANSITION_NB_CALLS <= 255
 
 	org 0x4000
 
@@ -251,15 +257,14 @@ writter_draw_page_step
         ret                                    ; the new line's first char is drawn on a later call
 
 .copy_step
-    ; TODO Implementation for the copy step
-    ; screen_table contains the destination screen addresses in 0xc000
-    ; the source screen adress is obtained by substracting 0x40 to the high byte (or resetting bit 6)
+    ; the transition tables contain the addresses of the blocks in the VISIBLE
+    ; screen (0xC000); the source address in the buffer is obtained by
+    ; resetting bit 6 of the high byte.
+    ; Each stage call handles WRITTER_TRANSITION_NB_PARALLEL blocks; the stages
+    ; are staggered by a few frames (the .delay_* counters) to obtain the
+    ; dissolve effect: half-erase, other half-erase, half-copy, other half-copy.
 
-
-    repeat WRITTER_TRANSITION_NB_PARALLEL
-        call copy_one_block_step_erase1
-    endr
-
+    call copy_blocks_erase1
 
     ld a, 25 : .delay_erase2 equ $-1
     or a : jr z, .delay_erase2_done
@@ -267,12 +272,7 @@ writter_draw_page_step
     ret
 
 .delay_erase2_done
-
-
-    repeat WRITTER_TRANSITION_NB_PARALLEL
-        call copy_one_block_step_erase2
-    endr
-
+    call copy_blocks_erase2
 
     ld a, 25 : .delay_step1 equ $-1
     or a : jr z, .delay_step1_done
@@ -280,10 +280,7 @@ writter_draw_page_step
     ret
 
 .delay_step1_done
-
-    repeat WRITTER_TRANSITION_NB_PARALLEL
-        call copy_one_block_step1
-    endr
+    call copy_blocks_step1
 
     ld a, 25 : .delay_step2 equ $-1
     or a : jr z, .delay_step2_done
@@ -291,9 +288,16 @@ writter_draw_page_step
     ret
 
 .delay_step2_done
-    repeat WRITTER_TRANSITION_NB_PARALLEL
-        call copy_one_block_step2
-    endr
+    call copy_blocks_step2
+
+    ; once the last copy stage has consumed its last call, the transition is
+    ; over: keep the page on screen for a while before the next one
+    ld a, (copy_blocks_step2.count)
+    or a : ret nz
+    ld a, WRITTER_PAGE_WAIT_FRAMES
+    ld (writter_wait_left), a
+    ld a, WRITTER_STATE_WAIT
+    ld (writter_state), a
     ret
 
 
@@ -370,11 +374,11 @@ writter_advance_to_next_row
 
     ld a, WRITTER_STATE_COPY
     ld (writter_state), a
-    ld hl, WRITTER_TRANSITION_NB_STEPS
-    ld (copy_one_block_step_erase1.copy_amount), hl
-    ld (copy_one_block_step1.copy_amount), hl
-    ld (copy_one_block_step2.copy_amount), hl
-    ld (copy_one_block_step_erase2.copy_amount), hl
+    ld a, WRITTER_TRANSITION_NB_CALLS
+    ld (copy_blocks_erase1.count), a
+    ld (copy_blocks_erase2.count), a
+    ld (copy_blocks_step1.count), a
+    ld (copy_blocks_step2.count), a
 
 
     ld hl, transition_tables : .transtion_ptr equ $-2
@@ -385,10 +389,10 @@ writter_advance_to_next_row
     
 .setup_transition_tables
     ld (.transtion_ptr), hl
-    ld (copy_one_block_step_erase1.copy_table_position), bc
-    ld (copy_one_block_step1.copy_table_position), bc
-    ld (copy_one_block_step2.copy_table_position), bc
-    ld (copy_one_block_step_erase2.copy_table_position), bc
+    ld (copy_blocks_erase1.copy_table_position), bc
+    ld (copy_blocks_erase2.copy_table_position), bc
+    ld (copy_blocks_step1.copy_table_position), bc
+    ld (copy_blocks_step2.copy_table_position), bc
     
     ld a, 3
     ld (writter_draw_page_step.delay_step1), a
@@ -421,190 +425,136 @@ writter_start_line
     ld (writter_char_ptr), hl                   ; hl now points at the first char code
     ret
 
-;; Erase previous char
-copy_one_block_step_erase1
-    ld hl, (.copy_amount)
-    ld a, h : or l : ret z
-
-    ld hl, writter_transition_table0 : .copy_table_position equ $-2
-    ld bc, WRITTER_RIGHT_CLEAR_MASK*256 + 8
-
-        ; get source
-        ld e, (hl) : inc hl
-        ld d, (hl) : inc hl
-        ld (.copy_table_position), hl
-        ex de, hl
-
-        ; get destination
-        ld a, 0x40 : add h : ld h, a
-        
-        ; copy top 8 lines
+    ;; Walks the 8 bytes of one transition block (2 bytes x 8 scanlines) in a
+    ;; checkerboard pattern and clears their right-pixel writter bit, directly
+    ;; on the visible screen.
+    ;; The walk is column-major (the 4 bytes of one column with +2 scanline
+    ;; steps, then the 4 bytes of the other column) so moving around only
+    ;; costs 8 bit operations on h/l instead of 16 bits ones on hl.
+    ;; Input:
+    ;; - hl = block address on the visible screen
+    ;; - c  = 0x10 (2 scanlines step)
+    ;; - start_col = column handled on the even lines (0 or 1); the other
+    ;;   column is handled on the odd lines
+    ;; Corrupts a, hl
+    macro TRANSITION_ERASE_WALK start_col
         assert WRITTER_TRANSITION_ATOMIC_UNIT_WIDTH_IN_PIXELS == 4
-        assert WRITTER_TRANSITION_ATOMIC_UNIT_HEIGHT_IN_PIXELS
+        assert WRITTER_TRANSITION_ATOMIC_UNIT_HEIGHT_IN_PIXELS == 8
 
+        if {start_col} == 1
+            inc l                                ; NB: block low bytes never reach 0xFF (x is even <= 94), so inc l/dec l cannot wrap
+        endif
         repeat 4, i, 0
-            ld a, b : and  (hl): ld (hl), a : inc hl
-
-            ld a, c : add h : ld h, a
-
-            ld a, b : and (hl) : ld (hl), a : dec hl
-
-            if {i} != 4
+            res WRITTER_RIGHT_BIT_POS, (hl)
+            if {i} != 3
                 ld a, c : add h : ld h, a
             endif
         endr
-
-    ld bc, WRITTER_TRANSITION_NB_STEPS : .copy_amount equ $-2
-    dec bc
-    ld (.copy_amount), bc
-    ld a, b : or c
-    ret
-
-
-copy_one_block_step1
-    ld hl, (.copy_amount)
-    ld a, h : or l : ret z
-
-    ld hl, writter_transition_table0 : .copy_table_position equ $-2
-    ld bc, 8*256 + 0X40
-
-.copy_loop
-        ; get source
-        ld e, (hl) : inc hl
-        ld d, (hl) : inc hl
-        ld (.copy_table_position), hl
-        ex de, hl
-
-        ; get destination
-        ld a, 0x40 : add h : ld d, a
-        ld e, l
-        
-        ; copy top 8 lines
-        assert WRITTER_TRANSITION_ATOMIC_UNIT_WIDTH_IN_PIXELS == 4
-        assert WRITTER_TRANSITION_ATOMIC_UNIT_HEIGHT_IN_PIXELS
-
+        ; move from the last even line back to line 1, on the other column
+        ld a, h : sub 5*8 : ld h, a
+        if {start_col} == 1
+            dec l
+        else
+            inc l
+        endif
         repeat 4, i, 0
-            ld a, (hl) : /*and b :*/ inc hl : ld (de), a : inc de
-            ;ld a, (hl) : /*and c :*/ dec hl : ld (de), a : dec de
-
-            ld a, b : add h : ld h, a
-            add c : ld d, a
-
-            ld a, (hl) : /*and c :*/ dec hl : ld (de), a : dec de
-
-
+            res WRITTER_RIGHT_BIT_POS, (hl)
             if {i} != 3
-                ld a, b : add h : ld h, a
-                add c : ld d, a
-            endif
-        endr
-
-    ld bc, WRITTER_TRANSITION_NB_STEPS : .copy_amount equ $-2
-    dec bc
-    ld (.copy_amount), bc
-    ld a, b : or c
-    ret
-
-
-
-copy_one_block_step_erase2
-    ld hl, (.copy_amount)
-    ld a, h : or l : ret z
-
-
-    ld hl, writter_transition_table0 : .copy_table_position equ $-2
-    ld bc, WRITTER_RIGHT_CLEAR_MASK*256 + 8
-
-
-        ; get source
-        ld e, (hl) : inc hl
-        ld d, (hl) : inc hl
-        ld (.copy_table_position), hl
-        ex de, hl
-        
-        ; get destination
-        ld a, 0x40 : add h : ld h, a
-        
-        ; copy top 8 lines
-        assert WRITTER_TRANSITION_ATOMIC_UNIT_WIDTH_IN_PIXELS == 4
-        assert WRITTER_TRANSITION_ATOMIC_UNIT_HEIGHT_IN_PIXELS
-
-        repeat 4, i, 0
-            ;ld a, (hl) : /*and b :*/ inc hl : ld (de), a : inc de
-            ;
-            inc hl 
-            ld a, b : and  (hl) : ld (hl), a : dec hl
-
-            ld a, c : add h : ld h, a
-
-            ld a, b :  and (hl) :  ld (hl), a 
-
-
-            if {i} != 4
                 ld a, c : add h : ld h, a
             endif
         endr
+    endm
 
-    ld bc, WRITTER_TRANSITION_NB_STEPS : .copy_amount equ $-2
-    dec bc
-    ld (.copy_amount), bc
-    ld a, b : or c
-    ret
-
-
-copy_one_block_step2
-    ld hl, (.copy_amount)
-    ld a, h : or l : ret z
-
-    ld hl, writter_transition_table0 : .copy_table_position equ $-2
-    ld bc, 8*256 + 0X40
-
-.copy_loop
-        ; get source
-        ld e, (hl) : inc hl
-        ld d, (hl) : inc hl
-        ld (.copy_table_position), hl
-        ex de, hl
-
-        ; get destination
-        ld a, 0x40 : add h : ld d, a
-        ld e, l
-        
-        ; copy top 8 lines
+    ;; Same walk as TRANSITION_ERASE_WALK, but copies the bytes from the
+    ;; buffer to the visible screen instead of erasing them.
+    ;; Input:
+    ;; - hl = block address in the buffer
+    ;; - de = block address on the visible screen (d = h + 0x40, e = l)
+    ;; - b  = 0x40 (buffer -> screen high byte offset)
+    ;; - c  = 0x10 (2 scanlines step)
+    ;; Corrupts a, hl, de
+    macro TRANSITION_COPY_WALK start_col
         assert WRITTER_TRANSITION_ATOMIC_UNIT_WIDTH_IN_PIXELS == 4
-        assert WRITTER_TRANSITION_ATOMIC_UNIT_HEIGHT_IN_PIXELS
+        assert WRITTER_TRANSITION_ATOMIC_UNIT_HEIGHT_IN_PIXELS == 8
 
+        if {start_col} == 1
+            inc l : inc e
+        endif
         repeat 4, i, 0
-            ;ld a, (hl) : /*and b :*/ inc hl : ld (de), a : inc de
-            ;
-            inc hl : inc de 
-            ld a, (hl) : dec hl : ld (de), a : dec de
-
-            ld a, b : add h : ld h, a
-            add c : ld d, a
-
-            ld a, (hl) :  ld (de), a 
-
-
+            ld a, (hl) : ld (de), a
             if {i} != 3
-                ld a, b : add h : ld h, a
-                add c : ld d, a
+                ld a, c : add h : ld h, a : add b : ld d, a
             endif
         endr
+        ; move from the last even line back to line 1, on the other column
+        ld a, h : sub 5*8 : ld h, a : add b : ld d, a
+        if {start_col} == 1
+            dec l : dec e
+        else
+            inc l : inc e
+        endif
+        repeat 4, i, 0
+            ld a, (hl) : ld (de), a
+            if {i} != 3
+                ld a, c : add h : ld h, a : add b : ld d, a
+            endif
+        endr
+    endm
 
-    ld bc, WRITTER_TRANSITION_NB_STEPS : .copy_amount equ $-2
-    dec bc
-    ld (.copy_amount), bc
-    ld a, b : or c
-    ret nz
+    ;; Generates one erase stage routine: each call clears half of the writter
+    ;; pixels (checkerboard given by start_col) of the next
+    ;; WRITTER_TRANSITION_NB_PARALLEL blocks of the transition table.
+    macro TRANSITION_ERASE_STAGE stage_name, start_col
+copy_blocks_{stage_name}
+    ld a, WRITTER_TRANSITION_NB_CALLS : .count equ $-1
+    or a : ret z
+    dec a : ld (.count), a
 
-    ; select next state
-    ld a, WRITTER_PAGE_WAIT_FRAMES
-    ld (writter_wait_left), a
-    ld a, WRITTER_STATE_WAIT
-    ld (writter_state), a
-    xor a
+    ld c, 0x10
+    ld hl, writter_transition_table0 : .copy_table_position equ $-2
+    repeat WRITTER_TRANSITION_NB_PARALLEL
+        ld e, (hl) : inc hl
+        ld d, (hl) : inc hl
+        ex de, hl                    ; hl = block address on screen ; de = table ptr (untouched by the walk)
+        TRANSITION_ERASE_WALK({start_col})
+        ex de, hl                    ; hl = table ptr back
+    endr
+    ld (.copy_table_position), hl
     ret
+    endm
+
+    ;; Generates one copy stage routine: each call copies half of the bytes
+    ;; (checkerboard given by start_col) of the next
+    ;; WRITTER_TRANSITION_NB_PARALLEL blocks from the buffer to the screen.
+    macro TRANSITION_COPY_STAGE stage_name, start_col
+copy_blocks_{stage_name}
+    ld a, WRITTER_TRANSITION_NB_CALLS : .count equ $-1
+    or a : ret z
+    dec a : ld (.count), a
+
+    ld bc, 0x40*256 + 0x10
+    ld hl, writter_transition_table0 : .copy_table_position equ $-2
+    repeat WRITTER_TRANSITION_NB_PARALLEL
+        ld e, (hl) : inc hl
+        ld d, (hl) : inc hl          ; de = block address on the visible screen
+        push hl                       ; the copy walk needs both hl and de
+            ld h, d : ld l, e
+            res 6, h                  ; hl = block address in the buffer
+            TRANSITION_COPY_WALK({start_col})
+        pop hl
+    endr
+    ld (.copy_table_position), hl
+    ret
+    endm
+
+;; Erase previous page, half of the pixels...
+    TRANSITION_ERASE_STAGE(erase1, 0)
+;; ... then the other half
+    TRANSITION_ERASE_STAGE(erase2, 1)
+;; Copy the new page from the buffer, half of the bytes...
+    TRANSITION_COPY_STAGE(step1, 0)
+;; ... then the other half; this stage ends the transition
+    TRANSITION_COPY_STAGE(step2, 1)
 
 
 
@@ -1009,7 +959,10 @@ writter_transition_table{table_code}
             current_entry = list_get(current_db, {i})
             current_x = list_get(current_entry, 0)
             current_y = list_get(current_entry, 1) + 8*WRITTER_GRID_START_ROW
-            current_address = compute_screen_address(0xC000, 96, current_x, current_y) - 0x4000
+            ; the VISIBLE screen address is stored (erase stages use it as is);
+            ; the buffer address only differs by bit 6 of the high byte, so the
+            ; copy stages derive it with a single "res 6, h"
+            current_address = compute_screen_address(0xC000, 96, current_x, current_y)
             db low(current_address)
             db high(current_address)
 
