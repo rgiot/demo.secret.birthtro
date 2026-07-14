@@ -50,6 +50,10 @@ WRITTER_GRID_WIDTH_PIXELS equ SCREEN_WDITH*2  ; TODO remove few pixels to be sur
 ;     for an odd difference and misalign every row lookup, hence the ">>1"
 WRITTER_GRID_START_ROW equ (SCREEN_HEIGHT_CHARS - WRITTER_GRID_HEIGHT) >> 1
 
+; once a page is fully drawn, it stays on screen this many frames before the
+; next page (from WRITTER_PAGES) starts being drawn
+WRITTER_PAGE_WAIT_FRAMES equ 200
+
 
 	org 0x4000
 
@@ -61,7 +65,7 @@ init
 
 		ld hl, 0xc9fb : ld (0x38), hl
 		ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00 + 96/2 : out (c), c
-		ld bc, 0xbc00 + 2 : out (c), c : ld bc, 0xbd00 + 50 : out (c), c
+		ld bc, 0xbc00 + 2 : out (c), c : ld bc, 0xbd00 + 50 + 2 : out (c), c
 		ld bc, 0xbc00 + 7 : out (c), c : ld bc, 0xbd00 + 29 : out (c), c
 		ld bc, 0xbc00 + 6 : out (c), c : ld bc, 0xbd00 + 21 : out (c), c
 		ld bc, 0xbc00 + 12 : out (c),c : ld bc, 0xbd00 + 0x30 : out (c), c
@@ -164,6 +168,7 @@ init
         ld de, writter_char_a    ; Address of the character data
         call print_one_char_left
 
+    ld hl, (WRITTER_PAGES)
     call writter_draw_page_start
     ei
 frame
@@ -174,8 +179,10 @@ frame
 
     halt : halt
 
-    ld bc, 0x7f10 : out (c), c : ld bc, 0x7f45 : out (c), c
+    ld bc, 0x7f10 : out (c), c : ld bc, 0x7f40 : out (c), c
     call writter_draw_page_step
+    ld bc, 0x7f10 : out (c), c : ld bc, 0x7f45 : out (c), c
+    halt
     ld bc, 0x7f10 : out (c), c : ld bc, 0x7f54 : out (c), c
 
     jp frame
@@ -187,36 +194,30 @@ frame
 ;; writter_draw_page_start (re)starts it, and writter_draw_page_step performs a
 ;; single bounded unit of work (clear one scanline, or draw one char) each time
 ;; it is called. Call writter_draw_page_step as many times as needed (e.g. once
-;; per frame) until writter_state reaches WRITTER_STATE_DONE.
+;; per frame). Once a page is fully drawn, it is left on screen for
+;; WRITTER_PAGE_WAIT_FRAMES calls, then the next page (from WRITTER_PAGES,
+;; wrapping around at its 0 terminator) starts being drawn automatically.
     enum WRITTER_STATE
-        DONE 
+        DONE
         CLEAR
         DRAW
+        WAIT
     endenum
 
-writter_state db WRITTER_STATE_DONE
-
-; clearing phase
-writter_clear_ptr dw 0           ; next entry to read in screen_table
-writter_clear_left db 0           ; scanlines still to clear
-
 ; drawing phase, between lines
-writter_page_line_ptr dw 0         ; current line record in the page
-writter_page_table_ptr dw 0         ; current row entry in screen_table
-writter_page_rows_left db 0          ; rows still to draw in the page
+writter_current_page dw WRITTER_PAGE0    ; page selected by the last writter_draw_page_start call
+writter_page_line_ptr dw 0                ; current line record in the page
+writter_char_ptr dw 0                       ; pointer to the next char code to draw in the current line
+writter_cursor dw 0                           ; screen address of the next char to draw
 
-; drawing phase, current line in progress (kept in memory, not registers,
-; since print_one_char_left/print_one_char_right clobber af/bc/de/hl, and the
-; state must also survive whatever runs between two writter_draw_page_step calls)
-writter_side db 0              ; 0 => next char starts left-aligned ; 1 => next char starts mid-byte
-writter_chars_left db 0         ; number of chars still to draw on the current line
-writter_pixels_pending db 0      ; nb of pixels of the char being drawn (stashed across the print call)
-writter_char_ptr dw 0             ; pointer to the next char code to draw in the current line
-writter_cursor dw 0                ; screen address of the next char to draw
+; wait phase, between pages
+writter_next_page_ptr dw WRITTER_PAGES+2      ; WRITTER_PAGES entry to load once the wait is over
 
-;; Prepares the state machine to (re)draw writter pagefrom scratch.
+;; Prepares the state machine to (re)draw the given page from scratch.
+;; Input: hl = address of the page to draw (e.g. one of the WRITTER_PAGES entries)
 ;; Must be called once before writter_draw_page_step is called repeatedly.
 writter_draw_page_start
+    ld (writter_current_page), hl
     ld hl, screen_table + WRITTER_GRID_START_ROW*16
     ld (writter_clear_ptr), hl
     ld a, WRITTER_GRID_HEIGHT*8
@@ -228,23 +229,51 @@ writter_draw_page_start
 ;; Performs one bounded unit of work towards drawing the page (clearing one
 ;; scanline, or drawing one char). Call repeatedly (e.g. once per frame) until
 ;; writter_state becomes WRITTER_STATE_DONE.
+;;
+;; NB: most of the counters/pointers below are read through self modifying
+;; code (an "ld a/hl, 0" whose immediate operand IS the variable, addressed
+;; via "label equ $-1/$-2") instead of a plain "ld a/hl, (label)". This avoids
+;; an extra memory access on the hottest read of each variable (speed matters
+;; more than readability in this per-frame code); every other read/write of
+;; the same variable still goes through the label normally, there is only
+;; ever one physical storage location.
 writter_draw_page_step
-    ld a, (writter_state)
+    ld a, 0 : writter_state equ $-1
     cp WRITTER_STATE_CLEAR
     jr z, .clear_step
     cp WRITTER_STATE_DRAW
     jr z, .draw_step
+    cp WRITTER_STATE_WAIT
+    jr z, .wait_step
     ret                                  ; nothing to do (done, or not started)
 
-.clear_step
-    ld hl, (writter_clear_ptr)
+.wait_step
+    ld a, 0 : writter_wait_left equ $-1
+    dec a
+    ld (writter_wait_left), a
+    ret nz                                  ; still waiting, nothing else to do this call
+
+    ; the wait is over: fetch the next page from WRITTER_PAGES, wrapping back
+    ; to its start once the 0 terminator is reached
+    ld hl, (writter_next_page_ptr)
     ld a, (hl) : ld e, a
     inc hl
-    ld a, (hl) : ld d, a                  ; de = scanline address to clear
+    ld a, (hl) : ld d, a                    ; de = next page address (0 if the terminator was reached)
     inc hl
-    ld (writter_clear_ptr), hl
+    ld a, d : or e
+    jr nz, .next_page_found
+        ld hl, WRITTER_PAGES
+        ld a, (hl) : ld e, a
+        inc hl
+        ld a, (hl) : ld d, a
+        inc hl
+.next_page_found
+    ld (writter_next_page_ptr), hl
+    ex de, hl
+    jp writter_draw_page_start                ; hl = next page address ; also returns to our caller
 
-    ex de, hl                              ; hl = scanline address to clear
+.clear_step
+    ld hl, (screen_table + WRITTER_GRID_START_ROW*16) : writter_clear_ptr equ $-2   ; hl = scanline address to clear (dereferenced directly)
     ld b, SCREEN_WDITH
 .clear_byte_loop
         ld a, (hl)
@@ -253,13 +282,17 @@ writter_draw_page_step
         inc hl
         djnz .clear_byte_loop
 
-    ld a, (writter_clear_left)
+    ld hl, (writter_clear_ptr)
+    inc hl : inc hl
+    ld (writter_clear_ptr), hl               ; advance to the next screen_table entry
+
+    ld a, 0 : writter_clear_left equ $-1
     dec a
     ld (writter_clear_left), a
     ret nz                                  ; more scanlines to clear on later calls
 
     ; clearing is done: set up the drawing phase, starting at the first line
-    ld hl, WRITTER_PAGE0
+    ld hl, (writter_current_page)
     ld (writter_page_line_ptr), hl
     ld hl, screen_table + WRITTER_GRID_START_ROW*16
     ld (writter_page_table_ptr), hl
@@ -271,7 +304,7 @@ writter_draw_page_step
     ret
 
 .draw_step
-    ld a, (writter_chars_left)
+    ld a, 0 : writter_chars_left equ $-1
     or a
     jr nz, .draw_one_char
 
@@ -297,7 +330,7 @@ writter_draw_page_step
 
     ld hl, (writter_cursor)                          ; hl = screen address to draw the char
 
-    ld a, (writter_side)
+    ld a, 0 : writter_side equ $-1
     or a
     jr nz, .draw_right
         call print_one_char_left
@@ -310,7 +343,7 @@ writter_draw_page_step
     ; total = side + nb_pixels ; bytes advanced = total>>1 ; new side = total&1
     ld a, (writter_side)
     ld b, a
-    ld a, (writter_pixels_pending)
+    ld a, 0 : writter_pixels_pending equ $-1
     add a, b
     srl a                                            ; a = bytes to advance ; carry = new side
     ld c, a : ld b, 0
@@ -327,14 +360,14 @@ writter_draw_page_step
 
 
 ;; Advances writter_page_line_ptr/writter_page_table_ptr/writter_page_rows_left past
-;; the line that was just drawn. Returns Z (and sets writter_state to
-;; WRITTER_STATE_DONE) when the whole page has been drawn, NZ otherwise.
+;; the line that was just drawn. Returns Z (and switches writter_state to
+;; WRITTER_STATE_WAIT, to pause on the finished page for a while before the
+;; next one starts) when the whole page has been drawn, NZ otherwise.
 writter_advance_to_next_row
     ld hl, (writter_page_line_ptr)
-    push hl
     inc hl : inc hl
     ld a, (hl)                         ; a = nb chars of the line just drawn
-    pop hl
+    dec hl : dec hl
     add a, 3
     ld c, a : ld b, 0
     add hl, bc
@@ -345,33 +378,31 @@ writter_advance_to_next_row
     add hl, bc
     ld (writter_page_table_ptr), hl
 
-    ld a, (writter_page_rows_left)
+    ld a, 0 : writter_page_rows_left equ $-1
     dec a
     ld (writter_page_rows_left), a
     ret nz
 
-    ld a, WRITTER_STATE_DONE
+    ld a, WRITTER_PAGE_WAIT_FRAMES
+    ld (writter_wait_left), a
+    ld a, WRITTER_STATE_WAIT
     ld (writter_state), a
-    ret                                    ; Z is still set from the "dec a" above (ld does not affect flags)
+    xor a                                    ; ensure Z is set for the caller (WRITTER_STATE_WAIT is nonzero)
+    ret
 
 
 ;; Reads the line pointed to by writter_page_line_ptr/writter_page_table_ptr and sets
 ;; up writter_cursor/writter_side/writter_chars_left/writter_char_ptr to (re)start
 ;; drawing it one char at a time.
 writter_start_line
-    ld hl, (writter_page_table_ptr)
-    ld a, (hl) : ld c, a
-    inc hl
-    ld a, (hl) : ld b, a                 ; bc = resolved row screen address
+    ld hl, (screen_table + WRITTER_GRID_START_ROW*16) : writter_page_table_ptr equ $-2   ; bc = resolved row screen address (dereferenced directly)
+    ld b, h : ld c, l
 
     ld hl, (writter_page_line_ptr)
     ld a, (hl) : inc hl                    ; a = nb bytes to skip
-    ld e, a : ld d, 0
-    push hl                                  ; save line ptr (points at nb_pixels_skip byte)
-    ld h, b : ld l, c
-    add hl, de
-    ld (writter_cursor), hl
-    pop hl                                      ; hl restored = line ptr
+    add a, c : ld c, a
+    ld a, 0 : adc a, b : ld b, a              ; bc = resolved row address + nb bytes to skip (no hl needed)
+    ld (writter_cursor), bc
 
     ld a, (hl) : inc hl                    ; a = nb pixels to skip (0 or 1)
     ld (writter_side), a
