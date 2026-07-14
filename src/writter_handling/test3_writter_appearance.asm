@@ -64,6 +64,7 @@ WRITTER_TRANSITION_TABLE3 equ [[46,40], [8,72], [44,40], [64,72], [66,72], [10,7
 WRITTER_TRANSITION_NB_STEPS equ 480
 print "WRITTER_TRANSITION_NB_STEPS: ", WRITTER_TRANSITION_NB_STEPS
 
+WRITTER_TRANSITION_NB_PARALLEL equ 3
 
 	org 0x4000
 
@@ -255,7 +256,7 @@ writter_draw_page_step
     ; the source screen adress is obtained by substracting 0x40 to the high byte (or resetting bit 6)
 
 
-    repeat 4
+    repeat WRITTER_TRANSITION_NB_PARALLEL
         call copy_one_block_step_erase1
     endr
 
@@ -268,7 +269,7 @@ writter_draw_page_step
 .delay_erase2_done
 
 
-    repeat 4
+    repeat WRITTER_TRANSITION_NB_PARALLEL
         call copy_one_block_step_erase2
     endr
 
@@ -280,7 +281,7 @@ writter_draw_page_step
 
 .delay_step1_done
 
-    repeat 4
+    repeat WRITTER_TRANSITION_NB_PARALLEL
         call copy_one_block_step1
     endr
 
@@ -290,7 +291,7 @@ writter_draw_page_step
     ret
 
 .delay_step2_done
-    repeat 4
+    repeat WRITTER_TRANSITION_NB_PARALLEL
         call copy_one_block_step2
     endr
     ret
