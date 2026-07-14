@@ -255,11 +255,44 @@ writter_draw_page_step
     ; the source screen adress is obtained by substracting 0x40 to the high byte (or resetting bit 6)
 
 
-    BREAKPOINT
-    call copy_one_block
-    call nz, copy_one_block
-    call nz, copy_one_block
-    call nz, copy_one_block
+    repeat 4
+        call copy_one_block_step_erase1
+    endr
+
+
+    ld a, 25 : .delay_erase2 equ $-1
+    or a : jr z, .delay_erase2_done
+    dec a : ld (.delay_erase2), a
+    ret
+
+.delay_erase2_done
+
+
+    repeat 4
+        call copy_one_block_step_erase2
+    endr
+
+
+    ld a, 25 : .delay_step1 equ $-1
+    or a : jr z, .delay_step1_done
+    dec a : ld (.delay_step1), a
+    ret
+
+.delay_step1_done
+
+    repeat 4
+        call copy_one_block_step1
+    endr
+
+    ld a, 25 : .delay_step2 equ $-1
+    or a : jr z, .delay_step2_done
+    dec a : ld (.delay_step2), a
+    ret
+
+.delay_step2_done
+    repeat 4
+        call copy_one_block_step2
+    endr
     ret
 
 
@@ -337,11 +370,19 @@ writter_advance_to_next_row
     ld a, WRITTER_STATE_COPY
     ld (writter_state), a
     ld hl, WRITTER_TRANSITION_NB_STEPS
-    ld (copy_one_block.copy_amount), hl
+    ld (copy_one_block_step_erase1.copy_amount), hl
+    ld (copy_one_block_step1.copy_amount), hl
+    ld (copy_one_block_step2.copy_amount), hl
+    ld (copy_one_block_step_erase2.copy_amount), hl
     ld hl, writter_transition_table0
-    ld (copy_one_block.copy_table_position), hl
-
-    
+    ld (copy_one_block_step_erase1.copy_table_position), hl
+    ld (copy_one_block_step1.copy_table_position), hl
+    ld (copy_one_block_step2.copy_table_position), hl
+    ld (copy_one_block_step_erase2.copy_table_position), hl
+    ld a, 25
+    ld (writter_draw_page_step.delay_step1), a
+    ld (writter_draw_page_step.delay_erase2), a
+    ld (writter_draw_page_step.delay_step2), a
     xor a                                    ; ensure Z is set for the caller (WRITTER_STATE_WAIT is nonzero)
     ret
 
@@ -369,10 +410,13 @@ writter_start_line
     ld (writter_char_ptr), hl                   ; hl now points at the first char code
     ret
 
-
-
-copy_one_block
+;; Erase previous char
+copy_one_block_step_erase1
     ld ix, writter_transition_table0 : .copy_table_position equ $-2
+
+    ld hl, (.copy_amount)
+    ld a, h : or l : ret z
+
     ld c, WRITTER_RIGHT_CLEAR_MASK
     ld b, WRITTER_LEFT_CLEAR_MASK
 
@@ -390,11 +434,59 @@ copy_one_block
         assert WRITTER_TRANSITION_ATOMIC_UNIT_WIDTH_IN_PIXELS == 4
         assert WRITTER_TRANSITION_ATOMIC_UNIT_HEIGHT_IN_PIXELS
 
-        repeat 8, i, 0
+        repeat 4, i, 0
+            ld a, (de) : and WRITTER_RIGHT_CLEAR_MASK : ld (de), a : inc de
+
+            ld a, 8 : add d : ld d, a
+
+            ld a, (de) : and WRITTER_LEFT_CLEAR_MASK : ld (de), a : dec de
+
+
+            if {i} != 4
+                ld a, 8 : add d : ld d, a
+            endif
+        endr
+
+    ld bc, WRITTER_TRANSITION_NB_STEPS : .copy_amount equ $-2
+    dec bc
+    ld (.copy_amount), bc
+    ret
+
+
+copy_one_block_step1
+    ld ix, writter_transition_table0 : .copy_table_position equ $-2
+
+    ld hl, (.copy_amount)
+    ld a, h : or l : ret z
+
+    ld c, WRITTER_RIGHT_CLEAR_MASK
+    ld b, WRITTER_LEFT_CLEAR_MASK
+
+.copy_loop
+        ; get source
+        ld l, (ix+0) : inc ix
+        ld h, (ix+0) : inc ix
+        ld (.copy_table_position), ix
+
+        ; get destination
+        ld a, 0x40 : add h : ld d, a
+        ld e, l
+        
+        ; copy top 8 lines
+        assert WRITTER_TRANSITION_ATOMIC_UNIT_WIDTH_IN_PIXELS == 4
+        assert WRITTER_TRANSITION_ATOMIC_UNIT_HEIGHT_IN_PIXELS
+
+        repeat 4, i, 0
             ld a, (hl) : /*and b :*/ inc hl : ld (de), a : inc de
+            ;ld a, (hl) : /*and c :*/ dec hl : ld (de), a : dec de
+
+            ld a, 8 : add d : ld d, a
+            ld a, 8 : add h : ld h, a
+
             ld a, (hl) : /*and c :*/ dec hl : ld (de), a : dec de
 
-            if {i} != 7
+
+            if {i} != 4
                 ld a, 8 : add d : ld d, a
                 ld a, 8 : add h : ld h, a
             endif
@@ -403,6 +495,100 @@ copy_one_block
     ld bc, WRITTER_TRANSITION_NB_STEPS : .copy_amount equ $-2
     dec bc
     ld (.copy_amount), bc
+    ret
+
+
+
+copy_one_block_step_erase2
+    ld ix, writter_transition_table0 : .copy_table_position equ $-2
+
+    ld hl, (.copy_amount)
+    ld a, h : or l : ret z
+
+    ld c, WRITTER_RIGHT_CLEAR_MASK
+    ld b, WRITTER_LEFT_CLEAR_MASK
+
+.copy_loop
+        ; get source
+        ld l, (ix+0) : inc ix
+        ld h, (ix+0) : inc ix
+        ld (.copy_table_position), ix
+
+        ; get destination
+        ld a, 0x40 : add h : ld d, a
+        ld e, l
+        
+        ; copy top 8 lines
+        assert WRITTER_TRANSITION_ATOMIC_UNIT_WIDTH_IN_PIXELS == 4
+        assert WRITTER_TRANSITION_ATOMIC_UNIT_HEIGHT_IN_PIXELS
+
+        repeat 4, i, 0
+            ;ld a, (hl) : /*and b :*/ inc hl : ld (de), a : inc de
+            ;
+            inc de 
+            ld a, (de) : and  WRITTER_CLEAR_MASK : ld (de), a : dec de
+
+            ld a, 8 : add d : ld d, a
+
+            ld a, (de) :  and WRITTER_CLEAR_MASK :  ld (de), a 
+
+
+            if {i} != 4
+                ld a, 8 : add d : ld d, a
+            endif
+        endr
+
+    ld bc, WRITTER_TRANSITION_NB_STEPS : .copy_amount equ $-2
+    dec bc
+    ld (.copy_amount), bc
+    ret
+
+
+copy_one_block_step2
+    ld ix, writter_transition_table0 : .copy_table_position equ $-2
+
+    ld hl, (.copy_amount)
+    ld a, h : or l : ret z
+
+    ld c, WRITTER_RIGHT_CLEAR_MASK
+    ld b, WRITTER_LEFT_CLEAR_MASK
+
+.copy_loop
+        ; get source
+        ld l, (ix+0) : inc ix
+        ld h, (ix+0) : inc ix
+        ld (.copy_table_position), ix
+
+        ; get destination
+        ld a, 0x40 : add h : ld d, a
+        ld e, l
+        
+        ; copy top 8 lines
+        assert WRITTER_TRANSITION_ATOMIC_UNIT_WIDTH_IN_PIXELS == 4
+        assert WRITTER_TRANSITION_ATOMIC_UNIT_HEIGHT_IN_PIXELS
+
+        repeat 4, i, 0
+            ;ld a, (hl) : /*and b :*/ inc hl : ld (de), a : inc de
+            ;
+            inc hl : inc de 
+            ld a, (hl) : dec hl : ld (de), a : dec de
+
+            ld a, 8 : add d : ld d, a
+            ld a, 8 : add h : ld h, a
+
+            ld a, (hl) :  ld (de), a 
+
+
+            if {i} != 4
+                ld a, 8 : add d : ld d, a
+                ld a, 8 : add h : ld h, a
+            endif
+        endr
+
+    ld bc, WRITTER_TRANSITION_NB_STEPS : .copy_amount equ $-2
+    dec bc
+    ld (.copy_amount), bc
+    ld a, b : or c
     ret nz
 
 
@@ -412,6 +598,7 @@ copy_one_block
     ld (writter_state), a
     xor a
     ret
+
 
 
 
@@ -765,10 +952,24 @@ WRITTER_PAGE1
         "rrrrrrrr iiii"
     )
 
+WRITTER_PAGE2
+    WRITTER_ENCODE_PAGE(
+        " a ",
+        " r ",
+        " i ",
+        "                   ",
+        "ariariariariariariariari",
+        "rr iiii",
+        "rrrrr iiii",
+        "rrrrrr iiii",
+        "rrrrrrr iiii",
+        "rrrrrrrr iiii"
+    )
 
 WRITTER_PAGES
     dw WRITTER_PAGE0
     dw WRITTER_PAGE1
+    dw WRITTER_PAGE2
     dw 0
 
     ; background_palette
