@@ -182,9 +182,9 @@ writter_draw_page_step
     cp WRITTER_STATE_CLEAR
     jr z, .clear_step
     cp WRITTER_STATE_DRAW
-    jr z, .draw_step
+    jp z, .draw_step                     ; jp: the unrolled clear pushes the target out of jr range
     cp WRITTER_STATE_COPY
-    jr z, .copy_step
+    jp z, .copy_step
     cp WRITTER_STATE_WAIT
     jr z, .wait_step
     ret                                  ; nothing to do (done, or not started)
@@ -216,13 +216,16 @@ writter_draw_page_step
 
 .clear_step
     ld hl, (screen_table2 + WRITTER_GRID_START_ROW*16) : writter_clear_ptr equ $-2   ; hl = scanline address to clear (dereferenced directly)
-    ld b, SCREEN_WDITH
-.clear_byte_loop
+    ; fully unrolled (no counter, no djnz); inc hl and not inc l as a buffer
+    ; line can cross a 256 bytes boundary
+    repeat SCREEN_WDITH, clearid, 0
         ld a, (hl)
         and WRITTER_CLEAR_MASK
         ld (hl), a
-        inc hl
-        djnz .clear_byte_loop
+        if {clearid} != SCREEN_WDITH-1
+            inc hl
+        endif
+    endr
 
     ld hl, (writter_clear_ptr)
     inc hl : inc hl
@@ -311,21 +314,25 @@ writter_draw_page_step
     ld l, a : ld h, 0
     ld bc, WRITTER_MAPPING
     add hl, bc
-    ld e, (hl) : inc hl : ld d, (hl)              ; de = address of the char data to draw
+    ld e, (hl) : inc hl : ld d, (hl)              ; de = char record (nb pixels + the 2 sprite pointers)
 
-    ld a, (de)                                      ; a = nb of pixels of the char
+    ld a, (de) : inc de                             ; a = nb of pixels of the char
     ld (writter_pixels_pending), a
 
-    ld hl, (writter_cursor)                          ; hl = screen address to draw the char
-
     ld a, 0 : writter_side equ $-1
-    or a
-    jr nz, .draw_right
-        call print_one_char_left
-        jr .drawn
-.draw_right
-        call print_one_char_right
-.drawn
+    or a : jr z, .use_even_sprite
+    inc de : inc de                                  ; the char starts mid-byte: use the odd-aligned sprite
+.use_even_sprite
+    ex de, hl
+    ld e, (hl) : inc hl : ld d, (hl)                  ; de = sprite (routine address + pixel data)
+    ex de, hl
+    ld c, (hl) : inc hl
+    ld b, (hl) : inc hl                                 ; bc = drawing routine for this sprite width
+    ex de, hl                                            ; de = sprite pixel data
+    ld (.or_routine+1), bc
+    ld hl, (writter_cursor)                              ; hl = buffer address to draw the char
+.or_routine
+    call writter_or_sprite_w1                             ; SMC: actually the routine matching the sprite width
 
     ; move the cursor past the char and update the current side
     ; total = side + nb_pixels ; bytes advanced = total>>1 ; new side = total&1
@@ -559,127 +566,35 @@ copy_blocks_{stage_name}
 
 
 
-    macro PRINT_ONE_CHAR_GENERATOR(direction)
-    ;; Draw the given char on screen at the given position
+    ;; Generate a char drawing routine specialised for one byte width: it ORs
+    ;; the pre-rendered sprite into the buffer, fully unrolled (no counters,
+    ;; no push/pop, no per-pixel work).
     ;; Input
-    ;; - hl = address of the screen to draw the char
-    ;; - de = address of the char data to draw (nb bits + the 8 bytes)
-print_one_char_{direction}
-        ld a, (de) : inc de      ; get the number of pixels in the character
-                        ; store the number of pixels in b
-
-        ld b, WRITTER_CHAR_HEIGHT
-    .loop
-            push bc, hl, af
-                ; draw one line BUT do not change the screen address
-                ; also keep the counter number
-                call draw_pixel_line_start_{direction}
-            pop af, hl
-            or a : ld bc, 0x800 ; works correctly for any destination screen
-            add hl, bc
-            pop bc
-            djnz .loop
+    ;; - hl = address of the buffer to draw the char
+    ;; - de = address of the sprite pixel data (8 lines x width bytes, line-major)
+    ;; Corrupts a, bc, de, hl
+    macro WRITTER_OR_SPRITE_ROUTINE w
+writter_or_sprite_w{w}
+        ld bc, 0x800 - ({w}-1)          ; from the last byte of a line to the first byte of the next one
+        repeat 8, lineid, 0
+            repeat {w}, colid, 0
+                ld a, (de) : or (hl) : ld (hl), a : inc de
+                if {colid} != {w}-1
+                    inc hl               ; NB: inc hl and not inc l, a buffer line can cross a 256 bytes boundary
+                endif
+            endr
+            if {lineid} != 7
+                add hl, bc
+            endif
+        endr
         ret
     endm
 
-    PRINT_ONE_CHAR_GENERATOR(left)
-    PRINT_ONE_CHAR_GENERATOR(right)
-
-
-    macro INIT_CHAR_WRITTER
-        ld bc, WRITTER_LEFT_DRAW_MASK*256+WRITTER_RIGHT_DRAW_MASK ; need to swap B and C for even start
-        ex af, af'
-            ld a, (de) : inc de  ; get the next line of pixels
-            exx 
-                ld c, a
-            exx
-        ex af, af'
-    endm
-
-
-; we skip the very first left pixel of the char to draw.
-; so we handle it specificaly. Afterwhise, e use the normal rendering
-; XXX We assume there is at least 2 pixels. In case of 1 pixel, it will fail
-draw_pixel_line_start_right
-
-    INIT_CHAR_WRITTER()
-
-    ; af = number of pixels to draw
-    ; c' = stream of bits to draw (read from right to left and drawn from left to right)
- 
-    dec a ; decrement number of available bits unconditionnally
-    ex af, af'
-        ld a, (hl) ; read current byte from the screen
-        ; handle 1st pixel
-        exx
-            rr c  ; Set left bit in carry
-        exx
-
-        jr nc, .continue_after_pixel2
-.draw_pixel2
-        or c                    ; add current pixel
-.continue_after_pixel2
-        ld (hl), a : inc hl ; save the result and move to next byte   
-    ex af,af'
-    jr draw_pixel_line_start_left.width_loop
-
-; Input
-; HL = address of the screen to draw the char
-; DE = address of the char data to draw (nb bits + the 8 bytes)
-; A = number of pixels to draw <= 8
-draw_pixel_line_start_left
-    INIT_CHAR_WRITTER()
-
-    ; af = number of pixels to draw
-    ; c' = stream of bits to draw (read from right to left and drawn from left to right)
-
-
-; draw pixel per pixel from the left of the char to the right of the char
-; A = number of pixels to draw <= 8
-; C' = current state of the line
-; B, C => drawing pixel masks (left, right)
-.width_loop ; loop over the bytes
-    ex af, af'
-        ld a, (hl)               ; read current byte from the screen
-        and WRITTER_CLEAR_MASK  ; remove former writter pixels
-
-        ; handle 1st pixel
-        exx
-            rr c  ; Set left bit in carry
-        exx
-
-        ; handle the pixel drawing
-        jr nc, .continue_after_pixel1
-.draw_pixel1
-        or b                    ; add current pixel
-.continue_after_pixel1
-
-        ; check if we have fished after this first pixel
-        ex af, af'
-    dec a
-    jr z, .leave_after_left_pixel   ;  leave if all pixels have been drawn
-    ex af, af'
-
-        ; HL <= screen address
-        ; A <= current value of the next byte to draw (with left pixel drawn if any, right pixel absent)
-        exx
-            rr c  ; Rotate right through carry to process the next pixel
-        exx
-        jr nc, .contnue_after_pixel2
-.draw_pixel2
-        or c      ; add current pixel
-.contnue_after_pixel2
-        ld (hl), a  ; save the current byte to the screen
-        inc hl        ; move to the next byte in the screen
-
-        ex af, af'
-    dec a
-    jr nz, .width_loop ; loop while we can
-    ret ; leave otherwhise
-.leave_after_left_pixel
-    ex af, af'
-    ld (hl), a
-    ret
+    WRITTER_OR_SPRITE_ROUTINE(1)
+    WRITTER_OR_SPRITE_ROUTINE(2)
+    WRITTER_OR_SPRITE_ROUTINE(3)
+    WRITTER_OR_SPRITE_ROUTINE(4)
+    WRITTER_OR_SPRITE_ROUTINE(5)
 
 
 
@@ -704,18 +619,91 @@ draw_pixel_line_start_left
         return value
     endfunction
 
+    ;; Compute the mode0 byte (restricted to the writter bits) of column j of
+    ;; a char line drawn at an EVEN pixel position: the byte holds
+    ;; pixels 2j (left slot) and 2j+1 (right slot)
+    function writter_even_sprite_byte v, j
+        v = {v}
+        j = {j}
+        r = 0
+        if ((v >> (2*j)) & 1) != 0
+            r = r | WRITTER_LEFT_DRAW_MASK
+        endif
+        if ((v >> (2*j+1)) & 1) != 0
+            r = r | WRITTER_RIGHT_DRAW_MASK
+        endif
+        return r
+    endfunction
+
+    ;; Same for a char line drawn at an ODD pixel position: the first byte
+    ;; only holds pixel 0 (right slot, the left slot belongs to the previous
+    ;; char), byte j>=1 holds pixels 2j-1 (left slot) and 2j (right slot)
+    function writter_odd_sprite_byte v, j
+        v = {v}
+        j = {j}
+        r = 0
+        if j != 0
+            if ((v >> (2*j-1)) & 1) != 0
+                r = r | WRITTER_LEFT_DRAW_MASK
+            endif
+        endif
+        if ((v >> (2*j)) & 1) != 0
+            r = r | WRITTER_RIGHT_DRAW_MASK
+        endif
+        return r
+    endfunction
+
+    ;; Emit the address of the sprite drawing routine specialised for the
+    ;; given byte width (1 to 5)
+    macro WRITTER_SPRITE_ROUTINE_PTR w
+        assert {w} >= 1 && {w} <= 5
+        if {w} == 1
+            dw writter_or_sprite_w1
+        endif
+        if {w} == 2
+            dw writter_or_sprite_w2
+        endif
+        if {w} == 3
+            dw writter_or_sprite_w3
+        endif
+        if {w} == 4
+            dw writter_or_sprite_w4
+        endif
+        if {w} == 5
+            dw writter_or_sprite_w5
+        endif
+    endm
+
+    ;; Emit one pre-rendered sprite: the routine address followed by the
+    ;; 8 lines x width bytes, line-major (the drawing routines walk the data
+    ;; with a simple inc de)
+    macro WRITTER_EMIT_SPRITE width, parity
+        WRITTER_SPRITE_ROUTINE_PTR({width})
+        repeat 8, lineid, 0
+            repeat {width}, colid, 0
+                db writter_{parity}_sprite_byte(list_get(current_char_lines, {lineid}), {colid})
+            endr
+        endr
+    endm
+
     ;;
     ;; Generate the data for the given char for the writter.
     ;; The number of columns can be different for each char, but the same for all the lines of the current char.
     ;; The last line is probably empty for most of the chars, but it is not mandatory.
     ;; The last column is probably empty for most of the chars, but it is not mandatory.
-    ;; Each char has 8 pixels columns maximum: 
+    ;; Each char has 8 pixels columns maximum:
     ;;   - we can fill it in a byte
     ;;   - therre is no reason to have chars too much wide especially in mode 0 resolution
     ;; '#' represents a pixel on
     ;; ' ' represents a pixel off
+    ;;
+    ;; The char is stored pre-rendered (writter bits only) in its two possible
+    ;; mode0 alignments (start on an even or an odd pixel), so drawing it is a
+    ;; simple OR of the sprite into the buffer: the buffer clearing phase has
+    ;; already removed every writter bit, and ORing preserves both the
+    ;; background bits and the right pixel of the previous char in a shared byte.
     macro WRITTER_CREATE_CHAR(symb, line0, line1, line2, line3, line4, line5, line6, line7)
-        CURRENT_CHAR_LENGTH = string_len({line0}) 
+        CURRENT_CHAR_LENGTH = string_len({line0})
 
         ; ensure the line is not > 8
         assert CURRENT_CHAR_LENGTH <= 8
@@ -729,16 +717,27 @@ draw_pixel_line_start_left
         assert CURRENT_CHAR_LENGTH == string_len({line6}), "All lines must have the same length"
         assert CURRENT_CHAR_LENGTH == string_len({line7}), "All lines must have the same length"
 
+        current_char_lines = []
+        current_char_lines = list_push(current_char_lines, writter_string_to_bitvalues({line0}))
+        current_char_lines = list_push(current_char_lines, writter_string_to_bitvalues({line1}))
+        current_char_lines = list_push(current_char_lines, writter_string_to_bitvalues({line2}))
+        current_char_lines = list_push(current_char_lines, writter_string_to_bitvalues({line3}))
+        current_char_lines = list_push(current_char_lines, writter_string_to_bitvalues({line4}))
+        current_char_lines = list_push(current_char_lines, writter_string_to_bitvalues({line5}))
+        current_char_lines = list_push(current_char_lines, writter_string_to_bitvalues({line6}))
+        current_char_lines = list_push(current_char_lines, writter_string_to_bitvalues({line7}))
+
+        CURRENT_EVEN_WIDTH = (CURRENT_CHAR_LENGTH+1)>>1
+        CURRENT_ODD_WIDTH = (CURRENT_CHAR_LENGTH+2)>>1
+
 writter_char_{symb}:
 .nb_pixels db CURRENT_CHAR_LENGTH
-        db writter_string_to_bitvalues({line0})
-        db writter_string_to_bitvalues({line1})
-        db writter_string_to_bitvalues({line2})
-        db writter_string_to_bitvalues({line3})
-        db writter_string_to_bitvalues({line4})
-        db writter_string_to_bitvalues({line5})
-        db writter_string_to_bitvalues({line6})
-        db writter_string_to_bitvalues({line7})
+        dw .even_sprite
+        dw .odd_sprite
+.even_sprite
+        WRITTER_EMIT_SPRITE CURRENT_EVEN_WIDTH, even
+.odd_sprite
+        WRITTER_EMIT_SPRITE CURRENT_ODD_WIDTH, odd
 
 writter_char_{symb}_length equ CURRENT_CHAR_LENGTH
     endm
