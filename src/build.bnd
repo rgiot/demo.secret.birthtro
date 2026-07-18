@@ -1,0 +1,22 @@
+
+{% set SNA="birthtro.sna" %}
+
+- tgt: test
+  dep: {{ SNA }}
+  cmd: emu --snapshot {{SNA}} run
+
+- tgt: {{SNA}}
+  dep:
+    - sna.asm 
+    - demo_code.asm
+    - palettes.asm
+    - constants.asm
+    - common.asm
+    - ../../data/face0_cpc.scr
+    - ../../data/face0_cpc.pal
+    - 
+  cmd: 
+   - basm --snapshot sna.asm -o {{SNA}} 
+
+
+-

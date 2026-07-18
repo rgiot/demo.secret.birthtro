@@ -6,13 +6,13 @@
   phony: true
   cmd:
     - basm test3_writter_appearance.asm --snapshot -o test3.sna
-    - emu --snapshot test3.sna  --emulator {{EMU}} run
+    - -emu --snapshot test3.sna  --emulator {{EMU}} run
 
 
-- tgt: test2
-  phony: true
+- tgt: test2 
+  phony: true 
   cmd:
-    - basm test2_generate_writter.asm --snapshot -o test2.sna --lst test2.html
+    - basm test2_generate_writter.asm --snapshot -o test2.sna --lst test2.html 
     - emu --snapshot test2.sna  --emulator {{EMU}} run
 
 
@@ -21,7 +21,6 @@
 - tgt: test1
   phony: true
   cmd:
-    - basm test1_static.asm --snapshot -o test1.sna --lst test1.html
+    - basm test1_static.asm --snapshot -o test1.sna --lst test1.html 
     - emu --snapshot test1.sna  --emulator {{EMU}} run
-
 
