@@ -97,7 +97,12 @@ demo_frame_run
     halt
 
 
+    DEBUG(GA_RED)
+    call scroller_handle_char_update
+    call scroller_handle_scrolling
+    DEBUG(GA_WHITE)
     ; 2 halts before the scroll
+
     halt
     di
 
@@ -108,12 +113,10 @@ demo_frame_run
     defs 64 - duration(djnz $)-1
     djnz .wait_lines
 
+    defs 64 - 6
+    
 	call scroller_show
 
-    DEBUG(GA_RED)
-    call scroller_handle_char_update
-    call scroller_handle_scrolling
-    DEBUG(GA_WHITE)
 	ei
 
 

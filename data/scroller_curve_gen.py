@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 duration = 256
-amplitude = 30
+amplitude = 35
 
 X = np.arange(0, duration, dtype=np.int16)
 Y = amplitude * np.sin(2 * np.pi * X / duration) + amplitude + 1 # NEVER 0
