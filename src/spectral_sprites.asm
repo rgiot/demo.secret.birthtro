@@ -272,6 +272,8 @@ show_bloc
     endenum
 
 
+
+
     ;; Generate the code that moves a column of the picture by one pixel, up or down.
     ;; A column spans on several bytes. So when there is a modification, it has to be done on all bytes of the column.
     ;; Modifications are done from left to right then right to left at the next line. This allows to reduce the number of instructions.
@@ -297,6 +299,10 @@ show_bloc
     ;; TODO remove the zigazag is serves for nothing as the line change can handle that. It would crunch better for the same executaion time
     assert SPECTRAL_BLOC_HEIGHT%8 == 0, "SPECTRAL_BLOC_HEIGHT must be a multiple of 8 for the spectral sprites. Otherwise the code to move up a column is not correct"
     macro SPECTRAL_SPRITE_MOVE_COLUMN_CODE_BODY, colid, column, move_direction, adjust_before
+
+        TICKER START CURRENT_METHOD_DURATION
+
+
         CURRENT_DIRECTION = DRAW_DIRECTION_LEFT_TO_RIGHT
         NB_LINES_TO_JUMP=0
 
@@ -397,6 +403,11 @@ show_bloc
         if !{adjust_before}
             db {move_direction} ; turn it into the new line of the moved column
         endif
+
+        TICKER STOP CURRENT_METHOD_DURATION
+        SPECTRAL_MOVE_METHODS_DURATION{colid} = list_push(SPECTRAL_MOVE_METHODS_DURATION{colid}, CURRENT_METHOD_DURATION)
+        ;unset CURRENT_METHOD_DURATION
+
         ret
     endm
 
@@ -423,12 +434,27 @@ spectral_sprite_down_column_{colid}
     endm
 
 
+    ;; generate the routine if it does not exists
+    macro SPECTRAL_SPRITE_NOOP_CODE colid, duration
+        ifndef spectral_column_noop_{duration}
+spectral_column_noop_{duration}
+    nop {duration}
+        endif
+        ret
+
+spectral_sprite_noop_column_{colid} equ spectral_column_noop_{duration}
+    endm
 
     ; Generate the code to move up/down all NON-BLANK columns of the picture. Blank columns
     ; (no '#' anywhere in spectral_sprites_model for that column) never draw anything, so
     ; there's no point generating a move routine, a jump table, or dispatching to them at
     ; runtime (see spectral_sprite_move_along_curve).
     repeat SPECTRAL_SPRITE_WIDTH, colid, 0
+
+        ; this is an accumulator for the duration of the move methods.
+        ; it will help to stablize
+        SPECTRAL_MOVE_METHODS_DURATION{{colid}} = []
+
         if !spectral_sprites_column_is_blank(list_get(spectral_sprites_up_actions, {colid}))
             SPECTRAL_SPRITE_UP_COLUMN_CODE(
                 {colid},
@@ -438,18 +464,24 @@ spectral_sprite_down_column_{colid}
                 {colid},
                 {eval}list_get(spectral_sprites_down_actions, {colid})
             )
+
+            print "DURATIONS ",{colid}, " ", SPECTRAL_MOVE_METHODS_DURATION{{colid}}
+            assert list_get( SPECTRAL_MOVE_METHODS_DURATION{{colid}}, 0) == list_get( SPECTRAL_MOVE_METHODS_DURATION{{colid}}, 1), "Move up and down must have the same duration for column {colid}"
+        
+            SPECTRAL_SPRITE_NOOP_CODE({colid}, {eval}list_get(SPECTRAL_MOVE_METHODS_DURATION{colid},0))
+        
         endif
 
     endrepeat
-spectral_sprite_any_column_do_nothing
-    ret
+
 
 
     repeat SPECTRAL_SPRITE_WIDTH, colid, 0
         if !spectral_sprites_column_is_blank(list_get(spectral_sprites_up_actions, {colid}))
+    ; each of these methods have EXACTLY the same duration. So the code is completely stable whatever is the step
 spectral_sprite_column{colid}_table
     dw spectral_sprite_down_column_{colid}
-    dw spectral_sprite_any_column_do_nothing
+    dw spectral_sprite_noop_column_{colid}
     dw spectral_sprite_up_column_{colid}
         endif
     endrepeat
@@ -536,4 +568,5 @@ delta_x_curve db SPECTRAL_DELTA_CURVE
 ;SPECTRAL_START_ADDRESS equ peek(screen_table + 2*SPECTRAL_START_LINE + 0) \
 ;                        + (peek(screen_table + 2*SPECTRAL_START_LINE + 1) << 8);\
 ;                        + SPECTRAL_START_COLUMN
+
 
