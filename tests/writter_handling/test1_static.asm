@@ -56,19 +56,19 @@ init
 		ld bc, 0x7f8c : out (c), c
 
 
-        ; set up the background_palette for the background
-        ld bc, 0x7f00 : out (c), c : ld a, (background_palette+0) : out (c), a
-        ld bc, 0x7f01 : out (c), c : ld a, (background_palette+1) : out (c), a
-        ld bc, 0x7f02 : out (c), c : ld a, (background_palette+2) : out (c), a
-        ld bc, 0x7f03 : out (c), c : ld a, (background_palette+3) : out (c), a
+        ; set up the BACKGROUND_IMG_PALETTE for the background
+        ld bc, 0x7f00 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+0) : out (c), a
+        ld bc, 0x7f01 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+1) : out (c), a
+        ld bc, 0x7f02 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+2) : out (c), a
+        ld bc, 0x7f03 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+3) : out (c), a
         ld bc, 0x7f00 + 8 : out (c), c : ld a, (writter_palette+0) : out (c), a
         ld bc, 0x7f01 + 8 : out (c), c : ld a, (writter_palette+0) : out (c), a
         ld bc, 0x7f02 + 8 : out (c), c : ld a, (writter_palette+0) : out (c), a
         ld bc, 0x7f03 + 8 : out (c), c : ld a, (writter_palette+0) : out (c), a
 
-        ; TODO setup the background_palette for the extra layers
+        ; TODO setup the BACKGROUND_IMG_PALETTE for the extra layers
 
-        ; set up the background_palette for the background
+        ; set up the BACKGROUND_IMG_PALETTE for the background
 		ld bc, 0x7f10 : out (c), c : ld bc, 0x7f54 : out (c), c
 		ld sp, $
 
@@ -346,8 +346,8 @@ WRITTER_CREATE_CHAR(
 
 
 
-    ; background_palette
-background_palette
+    ; BACKGROUND_IMG_PALETTE
+BACKGROUND_IMG_PALETTE
     incbin "../../data/face0_cpc.pal"
 
     ; there is only one color for the writter

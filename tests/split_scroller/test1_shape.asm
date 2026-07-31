@@ -4,7 +4,7 @@
 ; April 2026
 
 
-BLOC_HEIGHT equ 8
+SPECTRAL_BLOC_HEIGHT equ 8
 
 	org 0x4000
 
@@ -28,7 +28,7 @@ frame
 	di
 
 	; Normal s
-	repeat BLOC_HEIGHT
+	repeat SPECTRAL_BLOC_HEIGHT
 		out(c), e
 		out(c), e
 		out(c), e
@@ -36,7 +36,7 @@ frame
 		defs 64 - 4*4
 	endr
 
-	repeat BLOC_HEIGHT*2
+	repeat SPECTRAL_BLOC_HEIGHT*2
 		out(c), e
 		out(c), d
 		out(c), d
@@ -44,7 +44,7 @@ frame
 		defs 64 - 4*4
 	endr
 
-	repeat BLOC_HEIGHT
+	repeat SPECTRAL_BLOC_HEIGHT
 		out(c), e
 		out(c), e
 		out(c), e
@@ -52,7 +52,7 @@ frame
 		defs 64 - 4*4
 	endr
 
-	repeat BLOC_HEIGHT * 3
+	repeat SPECTRAL_BLOC_HEIGHT * 3
 		out(c), d
 		out(c), d
 		out(c), e
@@ -60,7 +60,7 @@ frame
 		defs 64 - 4*4
 	endr
 
-	repeat BLOC_HEIGHT
+	repeat SPECTRAL_BLOC_HEIGHT
 		out(c), e
 		out(c), e
 		out(c), e
@@ -69,14 +69,14 @@ frame
 	endr
 
 
-	repeat BLOC_HEIGHT*4
+	repeat SPECTRAL_BLOC_HEIGHT*4
 		defs 64
 	endr
 
 
 
 	; Rounded s
-	repeat BLOC_HEIGHT
+	repeat SPECTRAL_BLOC_HEIGHT
 		nop
 		out(c), e
 		nop
@@ -90,7 +90,7 @@ frame
 		defs 64 - 4*4
 	endr
 
-	repeat BLOC_HEIGHT*2
+	repeat SPECTRAL_BLOC_HEIGHT*2
 
 		out(c), e
 		out(c), d
@@ -100,7 +100,7 @@ frame
 	endr
 
 
-	repeat BLOC_HEIGHT
+	repeat SPECTRAL_BLOC_HEIGHT
 		nop
 		out(c), e
 		nop
@@ -114,7 +114,7 @@ frame
 		defs 64 - 4*4
 	endr
 
-	repeat BLOC_HEIGHT*3
+	repeat SPECTRAL_BLOC_HEIGHT*3
 		nop : nop : nop : nop
 		nop : nop : nop : nop
 		out(c), e
@@ -123,7 +123,7 @@ frame
 	endr
 
 
-	repeat BLOC_HEIGHT
+	repeat SPECTRAL_BLOC_HEIGHT
 		nop
 		out(c), e
 		nop

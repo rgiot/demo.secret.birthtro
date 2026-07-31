@@ -1,9 +1,12 @@
 
 {% set SNA="birthtro.sna" %}
 
+{% set FACE_SCR="../data/face2_cpc.scr" %}
+{% set FACE_PAL="../data/face2_cpc.pal" %}
+
 - tgt: test
   dep: {{ SNA }}
-  cmd: emu --snapshot {{SNA}} run
+  cmd: -emu --snapshot {{SNA}} run
 
 - tgt: {{SNA}}
   dep:
@@ -12,11 +15,13 @@
     - palettes.asm
     - constants.asm
     - common.asm
-    - ../../data/face0_cpc.scr
-    - ../../data/face0_cpc.pal
-    - 
+    - {{ FACE_SCR }}
+    - {{ FACE_PAL }}
   cmd: 
-   - basm --snapshot sna.asm -o {{SNA}} 
+   - basm --snapshot sna.asm -o {{SNA}} -DFACE_SCR=\"{{FACE_SCR}}\" -D FACE_PAL=\"{{FACE_PAL}}\"
 
 
--
+- tgt: clean
+  phony: true
+  cmd:
+    - rm {{SNA}}

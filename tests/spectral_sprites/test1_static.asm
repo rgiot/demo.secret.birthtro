@@ -27,8 +27,8 @@ SPECTRAL_SPRITE_RIGHT_BIT_POS equ  MODE0_RIGHT_PIXEL_BIT2_POS    ; used for odd 
 SPECTRAL_SPRITE_WIDTH equ 11
 SPECTRAL_SPRITE_HEIGHT equ 5
 
-BLOC_HEIGHT equ 16
-BLOC_WIDTH equ 8
+SPECTRAL_BLOC_HEIGHT equ 16
+SPECTRAL_BLOC_WIDTH equ 8
 
 SPECTRAL_START_ADDRESS equ 0xc000 + 3 + 96*5
 
@@ -51,19 +51,19 @@ init
 		ld bc, 0x7f8c : out (c), c
 
 
-        ; set up the background_palette for the background
-        ld bc, 0x7f00 : out (c), c : ld a, (background_palette+0) : out (c), a
-        ld bc, 0x7f01 : out (c), c : ld a, (background_palette+1) : out (c), a
-        ld bc, 0x7f02 : out (c), c : ld a, (background_palette+2) : out (c), a
-        ld bc, 0x7f03 : out (c), c : ld a, (background_palette+3) : out (c), a
+        ; set up the BACKGROUND_IMG_PALETTE for the background
+        ld bc, 0x7f00 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+0) : out (c), a
+        ld bc, 0x7f01 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+1) : out (c), a
+        ld bc, 0x7f02 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+2) : out (c), a
+        ld bc, 0x7f03 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+3) : out (c), a
         ld bc, 0x7f00 + 4 : out (c), c : ld a, (spectral_palette+0) : out (c), a
         ld bc, 0x7f01 + 4 : out (c), c : ld a, (spectral_palette+1) : out (c), a
         ld bc, 0x7f02 + 4 : out (c), c : ld a, (spectral_palette+2) : out (c), a
         ld bc, 0x7f03 + 4 : out (c), c : ld a, (spectral_palette+3) : out (c), a
 
-        ; TODO setup the background_palette for the extra layers
+        ; TODO setup the BACKGROUND_IMG_PALETTE for the extra layers
 
-        ; set up the background_palette for the background
+        ; set up the BACKGROUND_IMG_PALETTE for the background
 		ld bc, 0x7f10 : out (c), c : ld bc, 0x7f54 : out (c), c
 		ld sp, $
 
@@ -90,7 +90,7 @@ show_static_sprite
             jp nz, .skip
             push de, hl : call show_bloc : pop hl, de
 .skip
-            repeat BLOC_WIDTH
+            repeat SPECTRAL_BLOC_WIDTH
                 inc hl
             endrepeat
 
@@ -98,7 +98,7 @@ show_static_sprite
         djnz .loopx
 
         pop hl
-        repeat BLOC_HEIGHT
+        repeat SPECTRAL_BLOC_HEIGHT
             call bc26_hl
         endrepeat
         pop bc
@@ -112,19 +112,19 @@ show_static_sprite
 ;; Input:
 ;;   - HL: screen address
 show_bloc
-    ld b, BLOC_HEIGHT/2
-    assert BLOC_WIDTH % 2 = 0, "BLOC_WIDTH must be even "
+    ld b, SPECTRAL_BLOC_HEIGHT/2
+    assert SPECTRAL_BLOC_WIDTH % 2 = 0, "SPECTRAL_BLOC_WIDTH must be even "
 .yloop
     push bc
 
-        repeat BLOC_WIDTH
+        repeat SPECTRAL_BLOC_WIDTH
             if SPECTRAL_PLAIN
                 set SPECTRAL_SPRITE_RIGHT_BIT_POS, (hl)
             endif
             set SPECTRAL_SPRITE_LEFT_BIT_POS, (hl) : inc hl
         endrepeat
         call bc26_hl
-        repeat BLOC_WIDTH
+        repeat SPECTRAL_BLOC_WIDTH
             dec hl : set SPECTRAL_SPRITE_RIGHT_BIT_POS, (hl)
             if SPECTRAL_PLAIN
                 set SPECTRAL_SPRITE_LEFT_BIT_POS, (hl)
@@ -166,8 +166,8 @@ spectral_sprites_matrix db spectral_sprites_model
 
 
 
-    ; background_palette
-background_palette
+    ; BACKGROUND_IMG_PALETTE
+BACKGROUND_IMG_PALETTE
     incbin "../../data/face0_cpc.pal"
 
 spectral_palette

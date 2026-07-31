@@ -6,7 +6,7 @@
 
 
 
-BLOC_HEIGHT equ 8
+SPECTRAL_BLOC_HEIGHT equ 8
 MAXIMUM_LINE_SIZE equ 64; TODO really find the minimum value
 
 
@@ -152,7 +152,7 @@ scroller_show
 
 scroller_routine_table_full
 	repeat 8, line, 0
-		repeat BLOC_HEIGHT
+		repeat SPECTRAL_BLOC_HEIGHT
 			dw scroller_line_full{{line}}.start_code ; First start with a single line
 		endr
 	endr
@@ -160,7 +160,7 @@ scroller_routine_table_full
 
 scroller_routine_table_full_left
 	repeat 8, line, 0
-		repeat BLOC_HEIGHT
+		repeat SPECTRAL_BLOC_HEIGHT
 			dw scroller_line_full_left{{line}}.start_code ; First start with a single line
 		endr
 	endr
@@ -169,7 +169,7 @@ scroller_routine_table_full_left
 
 scroller_routine_table_left_1
 	repeat 8, line, 0
-		repeat BLOC_HEIGHT
+		repeat SPECTRAL_BLOC_HEIGHT
 			dw scroller_line_left1_{{line}}.start_code ; First start with a single line
 		endr
 	endr
@@ -177,7 +177,7 @@ scroller_routine_table_left_1
 
 scroller_routine_table_left_2
 	repeat 8, line, 0
-		repeat BLOC_HEIGHT
+		repeat SPECTRAL_BLOC_HEIGHT
 			dw scroller_line_left2_{{line}}.start_code ; First start with a single line
 		endr
 	endr
@@ -186,7 +186,7 @@ scroller_routine_table_left_2
 
 scroller_routine_table_left_3
 	repeat 8, line, 0
-		repeat BLOC_HEIGHT
+		repeat SPECTRAL_BLOC_HEIGHT
 			dw scroller_line_left3_{{line}}.start_code
 		endr
 	endr
@@ -196,7 +196,7 @@ scroller_routine_table_left_3
 
 scroller_routine_table_right
 	repeat 8, line, 0
-		repeat BLOC_HEIGHT
+		repeat SPECTRAL_BLOC_HEIGHT
 			dw scroller_line_right{{line}}.start_code
 		endr
 	endr
@@ -205,7 +205,7 @@ scroller_routine_table_right
 
 scroller_routine_table_right_1
 	repeat 8, line, 0
-		repeat BLOC_HEIGHT
+		repeat SPECTRAL_BLOC_HEIGHT
 			dw scroller_line_right1_{{line}}.start_code
 		endr
 	endr
@@ -214,7 +214,7 @@ scroller_routine_table_right_1
 
 scroller_routine_table_right_2
 	repeat 8, line, 0
-		repeat BLOC_HEIGHT
+		repeat SPECTRAL_BLOC_HEIGHT
 			dw scroller_line_right2_{{line}}.start_code
 		endr
 	endr
@@ -222,7 +222,7 @@ scroller_routine_table_right_2
 
 scroller_routine_table_right_3
 	repeat 8, line, 0
-		repeat BLOC_HEIGHT
+		repeat SPECTRAL_BLOC_HEIGHT
 			dw scroller_line_right3_{{line}}.start_code
 		endr
 	endr
@@ -231,7 +231,7 @@ scroller_routine_table_right_3
 
 scroller_routine_table_right_4
 	repeat 8, line, 0
-		repeat BLOC_HEIGHT
+		repeat SPECTRAL_BLOC_HEIGHT
 			dw scroller_line_right4_{{line}}.start_code
 		endr
 	endr

@@ -23,7 +23,7 @@ SCREEN_HEIGHT_CHARS equ 21
 
 SCROLLER_NB_VERTICAL_BLOCS equ 8
 ;; The number of times a routine is dulicated
-BLOC_HEIGHT equ 8
+SPECTRAL_BLOC_HEIGHT equ 8
 
 	include "inner://ga.asm"
 
@@ -52,13 +52,13 @@ init
 		ld bc, 0x7f8c : out (c), c
 
 
-        ; set up the background_palette for the background
-        ld bc, 0x7f00 : out (c), c : ld a, (background_palette+0) : out (c), a
-        ld bc, 0x7f01 : out (c), c : ld a, (background_palette+1) : out (c), a
-        ld bc, 0x7f02 : out (c), c : ld a, (background_palette+2) : out (c), a
-        ld bc, 0x7f03 : out (c), c : ld a, (background_palette+3) : out (c), a
+        ; set up the BACKGROUND_IMG_PALETTE for the background
+        ld bc, 0x7f00 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+0) : out (c), a
+        ld bc, 0x7f01 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+1) : out (c), a
+        ld bc, 0x7f02 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+2) : out (c), a
+        ld bc, 0x7f03 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+3) : out (c), a
 
-        ; set up the background_palette for the background
+        ; set up the BACKGROUND_IMG_PALETTE for the background
 		ld bc, 0x7f10 : out (c), c : ld bc, 0x7f54 : out (c), c
 		ld sp, $
 
@@ -227,7 +227,7 @@ scroller_configuration_table
 
 scroller_show_routine_table_a
 	repeat SCROLLER_NB_VERTICAL_BLOCS, line, 0
-		repeat BLOC_HEIGHT-1
+		repeat SPECTRAL_BLOC_HEIGHT-1
 			dw SCROLLER_CODE_{{line}}_a
 		endr
 		dw scroller_change_color
@@ -236,7 +236,7 @@ scroller_show_routine_table_a
 
 scroller_show_routine_table_b
 	repeat SCROLLER_NB_VERTICAL_BLOCS, line, 0
-		repeat BLOC_HEIGHT-1
+		repeat SPECTRAL_BLOC_HEIGHT-1
 			dw SCROLLER_CODE_{{line}}_b
 		endr
 		dw scroller_change_color
@@ -1089,8 +1089,8 @@ SCROLLER_RASTERS_DATA
 
 
 
-    ; background_palette
-background_palette
+    ; BACKGROUND_IMG_PALETTE
+BACKGROUND_IMG_PALETTE
     incbin "../../data/face0_cpc.pal"
 
 ; Generate the buffers

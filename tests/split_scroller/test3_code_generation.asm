@@ -18,7 +18,7 @@ SNASET CRTC_SEL, 0
 
 SCROLLER_NB_VERTICAL_BLOCS equ 8
 ;; The number of times a routine is dulicated
-BLOC_HEIGHT equ 8
+SPECTRAL_BLOC_HEIGHT equ 8
 
 
 ;;
@@ -206,7 +206,7 @@ scroller_configuration_table
 
 scroller_show_routine_table_a
 	repeat SCROLLER_NB_VERTICAL_BLOCS, line, 0
-		repeat BLOC_HEIGHT
+		repeat SPECTRAL_BLOC_HEIGHT
 			dw SCROLLER_CODE_{{line}}_a
 		endr
 	endr
@@ -214,7 +214,7 @@ scroller_show_routine_table_a
 
 scroller_show_routine_table_b
 	repeat SCROLLER_NB_VERTICAL_BLOCS, line, 0
-		repeat BLOC_HEIGHT
+		repeat SPECTRAL_BLOC_HEIGHT
 			dw SCROLLER_CODE_{{line}}_b
 		endr
 	endr

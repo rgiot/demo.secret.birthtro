@@ -1,3 +1,11 @@
+;#!bndbuild
+; - tgt: test2
+;   phony: true
+;   cmd:
+;     - basm test2_dynamic.asm --snapshot -o test2.sna --lst test2.html
+;     - -emu --snapshot test2.sna  --emulator ace run
+
+
 ;; June 2026
 ;; Krusty/Benediction
 ;; Start to work on the background display.
@@ -30,15 +38,15 @@ SCREEN_HEIGHT_CHARS equ 21
 SPECTRAL_SPRITE_WIDTH equ 22 ; more columns is too slow
 SPECTRAL_SPRITE_HEIGHT equ 5
 
-BLOC_HEIGHT equ 16
-BLOC_WIDTH equ 4
+SPECTRAL_BLOC_HEIGHT equ 16
+SPECTRAL_BLOC_WIDTH equ 4
 
 
 SPECTRAL_DELTA_CURVE equ [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 2, 4, 2, 4, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 2, 4, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 0, 2, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 2, 0, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 2, 0, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 4, 2, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 4, 2, 4, 2, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
 SPECTRAL_CURVE_STEPX equ 3
 
 
-SPECTRAL_START_LINE equ SCREEN_HEIGHT_CHARS*8/2 - BLOC_HEIGHT*SPECTRAL_SPRITE_HEIGHT/2 
+SPECTRAL_START_LINE equ SCREEN_HEIGHT_CHARS*8/2 - SPECTRAL_BLOC_HEIGHT*SPECTRAL_SPRITE_HEIGHT/2 
 SPECTRAL_START_COLUMN equ 4
 
 
@@ -192,19 +200,19 @@ init
 		ld bc, 0x7f8c : out (c), c
 
 
-        ; set up the background_palette for the background
-        ld bc, 0x7f00 : out (c), c : ld a, (background_palette+0) : out (c), a
-        ld bc, 0x7f01 : out (c), c : ld a, (background_palette+1) : out (c), a
-        ld bc, 0x7f02 : out (c), c : ld a, (background_palette+2) : out (c), a
-        ld bc, 0x7f03 : out (c), c : ld a, (background_palette+3) : out (c), a
+        ; set up the BACKGROUND_IMG_PALETTE for the background
+        ld bc, 0x7f00 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+0) : out (c), a
+        ld bc, 0x7f01 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+1) : out (c), a
+        ld bc, 0x7f02 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+2) : out (c), a
+        ld bc, 0x7f03 : out (c), c : ld a, (BACKGROUND_IMG_PALETTE+3) : out (c), a
         ld bc, 0x7f00 + 4 : out (c), c : ld a, (spectral_palette+0) : out (c), a
         ld bc, 0x7f01 + 4 : out (c), c : ld a, (spectral_palette+1) : out (c), a
         ld bc, 0x7f02 + 4 : out (c), c : ld a, (spectral_palette+2) : out (c), a
         ld bc, 0x7f03 + 4 : out (c), c : ld a, (spectral_palette+3) : out (c), a
 
-        ; TODO setup the background_palette for the extra layers
+        ; TODO setup the BACKGROUND_IMG_PALETTE for the extra layers
 
-        ; set up the background_palette for the background
+        ; set up the BACKGROUND_IMG_PALETTE for the background
 		ld bc, 0x7f10 : out (c), c : ld bc, 0x7f54 : out (c), c
 		ld sp, $
 
@@ -286,12 +294,12 @@ spectral_sprite_move_along_curve
 call_hl jp hl
 
 
-;; Address delta to move a bloc down to the next one. A bloc is BLOC_HEIGHT lines tall and
-;; BLOC_HEIGHT is a multiple of 8, so moving down one bloc is (BLOC_HEIGHT/8) char rows: on the
+;; Address delta to move a bloc down to the next one. A bloc is SPECTRAL_BLOC_HEIGHT lines tall and
+;; SPECTRAL_BLOC_HEIGHT is a multiple of 8, so moving down one bloc is (SPECTRAL_BLOC_HEIGHT/8) char rows: on the
 ;; CPC layout moving down 8 lines is always +SCREEN_WIDTH (the sub-line offset is unchanged),
-;; so no per-line bc26_hl is needed between blocs. When BLOC_HEIGHT==8 this is a single +SCREEN_WIDTH.
-SPECTRAL_BLOC_STRIDE equ (BLOC_HEIGHT/8)*SCREEN_WIDTH
-    assert BLOC_HEIGHT % 8 == 0, "BLOC_HEIGHT must be a multiple of 8 for SPECTRAL_BLOC_STRIDE"
+;; so no per-line bc26_hl is needed between blocs. When SPECTRAL_BLOC_HEIGHT==8 this is a single +SCREEN_WIDTH.
+SPECTRAL_BLOC_STRIDE equ (SPECTRAL_BLOC_HEIGHT/8)*SCREEN_WIDTH
+    assert SPECTRAL_BLOC_HEIGHT % 8 == 0, "SPECTRAL_BLOC_HEIGHT must be a multiple of 8 for SPECTRAL_BLOC_STRIDE"
 
 ;; XXX Claude written from initial handwritten done
 ;; Draw the static sprite in the middle of the screen.
@@ -329,7 +337,7 @@ show_static_sprite
         pop iy
         inc iy                                  ; next model column
         pop bc
-    ld a, c : add BLOC_WIDTH : ld c, a          ; next column x
+    ld a, c : add SPECTRAL_BLOC_WIDTH : ld c, a          ; next column x
     inc ix                                      ; next column top line
     djnz .col_loop
     ret
@@ -341,19 +349,19 @@ show_static_sprite
 ;; Input:
 ;;   - HL: screen address
 show_bloc
-    ld b, BLOC_HEIGHT/2
-    assert BLOC_WIDTH % 2 = 0, "BLOC_WIDTH must be even "
+    ld b, SPECTRAL_BLOC_HEIGHT/2
+    assert SPECTRAL_BLOC_WIDTH % 2 = 0, "SPECTRAL_BLOC_WIDTH must be even "
 .yloop
     push bc
 
-        repeat BLOC_WIDTH
+        repeat SPECTRAL_BLOC_WIDTH
             if SPECTRAL_PLAIN
                 set SPECTRAL_SPRITE_RIGHT_BIT_POS, (hl)
             endif
             set SPECTRAL_SPRITE_LEFT_BIT_POS, (hl) : inc hl
         endrepeat
         call bc26_hl
-        repeat BLOC_WIDTH
+        repeat SPECTRAL_BLOC_WIDTH
             dec hl : set SPECTRAL_SPRITE_RIGHT_BIT_POS, (hl)
             if SPECTRAL_PLAIN
                 set SPECTRAL_SPRITE_LEFT_BIT_POS, (hl)
@@ -370,14 +378,17 @@ show_bloc
 ; input: hl screen address
 ; modified:  A, BC
 bc26_hl
+    BREAKPOINT
     ld a, h
     add 8
     ld h, a
-    ret nc
+    jr nc,bc26_hl.__BASM__stabilize_pad_1
     ld bc, 0xc000 + 96
     add hl, bc
     ret
-
+.__BASM__stabilize_pad_1
+    waitnops 5
+    ret
 
 
     ;; Enumeration that encodes the drawing movement.
@@ -394,7 +405,7 @@ bc26_hl
     ;; As we work with block of height 8 to move to the next line consist in adding screen width to the screen address
     ;;
     ;; The boundary actions are drawn relative to a single anchor address, walked downward in
-    ;; fixed BLOC_HEIGHT steps (see the iterate loop below). Only ONE raster line changes state
+    ;; fixed SPECTRAL_BLOC_HEIGHT steps (see the iterate loop below). Only ONE raster line changes state
     ;; at each boundary when the sprite shifts by 1 pixel, and it must always be the one at the
     ;; TOPMOST of the "current line" (a) and "new line" (a+/-1): moving up, that's the new
     ;; (decremented) line, so we must decrement BEFORE computing the anchor; moving down, that's
@@ -411,7 +422,7 @@ bc26_hl
     ;;            (moving up), false applies it after drawing, right before "a" is returned to the
     ;;            caller (moving down)
     ;; TODO remove the zigazag is serves for nothing as the line change can handle that. It would crunch better for the same executaion time
-    assert BLOC_HEIGHT%8 == 0, "BLOC_HEIGHT must be a multiple of 8 for the spectral sprites. Otherwise the code to move up a column is not correct"
+    assert SPECTRAL_BLOC_HEIGHT%8 == 0, "SPECTRAL_BLOC_HEIGHT must be a multiple of 8 for the spectral sprites. Otherwise the code to move up a column is not correct"
     macro SPECTRAL_SPRITE_MOVE_COLUMN_CODE_BODY, colid, column, move_direction, adjust_before
         CURRENT_DIRECTION = DRAW_DIRECTION_LEFT_TO_RIGHT
         NB_LINES_TO_JUMP=0
@@ -425,7 +436,7 @@ bc26_hl
         ld d, (hl) ; high byte of the current line's screen address
         ld h, high(screen_table_lo)
         ld e, (hl) ; low byte of the current line's screen address (l is still the line index)
-        ld hl, SPECTRAL_START_COLUMN + ({colid}*BLOC_WIDTH) ; get the screen address of the column to move
+        ld hl, SPECTRAL_START_COLUMN + ({colid}*SPECTRAL_BLOC_WIDTH) ; get the screen address of the column to move
         add hl, de
 
         ld de, SPECTRAL_SPRITE_DRAW_MASK_BOTH_POS*256 + SPECTRAL_SPRITE_ERASE_MASK_BOTH_POS
@@ -448,7 +459,7 @@ bc26_hl
                 else
                     print "Jump ", NB_LINES_TO_JUMP, " blocs"
                     ; we have to jump to the next line of the column
-                    ld bc, SCREEN_WIDTH*NB_LINES_TO_JUMP*(BLOC_HEIGHT>>3) ; 1 pixel line = 1/8 of a bloc height
+                    ld bc, SCREEN_WIDTH*NB_LINES_TO_JUMP*(SPECTRAL_BLOC_HEIGHT>>3) ; 1 pixel line = 1/8 of a bloc height
                     add hl, bc
                     NB_LINES_TO_JUMP = 0
                 endif
@@ -466,7 +477,7 @@ bc26_hl
                 case SPECTRAL_SPRITE_BLOC_ACTION_NONE
                     break
                 case SPECTRAL_SPRITE_BLOC_ACTION_DRAW
-                    repeat BLOC_WIDTH, step, 1
+                    repeat SPECTRAL_BLOC_WIDTH, step, 1
                         ; ok but too slow, not retained (8 nops)
                         ;set SPECTRAL_SPRITE_LEFT_BIT_POS, (hl) ; 4 nops
                         ;set SPECTRAL_SPRITE_RIGHT_BIT_POS, (hl) ; 4 nops
@@ -482,15 +493,15 @@ bc26_hl
 
                         ld a, (hl) : or d : ld (hl), a ; 5 nops
                         
-                        if {step} != BLOC_WIDTH
+                        if {step} != SPECTRAL_BLOC_WIDTH
                             db CURRENT_DIRECTION
                         endif
                     endrepeat
                     break
                 case SPECTRAL_SPRITE_BLOC_ACTION_ERASE
-                    repeat BLOC_WIDTH, step, 1
+                    repeat SPECTRAL_BLOC_WIDTH, step, 1
                         ld a, (hl) : and e : ld (hl), a ; 5 nops
-                        if {step} != BLOC_WIDTH
+                        if {step} != SPECTRAL_BLOC_WIDTH
                            db CURRENT_DIRECTION
                         endif
                     endrepeat
@@ -592,10 +603,10 @@ spectral_column_top_line
     endrepeat
 
 
-
-    ; background_palette
-background_palette
-    incbin "../../data/face0_cpc.pal"
+    ; BACKGROUND_IMG_PALETTE
+BACKGROUND_IMG_PALETTE
+    ;incbin "../../data/face0_cpc.pal"
+    incbin "../../data/face2_cpc.pal"
 
 spectral_palette
     db 0x58, 0x45, 0x4d, 0x4f 
@@ -665,4 +676,5 @@ delta_x_curve db SPECTRAL_DELTA_CURVE
  ;   print {hex}SPECTRAL_START_ADDRESS
     ; screen
     org 0xc000
-    incbin "../../data/face0_cpc.scr"
+   ; incbin "../../data/face0_cpc.scr"
+    incbin "../../data/face2_cpc.scr"

@@ -6,7 +6,7 @@
   phony: true
   cmd:
     - basm test2_dynamic.asm --snapshot -o test2.sna --lst test2.html
-    - emu --snapshot test2.sna  --emulator {{EMU}} run
+    - -emu --snapshot test2.sna  --emulator {{EMU}} run
 
 - tgt: test1
   phony: true
