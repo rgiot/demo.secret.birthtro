@@ -60,7 +60,12 @@ demo_init_screen
 .setup_crtc
     ld bc, 0xbc00 + 0 : out (c), c : ld bc, 0xbd00 + 64-1 : out (c), c
     ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00 + SCREEN_WIDTHS_WORD : out (c), c
-    ld bc, 0xbc00 + 2 : out (c), c : ld bc, 0xbd00 + 50 : out (c), c
+    ld bc, 0xbc00 + 2 : out (c), c
+    if SHIFT_SCREEN_FOR_DEBUG
+        ld bc, 0xbd00 + 50 + 4 : out (c), c
+    else
+        ld bc, 0xbd00 + 50 : out (c), c
+    endif
     ld bc, 0xbc00 + 7 : out (c), c : ld bc, 0xbd00 + 29 : out (c), c
     ld bc, 0xbc00 + 6 : out (c), c : ld bc, 0xbd00 + SCREEN_HEIGHT_CHARS : out (c), c
     ld bc, 0xbc00 + 12 : out (c),c : ld bc, 0xbd00 + 0x30 : out (c), c
@@ -90,24 +95,23 @@ demo_frame_run
     call spectral_sprite_move_along_curve
     DEBUG(GA_WHITE)
     halt
-	di
-    TICKER START DEBUG_DURATION
-        DEBUG(GA_BLACK)
-    TICKER STOP
+
+    DEBUG(GA_RED)
+    call scroller_handle_char_update
+    call scroller_handle_scrolling
+    DEBUG(GA_WHITE)
+    ; 2 halts before the scroll
+    halt
+    di
 
 
-    ; The second halt arrives way too late.
-    ; So we have to manually wait here until reachingthe appropriate line allowing us to display the
-    ; split scroller
+    ; we want to have a sine wave
+    ld b, 20
+.wait_lines
+    defs 64 - duration(djnz $)-1
+    djnz .wait_lines
 
-	defs 33*64 + 64 - (3+4+3+4+1+1) + 1 +  13 - 1  -1 -1-1-DEBUG_DURATION ; ensure proper alignement
-
-	BRAKPOINT
 	call scroller_show
-	DEBUG(GA_RED)
-	call scroller_handle_char_update
-	call scroller_handle_scrolling
-	DEBUG(GA_BLACK)
 	ei
 
     ret
@@ -115,6 +119,7 @@ demo_frame_run
 ;;
 ;; During init, we
 ;; - setup the current palette as it may change over time
+;; - setup the scroller curve
 ;; TODO handle the animate part of the screen
 demo_frame_init
     ;ld hl, palette_sprites_monochrome_only
@@ -123,6 +128,16 @@ demo_frame_init
     ld hl,  palette_all_visible
     ;ld hl, palette_background_only
     call ga_set_palette
+
+
+    ; handle the scroller sine
+    ld hl, SCROLLER_CURVE_DATA : .curve_ptr equ $-2
+    inc l
+    ld (.curve_ptr), hl
+    ld a, (hl)
+    ld (demo_frame_run.wait_lines-1), a
+
+
 
     ret
 

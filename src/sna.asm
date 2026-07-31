@@ -34,6 +34,7 @@
 
 
 ENABLE_COMPLETE_SCREEN_COPY equ true
+SHIFT_SCREEN_FOR_DEBUG equ false
 
     
     SNASET CRTC_SEL, 0

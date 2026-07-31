@@ -987,6 +987,9 @@ SCROLLER_RASTERS_DATA
 
 
 
+	align 256
+SCROLLER_CURVE_DATA db SCROLLER_SINE
+
 
 ; Generate the buffers
 ; Buffers start empty.
