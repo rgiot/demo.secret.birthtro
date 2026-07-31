@@ -11,3 +11,19 @@ bc26_hl
     ld bc, 0xc000 + 96
     add hl, bc
     ret
+
+; wait the BEGINNING of vsync
+; modified: A, B
+secure_vsync
+	ld b, 0xf5
+.loop
+	in a, (c)
+	rra
+	jr c, .loop
+vsync
+	ld b, 0xf5
+.loop
+	in a, (c)
+	rra
+	jr nc, .loop
+	ret

@@ -1,0 +1,13 @@
+indent_size = 4
+comment_column = 13
+mnemonic_case = "LowerCase"
+directive_case = "UpperCase"
+register_case = "LowerCase"
+one_instruction_per_line = false
+space_around_column = "Both"
+space_around_assignment = "Both"
+hexadecimal_case = "UpperCase"
+hexadecimal_encoding = "0x"
+octal_encoding = "0o"
+binary_encoding = "0b"
+label_definition_postfix_with_column = "NoColumn"

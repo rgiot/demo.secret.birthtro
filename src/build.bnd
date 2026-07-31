@@ -10,14 +10,10 @@
 
 - tgt: {{SNA}}
   dep:
-    - sna.asm 
-    - demo_code.asm
-    - palettes.asm
-    - constants.asm
-    - common.asm
+    - "*.asm"
     - {{ FACE_SCR }}
     - {{ FACE_PAL }}
-  cmd: 
+  cmd:
    - basm --snapshot sna.asm -o {{SNA}} -DFACE_SCR=\"{{FACE_SCR}}\" -D FACE_PAL=\"{{FACE_PAL}}\"
 
 

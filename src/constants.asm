@@ -27,8 +27,8 @@ MODE0_RIGHT_PIXEL_BIT3_POS equ 0
 
 ;;;;;;;; Scroller related constants ;;;;;;;
 SCROLLER_NB_VERTICAL_BLOCS equ 8
-;; The number of times a routine is dulicated
-SCROLLER_BLOC_HEIGHT equ 8
+;; The number of times a routine is duplicated. The original scroll is not too tall
+SCROLLER_BLOC_HEIGHT equ 6
 
 
 
@@ -55,4 +55,3 @@ SPECTRAL_CURVE_STEPX equ 3
 
 SPECTRAL_START_LINE equ SCREEN_HEIGHT_CHARS*8/2 - SPECTRAL_BLOC_HEIGHT*SPECTRAL_SPRITE_HEIGHT/2 + 1
 SPECTRAL_START_COLUMN equ 4
-

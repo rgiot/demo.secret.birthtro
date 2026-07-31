@@ -1,0 +1,2 @@
+- tgt: ipmcult
+  cmd: emu --snapshot ./data/div-ipm.sna --crtc 1 run

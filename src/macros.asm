@@ -1,4 +1,10 @@
-;; Common macros that could be used for any part
+;;
+; Change the border color
+macro DEBUG col
+    ld bc, 0x7f10 : out (c), c
+    ld a, {col} : out (c), a
+endm
+
 
 ;;
 ; Exchange 2 16bits values in memory

@@ -1,0 +1,42 @@
+# cpclib-lsp configuration file.
+# Every field's default reproduces the LSP's exact out-of-the-box behavior -
+# delete any section/field you don't want to override.
+
+[asm]
+# Case-sensitive symbol matching for goto-definition/references, and for
+# real dry-run assembling (matches basm's own real default).
+case_sensitive = true
+# Escalate every warning in an assembly document to an error.
+warnings_as_errors = false
+
+[asm.warnings]
+# ADD/ADC/SBC/CP/SUB/AND/OR/XOR with an explicit "A," prefix that isn't
+# required (e.g. "cp a, c" instead of "cp c").
+redundant_accumulator_prefix = true
+# A basm shorthand assembled from several real opcodes (e.g. "add de, bc").
+fake_instructions = false
+# A byte/word write that overlaps a previously-written address.
+override_memory = true
+# A value that doesn't fit the 8/16-bit slot it's being written into.
+overflow = true
+# A declared-but-never-referenced MACRO/FUNCTION parameter or REPEAT/
+# ITERATE/FOR loop counter (LSP-only diagnostic, no basm CLI equivalent).
+unused_bindings = true
+
+[basic]
+warnings_as_errors = false
+
+[basic.warnings]
+# A GOTO/GOSUB/etc. target line that doesn't exist in the program.
+undefined_line = true
+# A CatArt-only warning: CURSOR/SYMBOL are valid BASIC but no-ops in CatArt.
+catart_no_op = true
+
+[bndbuild]
+warnings_as_errors = false
+
+[bndbuild.warnings]
+# The build file has neither a "targets:" nor a "tasks:" section.
+missing_build_structure = true
+# A dependency that's neither an existing file nor a target this file builds.
+missing_dependency = true
