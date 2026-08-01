@@ -123,7 +123,7 @@ replace_background_sprite_{sprite_nb}_{step_nb}
         ld hl, current_sprite_location
 
         ; XXX There is a bug in basm when using @lru instead of current_lru => the lru is wrongly altered
-        current_lru = lru_new(3)  ; LRU for A, D, E registers
+        current_lru = lru_new(4)  ; LRU for B, C, D, E registers
 
         repeat SPRITE{sprite_nb}_HEIGHT, y, 0
             push hl
@@ -152,12 +152,15 @@ replace_background_sprite_{sprite_nb}_{step_nb}
                             ; update the corresponding register
                             switch @slot
                                 case 0
-                                    ld a, @current_value
+                                    ld b, @current_value
                                     break
                                 case 1
-                                    ld d, @current_value
+                                    ld c, @current_value
                                     break
                                 case 2
+                                    ld d, @current_value
+                                    break
+                                case 3
                                     ld e, @current_value
                                     break
                                 default
@@ -211,22 +214,43 @@ replace_background_sprite_{sprite_nb}_{step_nb}
     endm
 
 
+    ;; bc26 but in assembler
+    function compute_next_line, current_sprite_location
+
+        h = high({current_sprite_location})
+        l = low({current_sprite_location})
+
+        h = h + 8
+        if h > 0xff
+            h = h - 0x100
+			l = l + 96
+			if l > 0xff
+				l = l - 0x100
+				h = h + 1
+			endif
+			h = h + 0xC0
+        endif
+
+        return 256*h + l 
+    endfunction
+
+
     ;; To speed up spirtes drwing, we want dedicated macros
     macro GENERATE_SPRITE_DISPLAY_CODE_DELTA sprite_nb, src, dst
 ; Replace the bytes to go from sprite {src} to sprite {dst} for sprite number {sprite_nb}
 replace_background_sprite_{sprite_nb}_{src}_{dst}
-	BREAKPOINT
         current_sprite_location = SPRITE{sprite_nb}_LOCATION 
-        ld hl, current_sprite_location
 
         ; XXX There is a bug in basm when using @lru instead of current_lru => the lru is wrongly altered
-        current_lru = lru_new(3)  ; LRU for A, D, E registers
+        current_lru = lru_new(3)  ; LRU for C, D, E registers
 		current_cursor_x = 0
 		current_cursor_y = 0
 		current_cursor_location = current_sprite_location
+		current_sprite_location_in_registers = false
 
         repeat SPRITE{sprite_nb}_HEIGHT, y, 0
-            push hl
+           ; push hl
+		   previous_sprite_location = current_sprite_location
                 repeat SPRITE{sprite_nb}_WIDTH, x, 0
 
                     @current_value_src = list_get(SPRITE{sprite_nb}_STEP{src}_CONTENT, {y} * SPRITE{sprite_nb}_WIDTH + {x}) 
@@ -235,18 +259,25 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 
 					if @to_be_displayed
 
-						; move at the right place
-						assert current_cursor_y == {y}, "current_cursor_y is not equal to y"
-						assert current_cursor_x <= {x}, "current_cursor_x is not less than or equal to x"
-						while current_cursor_x < {x}
-							if low(current_cursor_location) != 255
-								inc l
-							else
-								inc hl
-							endif
-							current_cursor_location = current_cursor_location + 1
-							current_cursor_x = current_cursor_x + 1
-						endwhile
+						if current_sprite_location_in_registers
+							; move at the right place
+							assert current_cursor_y == {y}, "current_cursor_y is not equal to y"
+							assert current_cursor_x <= {x}, "current_cursor_x is not less than or equal to x"
+							while current_cursor_x < {x}
+								if low(current_cursor_location) != 255
+									inc l
+								else
+									inc hl
+								endif
+								current_cursor_location = current_cursor_location + 1
+								current_cursor_x = current_cursor_x + 1
+							endwhile
+						else
+							ld hl, current_sprite_location
+							current_cursor_location = current_sprite_location
+							current_cursor_x = {x}
+							current_sprite_location_in_registers = true
+						endif
 
 
 						@current_value = @current_value_dst
@@ -272,7 +303,7 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 								; update the corresponding register
 								switch @slot
 									case 0
-										ld a, @current_value
+										ld c, @current_value
 										break
 									case 1
 										ld d, @current_value
@@ -292,7 +323,7 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 							; write in memory the proper value from the LRU cache
 							switch @slot
 								case 0
-									ld (hl), a
+									ld (hl), c
 									break   
 								case 1
 									ld (hl), d
@@ -319,14 +350,22 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
                     current_sprite_location = current_sprite_location + 1
                 endrepeat
 
-            pop hl
+            ;pop hl
+
+            ;call bc26_hl
+            current_sprite_location = previous_sprite_location ; go back to the beginning of the line
+            current_sprite_location = compute_next_line(current_sprite_location) ; compute the next line
+
+			print {hex}current_sprite_location
+			assert current_sprite_location >= 0xc000
+
+			current_sprite_location_in_registers = false
+
+
+			current_cursor_location = current_sprite_location
 			current_cursor_y = current_cursor_y + 1
 			current_cursor_x = 0
-            call bc26_hl
-            current_sprite_location = current_sprite_location - SPRITE{sprite_nb}_WIDTH
-            current_sprite_location = compute_next_line(current_sprite_location)
-			current_cursor_location = current_sprite_location
-            current_lru = lru_remove_slot(current_lru, 0) ; a has been used in bc26
+            ;current_lru = lru_remove_slot(current_lru, 0) ; a has been used in bc26
         endrepeat
         ret
 
@@ -392,7 +431,7 @@ SPRITE0_STEP{{frame}}_CONTENT equ load(LEFT_EYE{{frame}}_SPR)
 
 
 
-NB_REPEATED_FRAMES_IN_ANIMATION equ 4
+NB_REPEATED_FRAMES_IN_ANIMATION equ 10
 animation_do_nothing ret
 macro ANIMATION_STEP routine
 	dw {routine}

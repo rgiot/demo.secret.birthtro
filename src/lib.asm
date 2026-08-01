@@ -50,21 +50,8 @@ vsync
         address = {base} + char_y*{width} + pixel_y*0x800 + {char_x}
         return address
     endfunction
-    
-    ;; bc26 but in assembler
-    function compute_next_line, current_sprite_location
 
-        h = high({current_sprite_location})
-        l = low({current_sprite_location})
 
-        h = h + 8
-        if h > 0xff
-            h = h - 0x100
-            l = l + 96
-        endif
-
-        return 256*h + l 
-    endfunction
 
 	align 256
 ;;
