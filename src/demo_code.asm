@@ -156,6 +156,12 @@ demo_frame_run
     di : call PLY_AKG_Play : ei
     DEBUG(GA_GREEN)
    call writter_draw_page_step
+   DEBUG(GA_BRIGHT_CYAN)
+   ld a, 0 : .animated_background_activated equ $-1
+   or a
+   jr z, .no_animated_background
+   CALL_IN_BANK(replace_background_sprite_0, 0xc5)
+.no_animated_background
     DEBUG(GA_BLACK)
 
 	ei
@@ -173,8 +179,8 @@ demo_frame_init
     ;ld hl, palette_sprites_monochrome_only
     ;ld hl, palette_sprites_monochrome_and_background
     ;ld hl, palette_sprites_spectral_and_background
-    ld hl,  palette_all_visible
-    ;ld hl, palette_background_only
+    ;ld hl,  palette_all_visible
+    ld hl, palette_background_only
     ;ld hl, palette_writter_only
     call ga_set_palette
 

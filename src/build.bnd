@@ -1,8 +1,23 @@
 
 {% set SNA="birthtro.sna" %}
 
-{% set FACE_SCR="../data/face2_cpc.scr" %}
-{% set FACE_PAL="../data/face2_cpc.pal" %}
+
+# Variables to be set by the user. They control the image used as well as its dimensions
+# Wrong values imply wrong results, so be careful when changing them
+{% set FACE="face3" %} # Change here the prefix of the background if needed to change the picture
+
+# of course, each sprite share the same parameter...
+{%set SPRITE0_WIDTH=48//2 %} # Number of bytes  in the width of the sprite (we obtain the number of pixels by multiplying it by 4)
+{%set SPRITE0_HEIGHT=44 %} # Number of lines of the sprite
+{%set SPRITE0_X_OFFSET=10 %} # horizontal position in byte (so *2 to get the number of pixels) from left of the screen
+{%set SPRITE0_Y_OFFSET=50 %} # vertical position in pixel from top of the screen
+
+# Automatially created variables
+{% set FACE_SCR="../data/" ~ FACE ~ "_cpc.scr" %}
+{% set FACE_PAL="../data/" ~ FACE ~ "_cpc.pal" %}
+{% set LEFT_EYE0_SPR="../data/" ~ FACE ~ "_eye0.spr" %}
+{% set LEFT_EYE1_SPR="../data/" ~ FACE ~ "_eye1.spr" %}
+{% set LEFT_EYE2_SPR="../data/" ~ FACE ~ "_eye2.spr" %}
 {% set MUSIC_DATA="../data/music/ops.asm" %}
 {% set MUSIC_CFG="../data/music/ops_playerconfig.asm" %}
 
@@ -15,13 +30,27 @@
     - "*.asm"
     - {{ FACE_SCR }}
     - {{ FACE_PAL }}
+    - {{ LEFT_EYE0_SPR }} {{ LEFT_EYE1_SPR }} {{ LEFT_EYE2_SPR }}
     - {{ MUSIC_DATA }}
     - {{ MUSIC_CFG }}
-  cmd:
-   - basm --snapshot sna.asm -o {{SNA}} -DFACE_SCR=\"{{FACE_SCR}}\" -D FACE_PAL=\"{{FACE_PAL}}\" -DMUSIC_DATA=\"{{MUSIC_DATA}}\" -DMUSIC_CFG=\"{{MUSIC_CFG}}\"
+  cmd: |
+    basm --snapshot sna.asm -o {{SNA}} 
+        -DFACE_SCR=\"{{FACE_SCR}}\" -DFACE_PAL=\"{{FACE_PAL}}\"
+        -DLEFT_EYE0_SPR=\"{{LEFT_EYE0_SPR}}\" -DLEFT_EYE1_SPR=\"{{LEFT_EYE1_SPR}}\" -DLEFT_EYE2_SPR=\"{{LEFT_EYE2_SPR}}\"
+        -DSPRITE0_WIDTH={{SPRITE0_WIDTH}} -DSPRITE0_HEIGHT={{SPRITE0_HEIGHT}}
+        -DSPRITE0_X_OFFSET={{SPRITE0_X_OFFSET}} -DSPRITE0_Y_OFFSET={{SPRITE0_Y_OFFSET}}
+        -DMUSIC_DATA=\"{{MUSIC_DATA}}\" -DMUSIC_CFG=\"{{MUSIC_CFG}}\"
 
 
 - tgt: clean
   phony: true
   cmd:
     - rm {{SNA}}
+    - bndbuild -f ../data clean
+
+
+- tgt: {{ FACE_SCR }} {{EYE0_SPR}} {{EYE1_SPR}} {{EYE2_SPR}}
+  phony: true
+  cmd: 
+   - bndbuild -f ../data {{FACE ~ "_cpc.pal"}}
+   - bndbuild -f ../data {{FACE ~ "_eye0.spr"}}

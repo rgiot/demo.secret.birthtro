@@ -60,10 +60,20 @@ writter_draw_page_step
     ret                                  ; nothing to do (done, or not started)
 
 .wait_step
+    ; background animation is activated when we can wait
+    ld a, 1 : ld (demo_frame_run.animated_background_activated), a
+
+
     ld a, 0 : writter_wait_left equ $-1
     dec a
     ld (writter_wait_left), a
     ret nz                                  ; still waiting, nothing else to do this call
+
+
+    ; deactivate background stuff
+    xor a : ld (demo_frame_run.animated_background_activated), a
+
+
 
     ; the wait is over: fetch the next page from WRITTER_PAGES, wrapping back
     ; to its start once the 0 terminator is reached

@@ -35,7 +35,7 @@
 
 ENABLE_COMPLETE_SCREEN_COPY equ true
 SHIFT_SCREEN_FOR_DEBUG equ true
-
+HIDE_SCROLLER equ true
     
     SNASET CRTC_SEL, 0
     run demo_start
@@ -43,16 +43,25 @@ SHIFT_SCREEN_FOR_DEBUG equ true
 
     include "inner://ga.asm"
 
+    BANKSET 0
 range 0x0000, 0x00ff, stack_and_rst
-range 0x0100, 0x7fff, demo_code
+range 0x0100, 0x7fff, demo_code_main
 range 0x8000, 0xbfff, screen_buffer
 range 0xc000, 0xffff, screen_main
 
+    BANKSET 1
+range 0x4000, 0x7fff, demo_code_c5
 
-section demo_code
+    BANKSET 0
+section demo_code_main
     include "demo_code.asm"
-
 section screen_buffer
     incbin  FACE_SCR
+
+
+    BANKSET 1
+section demo_code_c5
+    include "animate.asm"
+
 
 

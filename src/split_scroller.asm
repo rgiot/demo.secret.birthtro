@@ -17,7 +17,11 @@ scroller_show
 
 	;split border
 	ld bc, 0xbc00+8 : out (c), c ; CRTC 0
-	ld de, 0x0000 + %110000     ; CRTC0
+	if !HIDE_SCROLLER
+		ld de, 0x0000 + %110000     ; CRTC0 working scroller
+	else
+		ld de, 0x0000      ; CRTC0 hidden scroller
+	endif
 	;ld bc, 0xbc00+6 : out (c), c ; CRTC 1
 	;ld de, 0x0000 + 38 ; CRTC 0 (screen height)
 	inc b

@@ -110,3 +110,22 @@ WRITTER_TRANSITION_NB_PARALLEL equ 4
 WRITTER_TRANSITION_NB_CALLS equ WRITTER_TRANSITION_NB_STEPS / WRITTER_TRANSITION_NB_PARALLEL
     assert WRITTER_TRANSITION_NB_CALLS * WRITTER_TRANSITION_NB_PARALLEL == WRITTER_TRANSITION_NB_STEPS
     assert WRITTER_TRANSITION_NB_CALLS <= 255
+
+
+
+;;;;;;;;;;;; Animation ;;;;;;;;;;;;;;;;;;;;;;;
+
+; Sprite 0 is left eye
+; information for the very first test
+;SPRITE0_LOCATION equ 0xc000 + 96*2 + 0x800*5 + 12
+;SPRITE0_WIDTH equ 13 ; XXX Need to update this if we change the sprite size
+;SPRITE0_HEIGHT equ 46
+
+
+
+; information for current voxy's test
+; SPRITE0_WIDTH and SPRITE0_HEIGHT are provided by the assembler
+
+SPRITE0_LOCATION equ 0xc000 + 96*(SPRITE0_Y_OFFSET>>3) + 0x800*(SPRITE0_Y_OFFSET%8) + SPRITE0_X_OFFSET
+
+SPRITE0_NB_FRAMES equ 3
