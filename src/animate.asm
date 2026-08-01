@@ -235,6 +235,8 @@ replace_background_sprite_{sprite_nb}_{step_nb}
     endfunction
 
 
+add_to_change equ duration(ld a, 0) + duration(add l) + duration(ld l, a)
+
     ;; To speed up spirtes drwing, we want dedicated macros
     macro GENERATE_SPRITE_DISPLAY_CODE_DELTA sprite_nb, src, dst
 ; Replace the bytes to go from sprite {src} to sprite {dst} for sprite number {sprite_nb}
@@ -247,6 +249,8 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 		current_cursor_y = 0
 		current_cursor_location = current_sprite_location
 		current_sprite_location_in_registers = false
+
+
 
         repeat SPRITE{sprite_nb}_HEIGHT, y, 0
            ; push hl
@@ -263,15 +267,27 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 							; move at the right place
 							assert current_cursor_y == {y}, "current_cursor_y is not equal to y"
 							assert current_cursor_x <= {x}, "current_cursor_x is not less than or equal to x"
-							while current_cursor_x < {x}
-								if low(current_cursor_location) != 255
-									inc l
-								else
-									inc hl
-								endif
-								current_cursor_location = current_cursor_location + 1
-								current_cursor_x = current_cursor_x + 1
-							endwhile
+							
+
+							delta_x = {x} - current_cursor_x
+							if delta_x > add_to_change && (low(current_cursor_location)+delta_x <= 255)
+								ld a, delta_x
+								add l
+								ld l, a
+								current_cursor_location = current_sprite_location
+								current_cursor_x = {x}
+							else
+								
+								while current_cursor_x < {x}
+									if low(current_cursor_location) != 255
+										inc l
+									else
+										inc hl
+									endif
+									current_cursor_location = current_cursor_location + 1
+									current_cursor_x = current_cursor_x + 1
+								endwhile
+							endif
 						else
 							ld hl, current_sprite_location
 							current_cursor_location = current_sprite_location
