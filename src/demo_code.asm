@@ -93,7 +93,8 @@ demo_init_screen
 
 ; Prepare the player to play the music
 demo_init_music
-    print "TODO - write music init"
+    ld hl, MUSIC : xor a
+    call PLY_AKG_Init
     ret
 
 
@@ -151,7 +152,9 @@ demo_frame_run
  ;   call spectral_sprite_move_along_curve ; x2 movement speed
 
     DEBUG(GA_RED)
-    BREAKPOINT
+
+    di : call PLY_AKG_Play : ei
+    DEBUG(GA_GREEN)
    call writter_draw_page_step
     DEBUG(GA_BLACK)
 
@@ -191,6 +194,12 @@ demo_frame_init
     include "constants.asm"
     include "lib.asm"
     include "palettes.asm"
+
+    ; music
+    include MUSIC_CFG
+MUSIC
+    include MUSIC_DATA
+    include "PlayerAkg.asm"
 
     ; effects code and data
     include "spectral_sprites.asm"

@@ -3,6 +3,8 @@
 
 {% set FACE_SCR="../data/face2_cpc.scr" %}
 {% set FACE_PAL="../data/face2_cpc.pal" %}
+{% set MUSIC_DATA="../data/music/ops.asm" %}
+{% set MUSIC_CFG="../data/music/ops_playerconfig.asm" %}
 
 - tgt: test
   dep: {{ SNA }}
@@ -13,8 +15,10 @@
     - "*.asm"
     - {{ FACE_SCR }}
     - {{ FACE_PAL }}
+    - {{ MUSIC_DATA }}
+    - {{ MUSIC_CFG }}
   cmd:
-   - basm --snapshot sna.asm -o {{SNA}} -DFACE_SCR=\"{{FACE_SCR}}\" -D FACE_PAL=\"{{FACE_PAL}}\"
+   - basm --snapshot sna.asm -o {{SNA}} -DFACE_SCR=\"{{FACE_SCR}}\" -D FACE_PAL=\"{{FACE_PAL}}\" -DMUSIC_DATA=\"{{MUSIC_DATA}}\" -DMUSIC_CFG=\"{{MUSIC_CFG}}\"
 
 
 - tgt: clean
