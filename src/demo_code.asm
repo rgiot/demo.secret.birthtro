@@ -160,6 +160,16 @@ demo_frame_run
    ld a, 0 : .animated_background_activated equ $-1
    or a
    jr z, .no_animated_background
+
+   BREAKPOINT
+
+    ld a, 1 : .reset_animation equ $-1
+    or a
+    jr z, .no_reset_animation
+    xor a : ld (.reset_animation), a
+    CALL_IN_BANK(reset_background_sprite_0, 0xc5)
+.no_reset_animation
+
    CALL_IN_BANK(replace_background_sprite_0, 0xc5)
 .no_animated_background
     DEBUG(GA_BLACK)

@@ -60,8 +60,7 @@ writter_draw_page_step
     ret                                  ; nothing to do (done, or not started)
 
 .wait_step
-    ; background animation is activated when we can wait
-    ld a, 1 : ld (demo_frame_run.animated_background_activated), a
+
 
 
     ld a, 0 : writter_wait_left equ $-1
@@ -175,12 +174,16 @@ writter_draw_page_step
 
     ; once the last copy stage has consumed its last call, the transition is
     ; over: keep the page on screen for a while before the next one
+.install_wait_state
     ld a, (copy_blocks_step2.count)
     or a : ret nz
     ld a, WRITTER_PAGE_WAIT_FRAMES
     ld (writter_wait_left), a
     ld a, WRITTER_STATE_WAIT
     ld (writter_state), a
+    ; background animation is activated when we can wait
+    ld a, 1 : ld (demo_frame_run.animated_background_activated), a
+    ld a, 1 : ld (demo_frame_run.reset_animation), a
     ret
 
 

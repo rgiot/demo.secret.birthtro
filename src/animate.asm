@@ -440,15 +440,17 @@ macro ANIMATION_STEP routine
 	endrepeat
 endm
 
+reset_background_sprite_0
+	ld hl, replace_background_sprite_0.table
+	ld (replace_background_sprite_0.ptr), hl
+	ret
 
 replace_background_sprite_0
 	; Get the appropriate routine
 	ld hl, .table : .ptr equ $-2
 	ld e, (hl) : inc hl : ld d, (hl)
 	ld a, e : or d
-	jr nz, .not_end
-	ld hl, .table
-	ld e, (hl) : inc hl : ld d, (hl)
+	ret z ; animation is played just one  time
 .not_end
 	inc hl
 	ld (.ptr), hl
