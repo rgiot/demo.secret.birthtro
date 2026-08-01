@@ -55,7 +55,7 @@ ga_set_palette
     repeat 16, i
         ld c, (hl)
         out (c), a : out (c), c
-        if {i} != 15 : inc hl : inc a : endif
+        if {i} != 16 : inc hl : inc a : endif
     endrepeat
     ret
 
@@ -64,9 +64,9 @@ ga_set_palette
         PRINT "DEBUG palette:  {palname}"
         repeat 16, i, 0
             ink = peek({palname}+{i})
-            PRINT " ", {hex}ink
+            PRINT "DEBUG ", {hex}ink
         endrepeat
-    endm
+    endm 
 
 palette_background_only db GENERATE_PALETTE(BACKGROUND_IMG_PALETTE, true, SPECTRAL_SPRITES_PALETTE, false, WRITTER_PALETTE, false)
 palette_all_visible db GENERATE_PALETTE(BACKGROUND_IMG_PALETTE, true, SPECTRAL_SPRITES_PALETTE, true, WRITTER_PALETTE, true)
@@ -74,10 +74,11 @@ palette_all_hidden db GENERATE_PALETTE(BLACK_PALETTE4, true, SPECTRAL_SPRITES_PA
 palette_sprites_monochrome_only db GENERATE_PALETTE(BACKGROUND_IMG_PALETTE, false, SPECTRAL_SPRITES_MONOCHROME_PALETTE, true, WRITTER_PALETTE, false)
 palette_sprites_monochrome_and_background db GENERATE_PALETTE(BACKGROUND_IMG_PALETTE, true, SPECTRAL_SPRITES_MONOCHROME_PALETTE, true, WRITTER_PALETTE, false)
 palette_sprites_spectral_and_background db GENERATE_PALETTE(BACKGROUND_IMG_PALETTE, true, SPECTRAL_SPRITES_PALETTE, true, WRITTER_PALETTE, false)
-
+palette_writter_only db GENERATE_PALETTE(BACKGROUND_IMG_PALETTE, false, SPECTRAL_SPRITES_PALETTE, false, WRITTER_PALETTE, true)
 
 DEBUG_PALETTE(palette_background_only)
 DEBUG_PALETTE(palette_all_visible)
 DEBUG_PALETTE(palette_all_hidden)
 DEBUG_PALETTE(palette_sprites_monochrome_only)
 DEBUG_PALETTE(palette_sprites_monochrome_and_background)
+DEBUG_PALETTE(palette_writter_only)

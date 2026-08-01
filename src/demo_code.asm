@@ -30,7 +30,26 @@ demo_init
     endif
 
     call show_static_sprite             ; init the spectral sprites
+
     call scroller_generate_initial_code ; init the split scroller
+
+    if true ; does not work at all
+    di
+    NB_REPEAT equ 30*4+24
+    assert NB_REPEAT%8 == 0
+    ld b, NB_REPEAT
+.consume_scroller_data
+    push bc
+        call scroller_handle_char_update
+        call scroller_handle_scrolling
+    pop bc
+    djnz .consume_scroller_data
+    ei
+    endif
+
+    di
+    ld hl, WRITTER_PAGE0 : call writter_draw_page_start ; Init the writter
+    ei
     ret
 
     if ENABLE_COMPLETE_SCREEN_COPY
@@ -83,7 +102,6 @@ demo_run
     call demo_frame_init
     call demo_frame_run
 
-
     jp demo_run
 
 
@@ -114,8 +132,16 @@ demo_frame_run
     djnz .wait_lines
 
     defs 64 - 6
-    
+
 	call scroller_show
+    ; TODO use the time when the scroll is up to make move big sprites
+
+ ;   call spectral_sprite_move_along_curve ; x2 movement speed
+
+    DEBUG(GA_RED)
+    BREAKPOINT
+   call writter_draw_page_step
+    DEBUG(GA_BLACK)
 
 	ei
 
@@ -134,6 +160,7 @@ demo_frame_init
     ;ld hl, palette_sprites_spectral_and_background
     ld hl,  palette_all_visible
     ;ld hl, palette_background_only
+    ;ld hl, palette_writter_only
     call ga_set_palette
 
 
@@ -156,3 +183,4 @@ demo_frame_init
     ; effects code and data
     include "spectral_sprites.asm"
     include "split_scroller.asm"
+    include "writter.asm"

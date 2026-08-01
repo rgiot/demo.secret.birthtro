@@ -44,8 +44,8 @@ SHIFT_SCREEN_FOR_DEBUG equ false
     include "inner://ga.asm"
 
 range 0x0000, 0x00ff, stack_and_rst
-range 0x0100, 0x3fff, demo_code
-range 0x4000, 0x7fff, music
+range 0x0100, 0x5fff, demo_code
+range 0x6000, 0x7fff, music
 range 0x8000, 0xbfff, screen_buffer
 range 0xc000, 0xffff, screen_main
 

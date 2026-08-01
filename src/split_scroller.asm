@@ -36,7 +36,6 @@ scroller_show
 	ld sp, (scroller_configuration_table.current_executing_table) ; get the table for the fram
 	                                                              ; it contains the list of routines to call
 																																																															;
-	BREAKPOINT
 	ret ; => execute the first line of scroller
 .continue ; while the very last one ends here
 	out (c), d ; ensure the split is deactivated
@@ -1002,3 +1001,5 @@ SCROLLER_RING_BUFFER_{{line}}
 	defs 200
 .test_write
 	endr
+
+	align 256 ; t bo sure ther eis nothing in the buffer here
