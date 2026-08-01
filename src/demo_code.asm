@@ -133,8 +133,20 @@ demo_frame_run
 
     defs 64 - 6
 
-	call scroller_show
+	call scroller_show 
+
     ; TODO use the time when the scroll is up to make move big sprites
+
+    ; compensate to avoid bad surprises
+    ld a, (.wait_lines-1)
+    add 0-max(SCROLLER_SINE)-1
+    neg
+    ld b, a
+.wait_lines2
+    defs 64 - duration(djnz $)-1
+    djnz .wait_lines2
+
+    defs 64 - 6
 
  ;   call spectral_sprite_move_along_curve ; x2 movement speed
 
