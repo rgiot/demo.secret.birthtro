@@ -251,6 +251,7 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 		current_sprite_location_in_registers = false
 
 
+		ld b, SPECTRAL_SPRITE_DRAW_MASK_BOTH_POS | WRITTER_DRAW_MASK
 
         repeat SPRITE{sprite_nb}_HEIGHT, y, 0
            ; push hl
@@ -299,6 +300,9 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 						@current_value = @current_value_dst
 						print "current lru: ", current_lru, " current y: ", {y}, " current x: ", {x}, " current value: ", @current_value
 
+						; read screen and remove former background
+						ld a, (hl) : and b
+
 						; we do not cler LRU cache when value is too rarely used, to avoid thrashing the cache
 						@current_value_used_few_times = list_get(SPRITE{sprite_nb}_FROM{src}_TO{dst}_HISTOGRAM, @current_value) <=2
 						if @current_value_used_few_times
@@ -339,13 +343,13 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 							; write in memory the proper value from the LRU cache
 							switch @slot
 								case 0
-									ld (hl), c
+									or c
 									break   
 								case 1
-									ld (hl), d
+									or d
 									break
 								case 2
-									ld (hl), e
+									or e
 									break
 								default
 									fail "Invalid slot number"
@@ -354,6 +358,9 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 							; in any case we need to update the counters
 
 						endif
+
+						ld (hl), a
+
 					endif
 
    ;                 print "current_sprite_location=",current_sprite_location 

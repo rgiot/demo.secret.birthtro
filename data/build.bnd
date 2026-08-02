@@ -1,0 +1,21 @@
+
+
+# Duplicate and adapt in case of change of picture
+# Voxy stick to your configration, do not change extension and/or resolution each time otherwise it will not work as expected
+- tgt: face3_cpc.scr face3_cpc.pal
+  dep: Baby_Face_v3.bmp
+  cmd: 
+    - img2cpc --mode 0 --overscan  Baby_Face_v3.bmp scr  --output face3_cpc.scr --palette face3_cpc.pal
+
+- tgt: face3_eye0.spr face3_eye1.spr face3_eye2.spr
+  dep: face3_eye0.png face3_eye1.png face3_eye2.png face3_cpc.pal
+  cmd:
+    - img2cpc --mode 0 --ga-pal face3_cpc.pal face3_eye0.png sprite --output face3_eye0.spr
+    - img2cpc --mode 0 --ga-pal face3_cpc.pal face3_eye1.png sprite --output face3_eye1.spr
+    - img2cpc --mode 0 --ga-pal face3_cpc.pal face3_eye2.png sprite --output face3_eye2.spr
+
+- tgt: clean
+  phony: true
+  cmd:
+    - -rm face3_cpc.scr face3_cpc.pal 
+    - -rm face3_eye0.spr face3_eye1.spr face3_eye2.spr

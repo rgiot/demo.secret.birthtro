@@ -138,6 +138,8 @@ demo_frame_run
 
     ; TODO use the time when the scroll is up to make move big sprites
 
+
+    if false    
     ; compensate to avoid bad surprises
     ld a, (.wait_lines-1)
     add 0-max(SCROLLER_SINE)-1
@@ -147,7 +149,7 @@ demo_frame_run
     defs 64 - duration(djnz $)-1
     djnz .wait_lines2
 
-    defs 64 - 6
+    endif
 
  ;   call spectral_sprite_move_along_curve ; x2 movement speed
 
@@ -161,7 +163,6 @@ demo_frame_run
    or a
    jr z, .no_animated_background
 
-   BREAKPOINT
 
     ld a, 1 : .reset_animation equ $-1
     or a
@@ -189,8 +190,8 @@ demo_frame_init
     ;ld hl, palette_sprites_monochrome_only
     ;ld hl, palette_sprites_monochrome_and_background
     ;ld hl, palette_sprites_spectral_and_background
-    ;ld hl,  palette_all_visible
-    ld hl, palette_background_only
+    ld hl,  palette_all_visible
+    ;ld hl, palette_background_only
     ;ld hl, palette_writter_only
     call ga_set_palette
 

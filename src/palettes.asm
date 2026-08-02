@@ -3,7 +3,7 @@ include once "inner://ga.asm"
 BACKGROUND_IMG_PALETTE equ load(FACE_PAL) ; 4 inks in a list
 SPECTRAL_SPRITES_PALETTE equ [0x58, 0x45, 0x4d, 0x4f ]   ; 4 inks in a list 
 SPECTRAL_SPRITES_MONOCHROME_PALETTE equ [0x4f, 0x4f, 0x4f, 0x4f]   ; 4 inks in a list
-BLACK_PALETTE4 equ [GA_BLACK, GA_BLACK, GA_BLACK, GA_BLACK]
+BLACK_PALETTE4 equ [GA_BLACK, GA_BLACK, GA_BLACK, GA_BLACK] ; DO NOT MODIFY
 WRITTER_PALETTE equ 0x4A                                 ; 1 ink
 
 

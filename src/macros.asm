@@ -1,8 +1,10 @@
 ;;
 ; Change the border color
 macro DEBUG col
+	if SHOW_DEBUG
     ld bc, 0x7f10 : out (c), c
     ld a, {col} : out (c), a
+	endif
 endm
 
 

@@ -1007,3 +1007,10 @@ SCROLLER_RING_BUFFER_{{line}}
 	endr
 
 	align 256 ; t bo sure ther eis nothing in the buffer here
+
+
+if false
+	print "true"
+else
+	print "false"
+endif

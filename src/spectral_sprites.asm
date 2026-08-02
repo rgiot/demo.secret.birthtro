@@ -18,19 +18,7 @@ function double_columns column
 endfunction
 
 
-;; Texture in the background
-;; XXX this is here a graphician can work.
-;;     Note that blocs are not suare and duplicated.
-;;     if needed, remove the call to double_columns and manually duplicate the line to double the horizontal resolution
-;; use " " for an empty bloc
-;; use "#" for a drawn bloc
-spectral_sprites_model equ [
-    double_columns("####    ####    ####  "),
-    double_columns("##  ##  ##  #   ##  ##"),
-    double_columns("####    ##  ##  ##  ##"),
-    double_columns("##  ##  ##  ##  ##  ##"),
-    double_columns("####    ##  ##  ####  ")
-]
+    include "spectral_sprites_logo.asm"
 
 
     ;; The action to execute when updating the screen to make move the sprites

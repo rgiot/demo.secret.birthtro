@@ -1,32 +1,6 @@
 ;#!bndbuild
 ; {% include "build.bnd" %}
 
-
-
-
-;#!bndbuild
-; {% set SNA="birthtro.sna" %}
-; {% set FACE_SCR="../data/face2_cpc.scr" %}
-; {% set FACE_PAL="../data/face2_cpc.pal" %}
-; - tgt: test
-;   dep: {{ SNA }}
-;   cmd: -emu --snapshot {{SNA}} run
-; - tgt: {{SNA}}
-;   dep:
-;     - sna.asm 
-;     - demo_code.asm
-;     - palettes.asm
-;     - constants.asm
-;     - common.asm
-;     - {{ FACE_SCR }}
-;     - {{ FACE_PAL }}
-;   cmd: 
-;    - basm --snapshot sna.asm -o {{SNA}} -DFACE_SCR=\"{{FACE_SCR}}\" -D FACE_PAL=\"{{FACE_PAL}}\"
-; - tgt: clean
-;   phony: true
-;   cmd:
-;     - rm {{SNA}}
-
 ;;
 ;; July 2026
 ;; sna for the main part
@@ -34,9 +8,10 @@
 
 
 ENABLE_COMPLETE_SCREEN_COPY equ true
-SHIFT_SCREEN_FOR_DEBUG equ true
-HIDE_SCROLLER equ true
-    
+SHIFT_SCREEN_FOR_DEBUG equ false ;true
+HIDE_SCROLLER equ false
+SHOW_DEBUG equ false    
+
     SNASET CRTC_SEL, 0
     run demo_start
     
