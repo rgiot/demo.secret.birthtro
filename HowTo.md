@@ -2,7 +2,7 @@ The aim of this document is to help to modify the code and assets.
 
 # How to test the demo
 
-Use the `test` rule in the bndbuild file of `src` folder.
+Use the `test_sna` rule in the bndbuild file of `src` folder.
 It will rebuild the snapshot of the demo if needed and launch it from ace emulator.
 
 In a terminal, from `src` folder :
@@ -11,7 +11,18 @@ In a terminal, from `src` folder :
 $ bndbuild test
 ```
 
+
+
 In vscode with the appropriate extension installed, click on the "Run: test" button
+
+
+# How to really run the demo
+
+The former way is the quick and dirty way to test the demo.
+For a real world usage, we have to link the demo, create the dsk and launch if from the dsk.
+It way notwork as it impact the linking that as been hand coded for a specific state of the demo. It may have to be adapted depending on crunch sizeevolution
+
+this time the rule to test is `test_dsk`
 
 # How to change the music
 

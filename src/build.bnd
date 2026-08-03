@@ -53,10 +53,14 @@
   dep: {{SNA_GENERATED | join(" ")}} dsk.asm
   cmd: basm dsk.asm --override --snapshot -o link.sna
 
+- tgt: test_dsk
+  dep: {{DSK}}
+  cmd: -emu --drivea {{DSK}} --auto-run-file=BIRTHTRO run
+
 - tgt: clean
   phony: true
   cmd:
-    - -rm {{SNA}}
+    - -rm {{SNA}} {{DSK}} {{SNA_GENERATED | join(" ")}} link.sna
     - bndbuild -f ../data clean
 
 
