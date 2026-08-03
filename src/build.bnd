@@ -1,6 +1,7 @@
 
 {% set SNA="birthtro.sna" %}
-
+{% set DSK="BIRTHTRO.DSK" %}
+{% set EXE="BIRTHTRO.BIN" %}
 
 # Variables to be set by the user. They control the image used as well as its dimensions
 # Wrong values imply wrong results, so be careful when changing them
@@ -21,11 +22,13 @@
 {% set MUSIC_DATA="../data/music/ops.asm" %}
 {% set MUSIC_CFG="../data/music/ops_playerconfig.asm" %}
 
-- tgt: test
+{%set SNA_GENERATED=["C0.300", "C0.8000", "C5.4000"]%}
+
+- tgt: test_sna
   dep: {{ SNA }}
   cmd: -emu --snapshot {{SNA}} run
 
-- tgt: {{SNA}}
+- tgt: {{SNA}} {{SNA_GENERATED | join(" ")}}
   dep:
     - "*.asm"
     - {{ FACE_SCR }}
@@ -41,6 +44,14 @@
         -DSPRITE0_X_OFFSET={{SPRITE0_X_OFFSET}} -DSPRITE0_Y_OFFSET={{SPRITE0_Y_OFFSET}}
         -DMUSIC_DATA=\"{{MUSIC_DATA}}\" -DMUSIC_CFG=\"{{MUSIC_CFG}}\"
 
+
+- tgt: test_snalink
+  dep: link.sna
+  cmd: -emu --snapshot link.sna run
+
+- tgt: {{DSK}} link.sna
+  dep: {{SNA_GENERATED | join(" ")}} dsk.asm
+  cmd: basm dsk.asm --override --snapshot -o link.sna
 
 - tgt: clean
   phony: true

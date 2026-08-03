@@ -1,0 +1,39 @@
+
+	include "linker_common.asm" ; TODO include it inside basm as it is so useful
+	
+	
+	org 0x100
+	
+	
+	run $
+	di
+		ld hl, 0xc9fb
+		ld (0x38), hl
+		ld sp, $
+	ei
+
+	BREAKPOINT
+
+	ld bc, 0x7fc5 : out (c), c
+	SELECTED_CRUNCHER = CRUNCHER_ZX0 : UNCRUNCH(C5_4000, 0x4000)
+
+	ld bc, 0x7fc0 : out (c), c
+	SELECTED_CRUNCHER = CRUNCHER_ZX0 : UNCRUNCH(C0_8000, 0x8000)
+	SELECTED_CRUNCHER = CRUNCHER_ZX0_BACKWARD : UNCRUNCH(C0_300, 0x0300)
+
+	jp 0x300
+
+	SELECTED_CRUNCHER = CRUNCHER_ZX0 : INSTALL_UNCRUNCHER()
+	SELECTED_CRUNCHER = CRUNCHER_ZX0_BACKWARD : INSTALL_UNCRUNCHER()
+	
+	SELECTED_CRUNCHER = CRUNCHER_ZX0_BACKWARD : LOAD_N_CRUNCH(C0_300, "C0.300")
+	SELECTED_CRUNCHER = CRUNCHER_ZX0 : LOAD_N_CRUNCH(C5_4000, "C5.4000")
+	assert $<0x4000, "we will have bank issues there"
+	assert $<0x8000
+	SELECTED_CRUNCHER = CRUNCHER_ZX0 : LOAD_N_CRUNCH(C0_8000, "C0.8000")
+
+
+
+
+
+	SAVE 'BIRTHTRO', , , DSK, 'BIRTHTRO.DSK'

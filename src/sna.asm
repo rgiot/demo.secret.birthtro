@@ -20,7 +20,7 @@ SHOW_DEBUG equ false
 
     BANKSET 0
 range 0x0000, 0x00ff, stack_and_rst
-range 0x0100, 0x7fff, demo_code_main
+range 0x0300, 0x7fff, demo_code_main
 range 0x8000, 0xbfff, screen_buffer
 range 0xc000, 0xffff, screen_main
 
@@ -40,3 +40,14 @@ section demo_code_c5
 
 
 
+	; XXX It seems there is a bug n BASM that makes it save 16k instead of 
+	; the true amount of bytes generated
+	; in the meanwhile, we can manually specify size
+	macro SAVE_SECTION, name, fname
+		section {name}
+		save {fname}, section_start("{name}"), section_used("{name}")
+	endm
+
+	SAVE_SECTION(demo_code_main, "C0.300")
+	SAVE_SECTION(screen_buffer, "C0.8000")
+	SAVE_SECTION(demo_code_c5,"C5.4000")
