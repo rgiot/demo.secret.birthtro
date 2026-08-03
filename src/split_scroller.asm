@@ -762,149 +762,14 @@ letter_{SELECTED_FONT_LETTER}_nb_nops db CHAR_{SELECTED_FONT_LETTER}_LINE_{CURRE
 		FONT_CREATE_IPM_LINE({line8})
 
 		FONT_STOP_LETTER()
+
+		registered_scroller_char = string_concat(registered_scroller_char, "{char}")
 	endm
 
 	macro NOP_FONT_SAME_AS_IPM char
 letter_{char} equ letter_ipm{char}
 letter_{char}_line_0 equ letter_ipm{char}_line_0
 	endm
-
-
-SCROLLER_FONTS
-
-		; Space has a width that corresponds to the duration of a out
-		FONT_CREATE_CHAR( sp,
-			".........",
-			".........",
-			".........",
-			".........",
-			".........",
-			".........",
-			".........",
-			"........."
-		)
-letter_impsp equ letter_sp
-
-
-		FONT_CREATE_IPM_CHAR( a,
-			".#..",
-			"#.#.",
-			"#.#.",
-			"###.",
-			"#.#.",
-			"#.#.",
-			"#.#.",
-			"#.#."
-		)
-		; our nop resolution font
-		FONT_CREATE_CHAR( a,
-			"....####........",
-			".##########.....",
-			"####....####....",
-			"####....####....",
-			"############....",
-			"####....####....",
-			"####....####....",
-			"####....####...."
-		)
-
-
-		FONT_CREATE_IPM_CHAR( h,
-			"#.#.",
-			"#.#.",
-			"#.#.",
-			"###.",
-			"#.#.",
-			"#.#.",
-			"#.#.",
-			"#.#."
-		)
-		NOP_FONT_SAME_AS_IPM(h)
-
-
-		FONT_CREATE_IPM_CHAR( i,
-			"###.",
-			".#..",
-			".#..",
-			".#..",
-			".#..",
-			".#..",
-			".#..",
-			"###."
-		)
-		FONT_CREATE_CHAR( i,  /*Here we use only one out column instead of 3 in the origial font*/
-			"####.....",
-			"####.....",
-			"####.....",
-			"####.....",
-			"####.....",
-			"####.....",
-			"####.....",
-			"####....."
-		)
-
-
-		FONT_CREATE_IPM_CHAR( r,
-			"###.",
-			"#.#.",
-			"#.#.",
-			"##..",
-			"#.#.",
-			"#.#.",
-			"#.#.",
-			"#.#."
-		)
-
-		FONT_CREATE_CHAR( r,
-			"###########.....",
-			"####....####....",
-			"####....####....",
-			"#########.......",
-			"####....####....",
-			"####....####....",
-			"####....####....",
-			"####....####...."
-		)
-
-
-
-
-		; our nop resolution font
-		FONT_CREATE_CHAR( s,
-			".###########....",
-			"####............",
-			"####............",
-			".##########.....",
-			"........####....",
-			"........####....",
-			"........####....",
-			"###########....."
-		)
-
-		; ipm cult out resolution font
-		FONT_CREATE_IPM_CHAR( s,
-			"###.",
-			"#...",
-			"#...",
-			"###.",
-			"..#.",
-			"..#.",
-			"..#.",
-			"###."
-		)
-
-		FONT_CREATE_IPM_CHAR( t,
-			"###.",
-            ".#..",
-            ".#..",
-            ".#..",
-            ".#..",
-            ".#..",
-            ".#..",
-            ".#.."
-		)
-		NOP_FONT_SAME_AS_IPM(t)
-
 
 
 
@@ -927,6 +792,9 @@ complete_charset = " " ; very first char is space
 			complete_charset = string_concat(complete_charset, char(int(list_get({lowercase_chars}, {i}))+('A'-'a'))) ; add the upper case version of the char to the charset
 		endr
 
+
+
+
 		; really execute charset_directive
 		charset complete_charset, 0
 
@@ -939,52 +807,39 @@ FONT_CHAR_TABLE
 	endm
 
 
+registered_scroller_char = ""
+
+SCROLLER_FONTS
+
+		; Space has a width that corresponds to the duration of a out
+		FONT_CREATE_CHAR( sp,
+			".........",
+			".........",
+			".........",
+			".........",
+			".........",
+			".........",
+			".........",
+			"........."
+		)
+letter_impsp equ letter_sp
+
+
+		include "split_scroller_font.asm"
+
+
 ; Generate the data for the mapping beteen a char and its code
 FONT_MAPPING
-	FONT_MAPPING_GENERATE("ahirst")
+	FONT_MAPPING_GENERATE({eval}registered_scroller_char)
 
 
-; Scroller text data : lower case correspond to IPM font and upper case to the nop resolution font
-scroller_text
-	db "this is art "
-scroller_text2
-	db "THIS IS ART "
-
-	repeat 10
-		db "this is art "
-		db "THIS IS ART "
-	endr
-
-
-	db "tTtTtTtTtTtTtTtTtTtTt"
-	db "hHhHhHhHhHhHhHhHhHhHhH"
-	db "iIiIiIiIiIiIiIiIiIiIiI"
-	db "sSsSsSsSsSsSsSsSsSsSsS"
-	db " "
-	db "iIiIiIiIiIiIiIiIiIiIiI"
-	db "sSsSsSsSsSsSsSsSsSsSsS"
-	db " "
-	db "aAaAaAaAaAaAaAaAaAaAaA"
-	db "rRrRrRrRrRrRrRrRrRrRrR"
-	db "tTtTtTtTtTtTtTtTtTtTtT"
-	db "  "
-	db 255
-
+include "split_scroller_text.asm"
 
 
 	align 256
 SCROLLER_RASTERS_DATA
 .start
-	; TODO write the real values of interest for the scroller raster
-
-		db GA_COL_09
-		db GA_COL_10
-		db GA_COL_18
-		db GA_COL_20
-		db GA_COL_20
-		db GA_COL_18
-		db GA_COL_10
-		db GA_COL_09
+	db SCROLLER_PALETTE
 .stop
 	db GA_BLACK ; The very last one is black to hide everything
 

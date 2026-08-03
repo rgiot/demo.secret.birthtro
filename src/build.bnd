@@ -45,7 +45,7 @@
 - tgt: clean
   phony: true
   cmd:
-    - rm {{SNA}}
+    - -rm {{SNA}}
     - bndbuild -f ../data clean
 
 

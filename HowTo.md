@@ -30,7 +30,11 @@ and replace the paths by the new file names.
 
 # How to specify colors
 
-Most of the time colros have to be specified using their ga arary values. no need to remember well, you can use symbols instead
+
+**Note** At the moment the demo has only one colorscheme. Of course we could use several later and change them on the fly.
+So it is possible to provide several versions of palette.asm and let Krusty handle the marge later
+
+Most of the time colors have to be specified using their ga arary values. no need to remember well, you can use symbols instead
 
 With `BASIC_COLOR_0`, ..., `BASIC_COLOR_27`
 or the name of the left:
@@ -121,9 +125,9 @@ SPECTRAL_SPRITES_MONOCHROME_PALETTE equ [0x4f, 0x4f, 0x4f, 0x4f]
 # How to change the writter font
 
 The font has to be coded in the source file too: `src/writter_font.asm`.
-Each char can have a **different number of pixels** horizontally as soon as all lines of a given char share the same number of pixels and **8 lines**.
+Each char can have a **different number of pixels** horizontally as soon as all lines of a given char share the same number of pixels and **8 lines**. We can use **lowercase** and **uppercase** chars
 
-You can modify exisint chars, or create new char that are not yet encoded.
+You can modify existing chars, or create new char that are not yet encoded.
 To encode a char respect the syntax:
 
 ```
@@ -196,9 +200,89 @@ WRITTER_PAGES
     dw 0
 ```
 
-# How to change the font of the scroller
+# How to change the fonts of the scroller
+
+There are 2 fonts in the scroller
+
+- IPM cult like font that uses the out precision that needs to be the same for the few exisitng chars and created similarly for the other
+- birthro font that uses the nop precision instead of the out precision
+
+all modifications have to be coded in `src/split_scroller_font.asm` and ipm/birthro fonts are coded in a differnt way.
+
+an ipm char is coded like that
+```z80
+		FONT_CREATE_IPM_CHAR( s,
+			"###.",
+			"#...",
+			"#...",
+			"###.",
+			"..#.",
+			"..#.",
+			"..#.",
+			"###."
+		)
+```
+you provide the  letter (in lower case) and the height lines of 4 columns. Here each `#` represents a 4 nops  wide pixel.
+
+a birthro char is coded like that
+
+```z80
+		FONT_CREATE_CHAR( s,
+			".###########....",
+			"####............",
+			"####............",
+			".##########.....",
+			"........####....",
+			"........####....",
+			"........####....",
+			"###########....."
+		)
+```
+
+you provide the char (also in lowercase) and the height lines.
+There are various constraints, if you do not respect them, the assembler fails. I suggest to assemble regularly. Here each `#` represents a 1 nop  pixel.
+Here are the constraints to respect:
+
+- The first `#` of the line can start at any horizontal position
+- Each line must end by at least 4 spaces
+- you need at least 4 spaces before setting a `#` (expect at the very beginning of a line)
+- you need at least 4 `#` before setting a space
+
+
+If the birthro char is exactly the same than the ipm char, state it explicitly without drawing it a second time with another encoding
+
+```z80
+	NOP_FONT_SAME_AS_IPM(t)
+```
+
+
+There is another constraint too each char defined as ipm must be defined as birthro too (and vice versa).
+So the best is probably to write first the IPM version of each char, use NOP_FONT_SAME_AS_IPM to duplicate them for birthro and progressively remove the duplication with handwritten variant that use the nop resolution.
+
+
+
+The font as to be registered
 
 Palette has to be setup in `src/palettes.asm` here
 
 
+
+```z80
+SCROLLER_PALETTE equ [
+        GA_COL_09,
+		GA_COL_10,
+		GA_COL_18,
+		GA_COL_20,
+		GA_COL_20,
+		GA_COL_18,
+		GA_COL_10,
+		GA_COL_09
+]
+```
+
+There is a single color per block line. It is technically impossible to have one color per line as in IPM cult
+
 # How to change the content of the scroller
+
+The content is in `src/split_scroller_text.asm`.
+switch between lower/upper case to select ipm/birthro font
