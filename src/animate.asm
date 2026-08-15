@@ -119,6 +119,7 @@
     ;; To speed up spirtes drwing, we want dedicated macros
     macro GENERATE_SPRITE_DISPLAY_CODE sprite_nb, step_nb
 replace_background_sprite_{sprite_nb}_{step_nb}
+    jp $
         current_sprite_location = SPRITE{sprite_nb}_LOCATION 
         ld hl, current_sprite_location
 

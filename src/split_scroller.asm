@@ -10,7 +10,7 @@ scroller_show
 	; split raster configuration
 	; XXX could be done BEFORE the di if needed
 	ld bc, 0x7f10 : out (c), c
-	ld hl, SCROLLER_RASTERS_DATA
+	ld hl, SCROLLER_INITIAL_RASTERS_DATA : .selected_scroller_palette equ $-2
 	outi : inc b
 	exx
 	;ld de, 0x544b
@@ -837,9 +837,15 @@ include "split_scroller_text.asm"
 
 
 	align 256
-SCROLLER_RASTERS_DATA
+SCROLLER_MONOCHROME_RASTERS_DATA
 .start
-	db SCROLLER_PALETTE
+	db SCROLLER_MONOCHROME_PALETTE
+.stop
+	db GA_BLACK ; The very last one is black to hide everything
+
+SCROLLER_COLORED_RASTERS_DATA
+.start
+	db SCROLLER_COLORED_PALETTE
 .stop
 	db GA_BLACK ; The very last one is black to hide everything
 
@@ -863,9 +869,3 @@ SCROLLER_RING_BUFFER_{{line}}
 
 	align 256 ; t bo sure ther eis nothing in the buffer here
 
-
-if false
-	print "true"
-else
-	print "false"
-endif

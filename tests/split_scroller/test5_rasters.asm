@@ -98,7 +98,7 @@ scroller_show
 	; split raster configuration
 	; XXX could be done BEFORE the di if needed
 	ld bc, 0x7f10 : out (c), c
-	ld hl, SCROLLER_RASTERS_DATA
+	ld hl, SCROLLER_COLORED_RASTERS_DATA
 	outi : inc b
 	exx
 	;ld de, 0x544b
@@ -1071,7 +1071,7 @@ scroller_text2
 
 
 	align 256
-SCROLLER_RASTERS_DATA
+SCROLLER_COLORED_RASTERS_DATA
 .start
 	; TODO write the real values of interest for the scroller raster
 

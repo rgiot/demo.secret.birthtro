@@ -4,6 +4,10 @@ from functools import cmp_to_key
 import numpy as np
 import pprint
 
+
+SCREEN_WIDTH_IN_PIXELS = 96*2
+SCREEN_HEIGHT_IN_PIXELS = 21*8
+
 # screen dimension
 WRITTER_WIDTH_IN_PIXELS = 96*2
 WRITTER_HEIGHT_IN_PIXELS = 10*8
@@ -17,6 +21,8 @@ ATOMIC_UNIT_HEIGHT_IN_PIXELS = 8
 
 BUFFER_WIDTH_IN_BLOCS = WRITTER_WIDTH_IN_PIXELS // ATOMIC_UNIT_WIDTH_IN_PIXELS
 BUFFER_HEIGHT_IN_BLOCS = WRITTER_HEIGHT_IN_PIXELS // ATOMIC_UNIT_HEIGHT_IN_PIXELS
+
+BUFFER_FULL_HEIGHT_IN_BLOCS = SCREEN_HEIGHT_IN_PIXELS // ATOMIC_UNIT_HEIGHT_IN_PIXELS
 
 
 def perlin(j, size, dens=128, octaves=1,):
@@ -66,14 +72,21 @@ def build_table(buffer):
 print(f"WRITTER_TRANSITION_ATOMIC_UNIT_WIDTH_IN_PIXELS equ {ATOMIC_UNIT_WIDTH_IN_PIXELS}")
 print(f"WRITTER_TRANSITION_ATOMIC_UNIT_HEIGHT_IN_PIXELS equ {ATOMIC_UNIT_HEIGHT_IN_PIXELS}")
 
+# The very first table uses the whole screen
 for j in range(4):
-    p = perlin(j, (BUFFER_WIDTH_IN_BLOCS, BUFFER_HEIGHT_IN_BLOCS), dens=12, octaves=3)
+
+    if j == 0:
+        CURRENT_HEIGHT = BUFFER_FULL_HEIGHT_IN_BLOCS
+    else:
+        CURRENT_HEIGHT = BUFFER_HEIGHT_IN_BLOCS
+
+    p = perlin(j, (BUFFER_WIDTH_IN_BLOCS, CURRENT_HEIGHT), dens=12, octaves=3)
     o = build_table(p)
 
     assert len(o) == len(p.flatten())
-    assert len(o) == BUFFER_WIDTH_IN_BLOCS * BUFFER_HEIGHT_IN_BLOCS
+    assert len(o) == BUFFER_WIDTH_IN_BLOCS * CURRENT_HEIGHT
 
-    r = np.zeros((BUFFER_HEIGHT_IN_BLOCS, BUFFER_WIDTH_IN_BLOCS))
+    r = np.zeros((CURRENT_HEIGHT, BUFFER_WIDTH_IN_BLOCS))
     for i, (value, (x, y)) in enumerate(o):
         r[y][x] = i
 
@@ -86,6 +99,10 @@ for j in range(4):
     plt.figure()
 
     print(f"WRITTER_TRANSITION_TABLE{j} equ [" + ", ".join(f"[{x*ATOMIC_UNIT_WIDTH_IN_BYTES},{y*ATOMIC_UNIT_HEIGHT_IN_PIXELS}]" for value, (x, y) in o) + "]")
+    if j == 0 :
+        print(f"WRITTER_TRANSITION_NB_STEPS_FULL equ {len(o)}")
+
+
 print(f"WRITTER_TRANSITION_NB_STEPS equ {len(o)}")
 
 plt.show()

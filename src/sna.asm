@@ -7,7 +7,7 @@
 
 
 
-ENABLE_COMPLETE_SCREEN_COPY equ true
+ENABLE_COMPLETE_SCREEN_COPY equ false ; now we let the demo display the screen
 SHIFT_SCREEN_FOR_DEBUG equ false ;true
 HIDE_SCROLLER equ false
 SHOW_DEBUG equ false    

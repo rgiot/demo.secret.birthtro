@@ -26,9 +26,9 @@
 
 - tgt: test_sna
   dep: {{ SNA }}
-  cmd: -emu --snapshot {{SNA}} run
+  cmd: -emu --emulator ace   --snapshot {{SNA}} run
 
-- tgt: {{SNA}} {{SNA_GENERATED | join(" ")}}
+- tgt: {{SNA}} {{SNA_GENERATED | join(" ")}} sna.lst
   dep:
     - "*.asm"
     - {{ FACE_SCR }}
@@ -43,11 +43,12 @@
         -DSPRITE0_WIDTH={{SPRITE0_WIDTH}} -DSPRITE0_HEIGHT={{SPRITE0_HEIGHT}}
         -DSPRITE0_X_OFFSET={{SPRITE0_X_OFFSET}} -DSPRITE0_Y_OFFSET={{SPRITE0_Y_OFFSET}}
         -DMUSIC_DATA=\"{{MUSIC_DATA}}\" -DMUSIC_CFG=\"{{MUSIC_CFG}}\"
+        --lst sna.lst
 
 
 - tgt: test_snalink
   dep: link.sna
-  cmd: -emu --snapshot link.sna run
+  cmd: -emu --emulator winape --snapshot link.sna run
 
 - tgt: {{DSK}} link.sna
   dep: {{SNA_GENERATED | join(" ")}} dsk.asm
@@ -55,7 +56,7 @@
 
 - tgt: test_dsk
   dep: {{DSK}}
-  cmd: -emu --drivea {{DSK}} --auto-run-file=BIRTHTRO run
+  cmd: -emu --emulator cpcec --drivea {{DSK}} --auto-run-file=BIRTHTRO run
 
 - tgt: clean
   phony: true

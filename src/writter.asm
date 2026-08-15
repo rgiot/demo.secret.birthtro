@@ -148,7 +148,7 @@ writter_draw_page_step
 
     call copy_blocks_erase1
 
-    ld a, 25 : .delay_erase2 equ $-1
+    ld a, WRITTER_COPY_DELAY_STEPS : .delay_erase2 equ $-1
     or a : jr z, .delay_erase2_done
     dec a : ld (.delay_erase2), a
     ret
@@ -156,7 +156,7 @@ writter_draw_page_step
 .delay_erase2_done
     call copy_blocks_erase2
 
-    ld a, 25 : .delay_step1 equ $-1
+    ld a, WRITTER_COPY_DELAY_STEPS : .delay_step1 equ $-1
     or a : jr z, .delay_step1_done
     dec a : ld (.delay_step1), a
     ret
@@ -164,7 +164,7 @@ writter_draw_page_step
 .delay_step1_done
     call copy_blocks_step1
 
-    ld a, 25 : .delay_step2 equ $-1
+    ld a, WRITTER_COPY_DELAY_STEPS : .delay_step2 equ $-1
     or a : jr z, .delay_step2_done
     dec a : ld (.delay_step2), a
     ret
@@ -264,18 +264,21 @@ writter_advance_to_next_row
 
     ld a, WRITTER_STATE_COPY
     ld (writter_state), a
-    ld a, WRITTER_TRANSITION_NB_CALLS
+    ld a, WRITTER_TRANSITION_NB_CALLS_FULL : .nb_calls equ $-1
     ld (copy_blocks_erase1.count), a
     ld (copy_blocks_erase2.count), a
     ld (copy_blocks_step1.count), a
     ld (copy_blocks_step2.count), a
+
+    ; the first execution draws the full image. The others only the writter
+    ld a, WRITTER_TRANSITION_NB_CALLS : ld (.nb_calls), a
 
 
     ld hl, transition_tables : .transtion_ptr equ $-2
 .restart_transition_tables
     ld c, (hl) : inc hl : ld b, (hl) : inc hl
     ld a, b : or c : jr nz, .setup_transition_tables
-    ld hl, transition_tables : jr .restart_transition_tables
+    ld hl, transition_tables.restart : jr .restart_transition_tables
     
 .setup_transition_tables
     ld (.transtion_ptr), hl
@@ -284,7 +287,7 @@ writter_advance_to_next_row
     ld (copy_blocks_step1.copy_table_position), bc
     ld (copy_blocks_step2.copy_table_position), bc
     
-    ld a, 3
+    ld a, WRITTER_COPY_DELAY_STEPS
     ld (writter_draw_page_step.delay_step1), a
     ld (writter_draw_page_step.delay_erase2), a
     ld (writter_draw_page_step.delay_step2), a
@@ -398,7 +401,7 @@ writter_start_line
     ;; WRITTER_TRANSITION_NB_PARALLEL blocks of the transition table.
     macro TRANSITION_ERASE_STAGE stage_name, start_col
 copy_blocks_{stage_name}
-    ld a, WRITTER_TRANSITION_NB_CALLS : .count equ $-1
+    ld a, WRITTER_TRANSITION_NB_CALLS_FULL : .count equ $-1
     or a : ret z
     dec a : ld (.count), a
 
@@ -420,7 +423,7 @@ copy_blocks_{stage_name}
     ;; WRITTER_TRANSITION_NB_PARALLEL blocks from the buffer to the screen.
     macro TRANSITION_COPY_STAGE stage_name, start_col
 copy_blocks_{stage_name}
-    ld a, WRITTER_TRANSITION_NB_CALLS : .count equ $-1
+    ld a, WRITTER_TRANSITION_NB_CALLS_FULL : .count equ $-1
     or a : ret z
     dec a : ld (.count), a
 
@@ -731,7 +734,11 @@ writter_transition_table{table_code}
         repeat list_len(current_db), i, 0
             current_entry = list_get(current_db, {i})
             current_x = list_get(current_entry, 0)
-            current_y = list_get(current_entry, 1) + 8*WRITTER_GRID_START_ROW
+            if {table_code} == 0
+                current_y = list_get(current_entry, 1) ; full screen is used for this one
+            else
+                current_y = list_get(current_entry, 1) + 8*WRITTER_GRID_START_ROW ; we need to skip part upper the writter
+            endif
             ; the VISIBLE screen address is stored (erase stages use it as is);
             ; the buffer address only differs by bit 6 of the high byte, so the
             ; copy stages derive it with a single "res 6, h"
@@ -744,13 +751,14 @@ writter_transition_table{table_code}
     
 
     ; generate the copy tables for the writter
-    BUILD_WRITTER_TRANSITION_TABLE(0)
+    BUILD_WRITTER_TRANSITION_TABLE(0) ; XXX this one is the very first one. It concerns the whole screen and has to be handled differently than the others
     BUILD_WRITTER_TRANSITION_TABLE(1)
     BUILD_WRITTER_TRANSITION_TABLE(2)
     BUILD_WRITTER_TRANSITION_TABLE(3)
     
 transition_tables
-    dw writter_transition_table0
+    dw writter_transition_table0 ; this one is used the very first time to display the whole screen
+.restart
     dw writter_transition_table1
     dw writter_transition_table2
     dw writter_transition_table3

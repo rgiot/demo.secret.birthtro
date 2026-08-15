@@ -10,7 +10,7 @@ BLACK_PALETTE4 equ [GA_BLACK, GA_BLACK, GA_BLACK, GA_BLACK] ; DO NOT MODIFY
 WRITTER_PALETTE equ 0x4A                                 ; 1 ink
 
 
-SCROLLER_PALETTE equ [
+SCROLLER_COLORED_PALETTE equ [
         GA_COL_09,
 		GA_COL_10,
 		GA_COL_18,
@@ -21,7 +21,20 @@ SCROLLER_PALETTE equ [
 		GA_COL_09
 ]
 
-assert list_len(SCROLLER_PALETTE) == 8, "SCROLLER_PALETTE must be 8 inks long"
+assert list_len(SCROLLER_COLORED_PALETTE) == 8, "SCROLLER_COLORED_PALETTE must be 8 inks long"
+
+SCROLLER_MONOCHROME_PALETTE equ [
+        GA_BRIGHT_WHITE,
+        GA_BRIGHT_WHITE,
+        GA_BRIGHT_WHITE,
+        GA_BRIGHT_WHITE,
+        GA_BRIGHT_WHITE,
+        GA_BRIGHT_WHITE,
+        GA_BRIGHT_WHITE,
+        GA_BRIGHT_WHITE
+]
+assert list_len(SCROLLER_MONOCHROME_PALETTE) == 8, "SCROLLER_MONOCHROME_PALETTE must be 8 inks long"
+
 
 inks = 0
 
