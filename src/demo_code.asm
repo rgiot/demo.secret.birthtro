@@ -174,6 +174,11 @@ demo_frame_run
     ld a, 1 : .reset_animation equ $-1
     or a
     jr z, .no_reset_animation
+
+
+    ; set the state of the animation to let the writter know it is playing and it should not copy now
+    ld a, ANIMATION_STATE_PLAYING
+    ld (animation_state), a
     xor a : ld (.reset_animation), a
     CALL_IN_BANK(reset_background_sprite_0, 0xc5)
 .no_reset_animation
@@ -188,13 +193,17 @@ demo_frame_run
 
     ret
 
+    assert $<0x4000 || $>0x8000
+    animation_state db ANIMATION_STATE_FINISHED
+
+
 ;;
 ;; During init, we
 ;; - setup the current palette as it may change over time
 ;; - setup the scroller curve
 ;; TODO handle the animate part of the screen
 demo_frame_init
-    BREAKPOINT : call event_handler
+    call event_handler
 
     ld hl, PALETTE_INITIAL : .selected_palette equ $-2
     call ga_set_palette
@@ -210,11 +219,11 @@ demo_frame_init
 
 
 demo_play_music
-    BREAKPOINT : ld a, 0 : .activated equ $-1 ; music is not played at the very beginning
+    ld a, 0 : .activated equ $-1 ; music is not played at the very beginning
     or a : ret z
 
 
-    BREAKPOINT
+    
     di : call PLY_AKG_Play : ei
     ret
 

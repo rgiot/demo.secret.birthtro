@@ -467,6 +467,8 @@ endm
 reset_background_sprite_0
 	ld hl, replace_background_sprite_0.table
 	ld (replace_background_sprite_0.ptr), hl
+
+
 	ret
 
 replace_background_sprite_0
@@ -474,7 +476,8 @@ replace_background_sprite_0
 	ld hl, .table : .ptr equ $-2
 	ld e, (hl) : inc hl : ld d, (hl)
 	ld a, e : or d
-	ret z ; animation is played just one  time
+
+	jr z, .over ; animation is played just one  time
 .not_end
 	inc hl
 	ld (.ptr), hl
@@ -486,6 +489,11 @@ replace_background_sprite_0
 	call call_hl
 	ei
 	ret
+.over
+    BREAKPOINT
+    ld a, ANIMATION_STATE_FINISHED
+    ld (animation_state), a
+    ret
 
 .table
 		ANIMATION_STEP(replace_background_sprite_0_0_1)
@@ -493,3 +501,16 @@ replace_background_sprite_0
 		ANIMATION_STEP(replace_background_sprite_0_2_1)
 		ANIMATION_STEP(replace_background_sprite_0_1_0)
 	dw 0
+
+
+    if false
+    // seems to not work ATM
+enum ANIMATION_STATE
+    PLAYING
+    FINISHED
+endenum
+    else
+    ANIMATION_STATE_PLAYING equ 0
+    ANIMATION_STATE_FINISHED equ 1
+    endif
+

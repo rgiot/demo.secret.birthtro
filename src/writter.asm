@@ -68,10 +68,17 @@ writter_draw_page_step
     ld (writter_wait_left), a
     ret nz                                  ; still waiting, nothing else to do this call
 
+    ld a, 1 : ld (writter_wait_left), a ; for an extra round
+
+    ; there is no copy while the background animation is playing, as it would overwrite the background sprite
+    ld a, (animation_state)
+    cp ANIMATION_STATE_PLAYING
+    BREAKPOINT
+    ret z
+
 
     ; deactivate background stuff
     xor a : ld (demo_frame_run.animated_background_activated), a
-
 
 
     ; the wait is over: fetch the next page from WRITTER_PAGES, wrapping back
@@ -139,6 +146,7 @@ writter_draw_page_step
         ret                                    ; the new line's first char is drawn on a later call
 
 .copy_step
+
     ; the transition tables contain the addresses of the blocks in the VISIBLE
     ; screen (0xC000); the source address in the buffer is obtained by
     ; resetting bit 6 of the high byte.

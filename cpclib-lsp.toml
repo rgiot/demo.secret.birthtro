@@ -8,6 +8,12 @@
 case_sensitive = true
 # Escalate every warning in an assembly document to an error.
 warnings_as_errors = false
+firmware_docs = true
+inactive_code = true
+inlay_hints = true
+code_lens = true
+breakpoint_directive = "BREAKPOINT"
+peephole_goal = "neutral"
 
 [asm.warnings]
 # ADD/ADC/SBC/CP/SUB/AND/OR/XOR with an explicit "A," prefix that isn't
@@ -22,9 +28,15 @@ overflow = true
 # A declared-but-never-referenced MACRO/FUNCTION parameter or REPEAT/
 # ITERATE/FOR loop counter (LSP-only diagnostic, no basm CLI equivalent).
 unused_bindings = true
+peephole_optimizer = false
+smc_label_without_equ = true
 
 [basic]
 warnings_as_errors = false
+code_lens = true
+inlay_hints = true
+run_emulator = "ace"
+firmware_docs = true
 
 [basic.warnings]
 # A GOTO/GOSUB/etc. target line that doesn't exist in the program.
@@ -34,6 +46,14 @@ catart_no_op = true
 
 [bndbuild]
 warnings_as_errors = false
+code_lens = true
+
+[dap]
+# Write a transcript of the whole debug-adapter conversation to this file.
+# Empty means no log. Relative paths are resolved against the project root.
+# Useful when a debug session misbehaves: the log shows every message in both
+# directions, which turns "the panes are empty" into something diagnosable.
+log = "CPCLIB-DAP.LOG"
 
 [bndbuild.warnings]
 # The build file has neither a "targets:" nor a "tasks:" section.
