@@ -442,6 +442,9 @@ copy_blocks_{stage_name}
     ret
     endm
 
+
+    
+
 ;; Erase previous page, half of the pixels...
     TRANSITION_ERASE_STAGE(erase1, 0)
 ;; ... then the other half

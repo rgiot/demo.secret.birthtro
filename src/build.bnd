@@ -26,7 +26,11 @@
 
 - tgt: test_sna
   dep: {{ SNA }}
-  cmd: -emu --emulator ace   --snapshot {{SNA}} run
+  cmd: -emu --emulator winape   --snapshot {{SNA}} run
+
+- tgt: debug_sna
+  dep: {{ SNA }}
+  cmd: -emu --emulator ace   --snapshot {{SNA}} debug
 
 - tgt: {{SNA}} {{SNA_GENERATED | join(" ")}} sna.lst
   dep:

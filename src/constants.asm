@@ -88,7 +88,7 @@ WRITTER_GRID_HEIGHT equ 10
 WRITTER_GRID_WIDTH_APPROXIMATE equ 24 ; as char are supposed to be propotional, we can only have an approximate number of char per line
 WRITTER_GRID_WIDTH_PIXELS equ SCREEN_WIDTH*2  ; TODO remove few pixels to be sure to not have hidden chars
 WRITTER_GRID_HEIGHT_PIXELS equ WRITTER_GRID_HEIGHT*8
-WRITTER_COPY_DELAY_STEPS equ 3
+WRITTER_COPY_DELAY_STEPS equ 100
 
 ; the writter grid is shorter than the screen, so it is vertically centered
 ; by starting a few char lines below the top of the screen
@@ -99,7 +99,7 @@ WRITTER_GRID_START_ROW equ (SCREEN_HEIGHT_CHARS - WRITTER_GRID_HEIGHT) >> 1
 
 ; once a page is fully drawn, it stays on screen this many frames before the
 ; next page (from WRITTER_PAGES) starts being drawn
-WRITTER_PAGE_WAIT_FRAMES equ 200
+WRITTER_PAGE_WAIT_FRAMES equ 3
 
 
 ; This is the content of  python ../tests/writter_handling/writter_appearance_table.py 
