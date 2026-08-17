@@ -1,9 +1,10 @@
 ;; July 2026
 ;; Krusty/Benediction
 
+    include once "inner://ga.asm"
+    include once 'demosystem/public.asm'
     include once "macros.asm"
     include once "functions.asm"
-    include once "inner://ga.asm"
 
 
 ;; We assume everythin is properly loaded in memory, and we just need to run the demo
@@ -23,6 +24,7 @@ demo_start
 
     ; Initialize the various components of effects
 demo_init
+    call demo_adapt_for_crtc
     call demo_init_screen
     call demo_init_music
     if ENABLE_COMPLETE_SCREEN_COPY
@@ -97,6 +99,21 @@ demo_init_music
     call PLY_AKG_Init
     ret
 
+
+
+demo_adapt_for_crtc
+    call ds_crtc_detector
+    cp 1
+    ret nz 
+.patch_crtc1
+    ld a, 6 : ld (scroller_show.crtc_register), a
+    if ! HIDE_SCROLLER
+        ld hl, SCREEN_HEIGHT_CHARS<<8 : ld (scroller_show.crtc_value), hl
+    endif
+    ret
+
+; XXX Can be moved in an ara that will be overriden later
+	DS_PRODUCE_CRTC_DETECTOR_ROUTINE()
 
 demo_run
     call secure_vsync

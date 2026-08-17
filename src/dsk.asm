@@ -1,5 +1,5 @@
 
-	include "linker_common.asm" ; TODO include it inside basm as it is so useful
+	include "demosystem/linker_common.asm" ; TODO include it inside basm as it is so useful
 	
 	
 	org 0x100

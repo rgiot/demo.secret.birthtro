@@ -14,6 +14,7 @@ inlay_hints = true
 code_lens = true
 breakpoint_directive = "BREAKPOINT"
 peephole_goal = "neutral"
+run_emulator = "ace"
 
 [asm.warnings]
 # ADD/ADC/SBC/CP/SUB/AND/OR/XOR with an explicit "A," prefix that isn't
@@ -54,6 +55,9 @@ code_lens = true
 # Useful when a debug session misbehaves: the log shows every message in both
 # directions, which turns "the panes are empty" into something diagnosable.
 log = "CPCLIB-DAP.LOG"
+emulator = "amspiritlite"
+endpoint = ""
+port = 8765
 
 [bndbuild.warnings]
 # The build file has neither a "targets:" nor a "tasks:" section.

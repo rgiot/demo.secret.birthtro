@@ -37,7 +37,7 @@ vsync
 	in a, (c)
 	rra
 	jr nc, .loop
-	ret
+	BREAKPOINT : ret
 
 
     ;; BUG: there are bug in the computation when using {var} instead of var.

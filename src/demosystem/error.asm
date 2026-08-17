@@ -1,0 +1,5 @@
+DS_OPEN_ERROR_GA equ 0x4C ; red
+DS_LOAD_ERROR_GA equ 0x40 ; gray
+DS_ASCII_ERROR_GA equ 0x4e ; orange
+DS_CLOSE_ERROR_GA equ 0x5c ; red
+DS_ASSERT_ERROR_GA equ 0x44

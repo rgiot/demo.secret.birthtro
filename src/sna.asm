@@ -10,9 +10,9 @@
 ENABLE_COMPLETE_SCREEN_COPY equ false ; now we let the demo display the screen
 SHIFT_SCREEN_FOR_DEBUG equ false ;true
 HIDE_SCROLLER equ false
-SHOW_DEBUG equ false    
+SHOW_DEBUG equ true    
 
-    SNASET CRTC_SEL, 0
+    SNASET CRTC_TYPE, 1  ; Demo is coded for CRTC0 but emulatro is requested to be CRTC1. adaptation must work and make the scroller visible
     run demo_start
     
 

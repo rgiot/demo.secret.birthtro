@@ -60,7 +60,7 @@
 
 - tgt: test_dsk
   dep: {{DSK}}
-  cmd: -emu --emulator cpcec --drivea {{DSK}} --auto-run-file=BIRTHTRO run
+  cmd: -emu --emulator ace --drivea {{DSK}} --auto-run-file=BIRTHTRO run
 
 - tgt: clean
   phony: true
