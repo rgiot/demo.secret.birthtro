@@ -7,8 +7,10 @@
 ;;;;;;;; Screen related constants ;;;;;;;
 
 SCREEN_WIDTH equ 96
-SCREEN_WIDTHS_WORD equ SCREEN_WIDTH/2
+SCREEN_WIDTH_WORDS equ SCREEN_WIDTH/2
 SCREEN_HEIGHT_CHARS equ 21
+SCREEN_CRTC_R2 equ 50
+SCREEN_CRTC_R3 equ 0x88
 
 ;;;;;;;; Pixels related constants ;;;;;;;;
 

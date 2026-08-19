@@ -56,6 +56,7 @@ code_lens = true
 # directions, which turns "the panes are empty" into something diagnosable.
 log = "CPCLIB-DAP.LOG"
 emulator = "amspiritlite"
+#emulator = "1984js"
 endpoint = ""
 port = 8765
 

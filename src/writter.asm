@@ -73,7 +73,7 @@ writter_draw_page_step
     ; there is no copy while the background animation is playing, as it would overwrite the background sprite
     ld a, (animation_state)
     cp ANIMATION_STATE_PLAYING
-    BREAKPOINT
+    
     ret z
 
 

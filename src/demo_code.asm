@@ -24,7 +24,7 @@ demo_start
 
     ; Initialize the various components of effects
 demo_init
-    call demo_adapt_for_crtc
+    call demo_adapt_for_crtc ; Need to be the very first stuff
     call demo_init_screen
     call demo_init_music
     if ENABLE_COMPLETE_SCREEN_COPY
@@ -80,13 +80,15 @@ demo_init_screen
     ; set up the CRTC as expected
 .setup_crtc
     ld bc, 0xbc00 + 0 : out (c), c : ld bc, 0xbd00 + 64-1 : out (c), c
-    ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00 + SCREEN_WIDTHS_WORD : out (c), c
+    ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00 + SCREEN_WIDTH_WORDS : out (c), c
+    ld bc, 0xbc00 + 3 : out (c), c : ld bc, 0xbd00 + SCREEN_CRTC_R3 : out (c), c
     ld bc, 0xbc00 + 2 : out (c), c
     if SHIFT_SCREEN_FOR_DEBUG
-        ld bc, 0xbd00 + 50 + 4 : out (c), c
+        ld bc, 0xbd00 + SCREEN_CRTC_R2 + 4 : out (c), c
     else
-        ld bc, 0xbd00 + 50 : out (c), c
+        ld bc, 0xbd00 + SCREEN_CRTC_R2 : out (c), c
     endif
+.crtc_r2_value equ $-2 - list_len(assemble("out(c),c"))
     ld bc, 0xbc00 + 7 : out (c), c : ld bc, 0xbd00 + 29 : out (c), c
     ld bc, 0xbc00 + 6 : out (c), c : ld bc, 0xbd00 + SCREEN_HEIGHT_CHARS : out (c), c
     ld bc, 0xbc00 + 12 : out (c),c : ld bc, 0xbd00 + 0x30 : out (c), c
@@ -103,8 +105,15 @@ demo_init_music
 
 demo_adapt_for_crtc
     call ds_crtc_detector
-    cp 1
-    ret nz 
+    cp 1 : jr z, .patch_crtc1
+    cp 3 : jr z, .patch_crtc3
+    cp 4 : jr z, .patch_crtc4
+    ret
+.patch_crtc3
+.patch_crtc4
+    ld hl, demo_init_screen.crtc_r2_value
+    dec (hl)
+    ret
 .patch_crtc1
     ld a, 6 : ld (scroller_show.crtc_register), a
     if ! HIDE_SCROLLER
@@ -148,7 +157,7 @@ demo_frame_run
     ld b, 20
 .wait_lines
     defs 64 - duration(djnz $)-1
-    djnz .wait_lines
+    BREAKPOINT : djnz .wait_lines
 
     defs 64 - 6
 
