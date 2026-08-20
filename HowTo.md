@@ -1,28 +1,156 @@
-The aim of this document is to help to modify the code and assets.
+# Birthtro Demo — How to Modify and Build
 
-# How to test the demo
+This guide helps graphicians and non-programmers customize the demo: change colors, backgrounds, sprites, music, text, and more.
 
-Use the `test_sna` rule in the bndbuild file of `src` folder.
-It will rebuild the snapshot of the demo if needed and launch it from ace emulator.
+---
 
-In a terminal, from `src` folder :
+## Quick Start — Test the Demo
+
+To rebuild and run the demo quickly in an emulator:
 
 ```bash
-$ bndbuild test
+cd src
+bndbuild test_sna
 ```
 
+This compiles the demo and launches it in the emulator. It takes a few seconds the first time (rebuilds changed assets), then only rebuilds what changed.
 
+**Alternatively, from VS Code:** Click the **"Run: test_sna"** button if you have the build extension installed.
 
-In vscode with the appropriate extension installed, click on the "Run: test" button
+---
 
+## Understanding the Build System
 
-# How to really run the demo
+XXX: AI generted crap ;) title are wrong, but content is ok...
 
-The former way is the quick and dirty way to test the demo.
-For a real world usage, we have to link the demo, create the dsk and launch if from the dsk.
-It way notwork as it impact the linking that as been hand coded for a specific state of the demo. It may have to be adapted depending on crunch sizeevolution
+The build system has three layers:
 
-this time the rule to test is `test_dsk`
+1. **User configuration** (`src/build.bnd`)
+   - You edit *variables* here (which sprites to use, sprite position/size)
+   - Example: `{% set FACE="face3" %}` means "use face3_cpc.scr, face3_cpc.pal, face3_eye*.spr"
+
+2. **Automatic asset generation** (`data/build.bnd`)
+   - Converts image files (BMP, PNG) to CPC format (.scr, .pal, .spr)
+   - Happens automatically when you change images
+
+3. **Compilation & linking** (`src/*.asm`)
+   - Assembly compiler reads all files and produces the snapshot
+   - Injected variables from step 1 tell it which .scr/.pal/.spr files to use
+
+**The workflow:**
+```
+Edit src/build.bnd (change FACE variable)
+    ↓
+Run: bndbuild test_sna
+    ↓
+Build system finds face3_cpc.scr, face3_cpc.pal, face3_eye0/1/2.spr
+    ↓
+Assembler includes them in the snapshot
+    ↓
+birthtro.sna is created and runs in emulator
+```
+
+---
+
+## Common Tasks
+
+### Task 1: Change Palette Colors
+
+**What you're doing:** Changing which colors the demo uses.
+
+**Where to work:**
+- Your PC image files: `data/Baby_Face_v3.bmp` (background), `data/face3_eye*.png` (sprites)
+- The palette is **automatically extracted** from the main image
+
+**Steps:**
+
+1. Edit your image files (Photoshop, GIMP, etc.)
+   - Edit `Baby_Face_v3.bmp` to change backgropixels/und colors
+   - Edit `face3_eye0.png`, `face3_eye1.png`, `face3_eye2.png` to change eye sprite pixels with the same colors
+   - ⚠️ **Important:** Keep to **4 colors max** in each image (CPC Mode 0 limitation)
+
+2. Save your images in the same location (`data/` folder)
+
+3. Rebuild:
+   ```bash
+   cd src
+   bndbuild test_sna
+   ```
+
+4. The build system automatically converts your images to CPC format, extracts colors, and rebuilds the demo.
+
+**What happens behind the scenes:**
+- `img2cpc` converts your BMP to screen data (`.scr`) and palette (`.pal`)
+- Your PNG sprites are converted to `.spr` files using the palette from the background
+- The compiler reads these files and includes them in the snapshot
+
+---
+
+### Task 2: Change Background & Eye Sprites (Pick a Different Face)
+
+**What you're doing:** Switching to a different set of background + sprite images.
+
+**Current setup:** Uses "face3" files (face3_cpc.scr, face3_cpc.pal, face3_eye0/1/2.spr)
+
+**To use a different face:**
+
+1. **Option A: Use an existing face** (if face0, face2, etc. already exist in `data/`)
+   
+   Edit `src/build.bnd` and change:
+   ```jinja2
+   {% set FACE="face3" %}  →  {% set FACE="face0" %}
+   ```
+   
+   Then rebuild:
+   ```bash
+   cd src
+   bndbuild test_sna
+   ```
+
+2. **Option B: Create a new face from scratch**
+   
+   a. Prepare two sets of images:
+      - `Baby_Face_NEW.bmp` — the background (320×200 pixels, mode 0 → 4 colors max)
+      - `NEW_eye0.png`, `NEW_eye1.png`, `NEW_eye2.png` — three animation frames (same palette)
+   
+   b. In `data/build.bnd`, add a new rule. Copy this block and update the filenames:
+      ```bnd
+      - tgt: faceNEW_cpc.scr faceNEW_cpc.pal
+        dep: Baby_Face_NEW.bmp
+        cmd: 
+          - img2cpc --mode 0 --overscan  Baby_Face_NEW.bmp scr  --output faceNEW_cpc.scr --palette faceNEW_cpc.pal
+
+      - tgt: faceNEW_eye0.spr faceNEW_eye1.spr faceNEW_eye2.spr
+        dep: faceNEW_eye0.png faceNEW_eye1.png faceNEW_eye2.png faceNEW_cpc.pal
+        cmd:
+          - img2cpc --mode 0 --ga-pal faceNEW_cpc.pal faceNEW_eye0.png sprite --output faceNEW_eye0.spr
+          - img2cpc --mode 0 --ga-pal faceNEW_cpc.pal faceNEW_eye1.png sprite --output faceNEW_eye1.spr
+          - img2cpc --mode 0 --ga-pal faceNEW_cpc.pal faceNEW_eye2.png sprite --output faceNEW_eye2.spr
+      ```
+   
+   c. In `src/build.bnd`, change:
+      ```jinja2
+      {% set FACE="face3" %}  →  {% set FACE="faceNEW" %}
+      ```
+   
+   d. Also adjust sprite dimensions in `src/build.bnd` if needed:
+      ```jinja2
+      {%set SPRITE0_WIDTH=48//2 %}   # Eye width in bytes (pixels = bytes × 4)
+      {%set SPRITE0_HEIGHT=44 %}     # Eye height in lines
+      {%set SPRITE0_X_OFFSET=10 %}   # Horizontal position (in bytes, × 2 for pixels)
+      {%set SPRITE0_Y_OFFSET=50 %}   # Vertical position (in pixels from top)
+      ```
+   
+   e. Rebuild:
+      ```bash
+      cd src
+      bndbuild test_sna
+      ```
+
+**Sprite constraints:**
+- All three animation frames (eye0, eye1, eye2) must have **the same width, height, and position**
+- Each sprite must use **the same 4-color palette** as the background
+- No pixel duplication or mode 1/2 conversions — images are used as-is
 
 # How to change the music
 
@@ -38,83 +166,315 @@ In `src/build.bnd` search for these lines
 
 and replace the paths by the new file names.
 
+---
 
-# How to specify colors
+### Task 3: Change Music
+
+**To change music:**
+
+1. Create your music file in AT3 format (e.g., with Arkos Tracker)
+
+2. Export it as:
+   - `YOUR_SONG.asm` — the music data
+   - `YOUR_SONG_playerconfig.asm` — the player configuration
+
+3. In `src/build.bnd`, change:
+   ```jinja2
+   {% set MUSIC_DATA="../data/music/ops.asm" %}
+   {% set MUSIC_CFG="../data/music/ops_playerconfig.asm" %}
+   ```
+   
+   to:
+   ```jinja2
+   {% set MUSIC_DATA="../data/music/YOUR_SONG.asm" %}
+   {% set MUSIC_CFG="../data/music/YOUR_SONG_playerconfig.asm" %}
+   ```
+
+4. Rebuild:
+   ```bash
+   cd src
+   bndbuild test_sna
+   ```
 
 
-**Note** At the moment the demo has only one colorscheme. Of course we could use several later and change them on the fly.
-So it is possible to provide several versions of palette.asm and let Krusty handle the marge later
+---
 
-Most of the time colors have to be specified using their ga arary values. no need to remember well, you can use symbols instead
+### Task 4: Change Writter Font (Text Font)
 
-With `BASIC_COLOR_0`, ..., `BASIC_COLOR_27`
-or the name of the left:
+**What you're doing:** Modifying the custom pixel font used for text display.
 
+**Font file:** `src/writter_font.asm`
+
+**To edit a character:**
+
+In `src/writter_font.asm`, find the character you want to change. Each character is defined like:
+
+```asm
+WRITTER_CREATE_CHAR(
+    i,                  # Character ID
+    " ##  ",           # Row 1 (space = empty pixel, # = filled pixel)
+    "     ",           # Row 2
+    "###  ",           # Row 3
+    " ##  ",           # Row 4
+    " ##  ",           # Row 5
+    " ##  ",           # Row 6
+    "#### ",           # Row 7
+    "     "            # Row 8 (usually empty for spacing)
+)
 ```
-GA_BLACK    set GA_COL_00 
-GA_BLUE set GA_COL_01 
-GA_BRIGHT_BLUE  set GA_COL_02 
-GA_RED  set GA_COL_03 
-GA_MAGENTA  set GA_COL_04 
-GA_MAUVE    set GA_COL_05 
-GA_BRIGHT_RED   set GA_COL_06 
-GA_PURPLE   set GA_COL_07 
-GA_BRIGHT_MAGENTA   set GA_COL_08 
-GA_GREEN    set GA_COL_09 
-GA_CYAN set GA_COL_10 
-GA_SKY_BLUE set GA_COL_11 
-GA_YELLOW   set GA_COL_12 
-GA_WHITE    set GA_COL_13 
-GA_PASTEL_BLUE  set GA_COL_14 
-GA_ORANGE   set GA_COL_15 
-GA_PINK set GA_COL_16 
-GA_PASTEL_MAGENTA   set GA_COL_17 
-GA_BRIGHT_GREEN set GA_COL_18 
-GA_SEA_GREEN    set GA_COL_19 
-GA_BRIGHT_CYAN  set GA_COL_20 
-GA_LIME set GA_COL_21 
-GA_PASTEL_GREEN set GA_COL_22 
-GA_PASTEL_CYAN  set GA_COL_23 
-GA_BRIGHT_YELLOW    set GA_COL_24 
-GA_PASTEL_YELLOW    set GA_COL_25 
-GA_BRIGHT_WHITE set GA_COL_26 
+
+**To create a new character:**
+
+1. Find an unused character ID (check existing IDs in the file)
+2. Add a new `WRITTER_CREATE_CHAR` block with 8 rows
+3. Use space (` `) for empty pixels, `#` for filled pixels
+4. Below the font definitions, register your new characters:
+   ```asm
+   WRITTER_MAPPING
+       WRITTER_MAPPING_GENERATE("ari")  # Add your new char IDs here
+   ```
+
+**Character design tips:**
+- Each character can have a different width (but all rows must match)
+- Use 8 lines (required)
+- Leave the last row empty for spacing between lines (you can still use it if necessary)
+- Leave at least one empty column for spacing between characters (you can still use it if necessary)
+
+**Rebuild:**
+```bash
+cd src
+bndbuild test_sna
 ```
 
-# How to change the background and moving eyes sprites
+---
 
-In `src/build.bnd` search for these lines and update them if needed
+### Task 5: Change Writter Text Content
 
-```jinja2
-{% set FACE="face3" %} # Change here the prefix of the background if needed to change the picture
-{%set SPRITE0_WIDTH=48//2 %} # Number of bytes  in the width of the sprite (we obtain the number of pixels by multiplying it by 4)
-{%set SPRITE0_HEIGHT=44 %} # Number of lines of the sprite
-{%set SPRITE0_X_OFFSET=10 %} # horizontal position in byte (so *2 to get the number of pixels) from left of the screen
-{%set SPRITE0_Y_OFFSET=50 %} # vertical position in pixel from top of the screen
+**What you're doing:** Changing the text that appears on screen.
+
+**File:** `src/writter_pages.asm`
+
+**To change the text:**
+
+Find the `WRITTER_PAGE` you want to edit and change the strings:
+
+```asm
+WRITTER_PAGE1
+    WRITTER_ENCODE_PAGE(
+        " a ",           # Page title or first line
+        " r ",
+        " i ",
+        "                   ",  # Blank line
+        "ariariariariariariariari",  # Text line
+        "rr iiii",
+        "rrrrr iiii",
+        ...
+    )
 ```
-They allow to setup the base name of the files to load size of the eye sprites in case it is changed.
 
-if `FACE` is `face3`, the following files will be used by the demo:
-`data/face3_cpc.pal`, `data/face3_cpc.scr`, `data/face3_eye0.spr`, `data/face3_eye1.spr`, `data/face3_eye2.spr`.
-The are automatically generate from the PC images. The current build system assumes there are 3 images in the animation (including the one already in the full picture).
-Of course it is doable to have more steps (I'm pretty sure it will even speed up the display). Krusty can adapt everything if needed.
 
-The rules to build these these files are in `data/build.bnd`. If you edit the very same images, there is nothing to change.
-If your PC image differ, copy paste the rules and moify all file names in tgt, dep, cmd items.
-If there are more images in the animation jsut duplicate the line that convert an eye.
-ATM everything is hardcoded for Baby_Face_v3.bmp, face3_eye0.png, face3_eye1.png, face3_eye2.png with the **same palette**, **4 inks** and **no pixel duplication to micmick mode 0** (as it is the way voxy shared is picture).
+As char width is variable, you can have a avariable number of chars per line. Text is pixel centered.
 
-# How to change the spectral sprites logo
-
-Warning the change of the logo impact the duration of the rendering.
-It may break some timing and the demo. In that case Krusty could try to fix without any guarantees.
-So you can still propose logos that broke stuff.
-
-The logo is written in the asm source code in `src/spectral_sprites_logo.asm`
-Just modify the strings content and use space for no pixel, # for pixel.
-It can be more visible if you ask your editor to search for # as it will be highlighted.
-The "pixels" are not drawn as square in the demo, so take that into account
-
+**Rebuild:**
+```bash
+cd src
+bndbuild test_sna
 ```
+
+---
+
+### Task 6: Change Scroller Fonts (Top Scroller Text)
+
+**What you're doing:** Modifying the pixel fonts used for the top scroller text display.
+
+**Font file:** `src/split_scroller_font.asm`
+
+**To edit a character:**
+
+The scroller uses two font variants for smooth animation:
+- **IPM precision** (4-nop pixels) — slower scroll, smoother animation
+- **NOP precision** (1-nop pixels) — faster scroll
+
+Character definitions use `#` for pixels and spaces for empty:
+
+```asm
+FONT_CREATE_IPM_CHAR( a,
+    ".#..",      # Row 1 (4 pixels wide for IPM)
+    "#.#.",      # Row 2
+    "#.#.",
+    "###.",
+    "#.#.",
+    "#.#.",
+    "#.#.",
+    "#.#."
+)
+```
+
+**To create a new character:**
+
+1. Define the IPM precision version with `FONT_CREATE_IPM_CHAR` (8 rows, 4 columns):
+   ```asm
+FONT_CREATE_IPM_CHAR( yourchar,
+    ".#..",      # Row 1 (4 pixels wide; . = empty, # = filled)
+    "#.#.",      # Row 2
+    "#.#.",
+    "###.",
+    "#.#.",
+    "#.#.",
+    "#.#.",
+    "#.#."
+)
+   ```
+
+2. Define the NOP precision version. Either **reuse the same design**:
+   ```asm
+   NOP_FONT_SAME_AS_IPM(yourchar)
+   ```
+   
+   Or write a **different, more detailed design** with `FONT_CREATE_CHAR` (1-nop pixels, same 8 rows):
+   ```asm
+FONT_CREATE_CHAR( yourchar,
+    "....####........",   # Each # is 1 nop wide — much finer detail possible
+    ".##########.....",
+    "####....####....",
+    "####....####....",
+    "############....",
+    "####....####....",
+    "####....####....",
+    "####....####...."
+)
+   ```
+   
+   Use `NOP_FONT_SAME_AS_IPM` when the IPM shape is good enough. Write a `FONT_CREATE_CHAR` when you want a sharper, more detailed variant (as is done for `a` and `i` in the current font file).
+
+3. Register it in the font table at the bottom of `src/split_scroller_font.asm`:
+   ```asm
+   FONT_MAPPING_GENERATE("ahirstyourchar")  # Add your char ID here
+   ```
+
+**Character design constraints (both variants):**
+- All 8 rows must have the same total nop duration
+- Lines must end with `.` pixels (not `#`)
+- The first `#` can be anywhere on the line (leading `.` run has no minimum length)
+
+**Additional constraint for `FONT_CREATE_IPM_CHAR`:**
+- Exactly 4 columns per row (each column = 4 nops internally)
+- Minimum 2 columns (= 8 nops) for 8-frame drawing animation
+
+**Additional constraint for `FONT_CREATE_CHAR` (NOP precision):**
+- Any run of `.` or `#` after the first `#` must be **at least 4 symbols long** (each symbol = 1 nop)
+- Minimum 8 symbols total width
+
+**Rebuild:**
+```bash
+cd src
+bndbuild test_sna
+```
+
+---
+
+### Task 7: Change Scroller Text Content
+
+**What you're doing:** Changing what text scrolls.
+
+**File:** `src/split_scroller_text.asm`
+
+**To change the text:**
+
+Find the `scroller_text` label and edit the string:
+
+```asm
+scroller_text
+    db "Hello world this is text"
+    db 255  # End marker
+```
+
+**Text case note:** The scroller switches fonts based on uppercase/lowercase:
+- Uppercase letters use IPM precision (blocky - oldschool)
+- Lowercase letters use NOP precision (smoother - newschool)
+
+**Rebuild:**
+```bash
+cd src
+bndbuild test_sna
+```
+
+---
+
+### Task 8: Change Scroller Color Palette
+
+**What you're doing:** Switching between two scroller color schemes.
+
+**File:** `src/split_scroller.asm` (line ~842)
+
+**Available palettes:**
+
+1. **SCROLLER_COLORED_PALETTE** (current default)
+   ```
+   GA_COL_09, GA_COL_10, GA_COL_18, GA_COL_20,
+   GA_COL_20, GA_COL_18, GA_COL_10, GA_COL_09
+   ```
+
+2. **SCROLLER_MONOCHROME_PALETTE**
+   ```
+   GA_BRIGHT_WHITE (repeated 8 times)
+   ```
+
+**To switch palettes:**
+
+In `src/split_scroller.asm`, find this section (around line 842):
+
+```asm
+.selected_scroller_palette equ $-2
+    db SCROLLER_MONOCHROME_PALETTE  # Change this line
+    db SCROLLER_COLORED_PALETTE
+```
+
+Change `SCROLLER_MONOCHROME_PALETTE` to `SCROLLER_COLORED_PALETTE` or vice versa.
+
+**To create a custom palette:**
+
+1. In `src/palettes.asm`, add a new palette definition:
+   ```asm
+   SCROLLER_CUSTOM_PALETTE equ [
+       GA_COL_01,
+       GA_COL_02,
+       GA_COL_03,
+       GA_COL_04,
+       GA_COL_04,
+       GA_COL_03,
+       GA_COL_02,
+       GA_COL_01
+   ]
+   assert list_len(SCROLLER_CUSTOM_PALETTE) == 8, "Must be 8 inks"
+   ```
+
+2. In `src/split_scroller.asm`, use it:
+   ```asm
+   .selected_scroller_palette equ $-2
+       db SCROLLER_CUSTOM_PALETTE
+       db SCROLLER_COLORED_PALETTE
+   ```
+
+3. Rebuild:
+   ```bash
+   cd src
+   bndbuild test_sna
+   ```
+
+---
+
+### Task 9: Change Spectral Sprites Logo (Animated Logo)
+
+**What you're doing:** Modifying the animated pixel logo pattern.
+
+**File:** `src/spectral_sprites_logo.asm`
+
+**To edit the logo:**
+
+Find the `spectral_sprites_model` and edit it:
+
+```asm
 spectral_sprites_model equ [
     "####    ####    ####  ",
     "##  ##  ##  #   ##  ##",
@@ -122,178 +482,113 @@ spectral_sprites_model equ [
     "##  ##  ##  ##  ##  ##",
     "####    ##  ##  ####  "
 ]
-
 ```
 
-Palette has to be setup in `src/palettes.asm` in these two arrays that are self-explicit
+**Logo design tips:**
+- Use `#` for filled pixels, space for empty
+- Each line can be any width
+- All lines in one logo must have same width
+- Pixels are drawn as circles, not squares
+- ⚠️ **WARNING:** Changing logo size can break animation timing. Test carefully and may require Krusty to adjust memory layout.
 
-```z80
-SPECTRAL_SPRITES_PALETTE equ [0x58, 0x45, 0x4d, 0x4f ]   ; 4 inks in a list 
-SPECTRAL_SPRITES_MONOCHROME_PALETTE equ [0x4f, 0x4f, 0x4f, 0x4f] 
+**Rebuild:**
+```bash
+cd src
+bndbuild test_sna
 ```
 
+---
 
-# How to change the writter font
+## Reference: Color System
 
-The font has to be coded in the source file too: `src/writter_font.asm`.
-Each char can have a **different number of pixels** horizontally as soon as all lines of a given char share the same number of pixels and **8 lines**. We can use **lowercase** and **uppercase** chars
+### GA Color Constants
 
-You can modify existing chars, or create new char that are not yet encoded.
-To encode a char respect the syntax:
-
-```
-WRITTER_CREATE_CHAR(
-    i,
-    " ##  ",
-    "     ",
-    "###  ",
-    " ##  ",
-    " ##  ",
-    " ##  ",
-    "#### ",
-    "     "
-)
-```
-
-`i` represents a char, and the next lines represent the pixels. space or #.
-Ideally the last line needs to be empty expect for long chars in order to have a visual spearation between rows. At least one column should be empty to visially spearate chars in  a row. 
-But this is a matter of design.
-
-i and I would be two different chars.
-
-To be usable the chars needs to registered
-
-```z80
-WRITTER_MAPPING
-    WRITTER_MAPPING_GENERATE("ari")
-```
-means only a, r, i are usable in addition of space. If more chars are encoded, they need to be added to the string.
-
-
-
-
-Palette has to be setup in `src/palettes.asm` here
-
-```z80
-WRITTER_PALETTE equ 0x4A  
-```
-
-# how to change the content of the writter pages
-
-Everything is in `src/writter_page.asm`.
+The CPC uses a color palette called the "Gate Array" (GA). Colors are referenced as GA values (0-27):
 
 ```
-WRITTER_PAGE2
-    WRITTER_ENCODE_PAGE(
-        " a ",
-        " r ",
-        " i ",
-        "                   ",
-        "ariariariariariariariari",
-        "rr iiii",
-        "rrrrr iiii",
-        "rrrrrr iiii",
-        "rrrrrrr iiii",
-        "rrrrrrrr iiii"
-    )
+GA_BLACK (0)          GA_RED (3)           GA_GREEN (9)         GA_YELLOW (12)
+GA_BLUE (1)           GA_MAGENTA (4)       GA_CYAN (10)         GA_WHITE (13)
+GA_BRIGHT_BLUE (2)    GA_MAUVE (5)         GA_SKY_BLUE (11)     GA_PASTEL_BLUE (14)
+...and more (see src/palettes.asm for full list)
 ```
 
-defines a page named WRITTER_PAGE2 with its content that will be rendered centered.
-Each line beign an argument encoded in the string. stricly **10**. I do not know the number max of chars in a row, as it depends on their width.
-
-All pages need to be registered to be displayed:
+### Available GA Colors
 
 ```
-WRITTER_PAGES
-    dw WRITTER_PAGE0
-    dw WRITTER_PAGE1
-    dw WRITTER_PAGE2
-    dw 0
+GA_COL_00 to GA_COL_27  # 28 distinct colors on the CPC
+GA_BRIGHT_WHITE, GA_BLACK  # Special named colors
 ```
 
-# How to change the fonts of the scroller
+### Palette Composition
 
-There are 2 fonts in the scroller
+The demo uses `GENERATE_PALETTE()` to create 16-ink palettes dynamically:
 
-- IPM cult like font that uses the out precision that needs to be the same for the few exisitng chars and created similarly for the other
-- birthro font that uses the nop precision instead of the out precision
+- **Inks 0-3:** Background colors (4 inks)
+- **Inks 4-7:** Sprite colors (4 inks)
+- **Inks 8-15:** Writter font colors (8 inks)
 
-all modifications have to be coded in `src/split_scroller_font.asm` and ipm/birthro fonts are coded in a differnt way.
+Each layer can be shown or hidden independently.
 
-an ipm char is coded like that
-```z80
-		FONT_CREATE_IPM_CHAR( s,
-			"###.",
-			"#...",
-			"#...",
-			"###.",
-			"..#.",
-			"..#.",
-			"..#.",
-			"###."
-		)
-```
-you provide the  letter (in lower case) and the height lines of 4 columns. Here each `#` represents a 4 nops  wide pixel.
+### Scroller Palettes
 
-a birthro char is coded like that
+The scroller has two pre-defined palette styles (8 inks each):
 
-```z80
-		FONT_CREATE_CHAR( s,
-			".###########....",
-			"####............",
-			"####............",
-			".##########.....",
-			"........####....",
-			"........####....",
-			"........####....",
-			"###########....."
-		)
-```
+1. **SCROLLER_COLORED_PALETTE** — Gradient blend (GA_COL_09-20)
+2. **SCROLLER_MONOCHROME_PALETTE** — White only
 
-you provide the char (also in lowercase) and the height lines.
-There are various constraints, if you do not respect them, the assembler fails. I suggest to assemble regularly. Here each `#` represents a 1 nop  pixel.
-Here are the constraints to respect:
+---
 
-- The first `#` of the line can start at any horizontal position
-- Each line must end by at least 4 spaces
-- you need at least 4 spaces before setting a `#` (expect at the very beginning of a line)
-- you need at least 4 `#` before setting a space
+## Troubleshooting
 
+### "Image must be 192x168"
+Make sure your background BMP is exactly **192 pixels × 168 pixels**. Use your image editor to resize if needed.
 
-If the birthro char is exactly the same than the ipm char, state it explicitly without drawing it a second time with another encoding
+(in fact we can double the pixels without issue)
 
-```z80
-	NOP_FONT_SAME_AS_IPM(t)
+### "Image must have 4 colors max"
+Count unique colors in your image:
+- Photoshop: Window → Color → check swatches
+- GIMP: Image → Mode → check indexed color palette
+
+### "Sprites have mismatched dimensions"
+All three animation frames (eye0, eye1, eye2) must be:
+- Same width (in pixels)
+- Same height (in pixels)
+- Same offset position (X, Y)
+
+Adjust `src/build.bnd` if you change sprite size:
+```jinja2
+{%set SPRITE0_WIDTH=48//2 %}    # Width in bytes
+{%set SPRITE0_HEIGHT=44 %}      # Height in lines
+{%set SPRITE0_X_OFFSET=10 %}    # X position (in bytes)
+{%set SPRITE0_Y_OFFSET=50 %}    # Y position (in pixels)
 ```
 
+### "Build fails with 'size crunch'"
+The demo has hard-coded memory layout for linking. If you add too much code/data, it may exceed available RAM. Contact the original creator (Krusty) for memory layout adjustments.
 
-There is another constraint too each char defined as ipm must be defined as birthro too (and vice versa).
-So the best is probably to write first the IPM version of each char, use NOP_FONT_SAME_AS_IPM to duplicate them for birthro and progressively remove the duplication with handwritten variant that use the nop resolution.
+### "Scroller characters appear wrong"
+Check these constraints:
+- Characters must be **at least 8 nops wide** (for progressive 8-frame drawing)
+- All rows must end with **4+ spaces** (timing requirement)
+- All rows of one character must have **same duration** (nops)
 
+### "Emulator won't run snapshot"
+- Check that `bndbuild test_sna` completed without errors
+- Check terminal output for error messages
+- Verify all image files exist in `data/` folder
 
+---
 
-The font as to be registered
+## Advanced: Running on Floppy Disk
 
-Palette has to be setup in `src/palettes.asm` here
+To create a bootable disk image:
 
-
-
-```z80
-SCROLLER_PALETTE equ [
-        GA_COL_09,
-		GA_COL_10,
-		GA_COL_18,
-		GA_COL_20,
-		GA_COL_20,
-		GA_COL_18,
-		GA_COL_10,
-		GA_COL_09
-]
+```bash
+cd src
+bndbuild test_dsk
 ```
 
-There is a single color per block line. It is technically impossible to have one color per line as in IPM cult
+Output: `src/BIRTHTRO.DSK` (ready to run on CPC or emulator)
 
-# How to change the content of the scroller
-
-The content is in `src/split_scroller_text.asm`.
-switch between lower/upper case to select ipm/birthro font
+**Note:** Full linking is involved (may take a minute on first build). Requires hard-coded memory layout—contact Krusty if you add significant code.
