@@ -547,6 +547,8 @@ scroller_select_new_char
 .text_location equ $-2
 	ld a, (hl)
 
+	BREAKPOINT
+
 	cp 255 : jr nz, .save_next_char_position
 
 	ld hl, scroller_text
@@ -833,8 +835,42 @@ FONT_MAPPING
 	FONT_MAPPING_GENERATE({eval}registered_scroller_char)
 
 
-include "split_scroller_text.asm"
+function IS_EOL char
+	return {char} == 10 || {char} == 13
+endfunction
 
+function IS_NOT_EOL char
+	return !IS_EOL({char})
+endfunction
+
+function IS_INVALID char
+	return -1 == list_position_value(complete_charset, {char})
+endfunction
+
+function KEEP_CHAR char
+	return (!IS_EOL({char})) && (!IS_INVALID({char}))
+endfunction
+
+SCROLLER_RAW_TEXT equ load("split_scroller_text.txt") 				; Read the text (as a binary file) with line return
+SCROLLER_TEXT equ string_from_list(list_filter(SCROLLER_RAW_TEXT, "KEEP_CHAR"))      ; Remove them. Warning, they are not replaced by a space!
+print SCROLLER_RAW_TEXT
+print SCROLLER_TEXT
+
+print "SCROLLER_TEXT = ", SCROLLER_TEXT
+scroller_text
+.start
+	db SCROLLER_TEXT ; hope it is mapped properly as it is a string
+.end
+	db 255
+
+.nb_chars = .end-.start
+	; Double check there is no erro rin the text
+	repeat .nb_chars, i, 0
+		.current = peek(.start + {i})
+		if .current >= string_len(complete_charset)
+			FAIL "Invalid char in the text: ", {hex}.current, " at (filtered) position ", {i}
+		endif
+	endrepeat
 
 	align 256
 SCROLLER_MONOCHROME_RASTERS_DATA

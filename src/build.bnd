@@ -26,7 +26,7 @@
 
 - tgt: test_sna
   dep: {{ SNA }}
-  cmd: -emu --emulator amspirit   --snapshot {{SNA}} run
+  cmd: -emu --emulator ace   --snapshot {{SNA}} run
 
 - tgt: debug_sna
   dep: {{ SNA }}
