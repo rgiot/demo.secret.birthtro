@@ -16,19 +16,9 @@ WRITTER_PAGE0
         "aaaa rrrrrrrr iiii"
     )
 
-WRITTER_PAGE1
-    WRITTER_ENCODE_PAGE(
-        "abcdefghijklmnopqrstuvwxyz",
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        " i ",
-        "                   ",
-        "ariariariariariariariari",
-        "rr iiii",
-        "rrrrr iiii",
-        "rrrrrr iiii",
-        "rrrrrrr iiii",
-        "rrrrrrrr iiii"
-    )
+
+    WRITTER_ADD_PAGE_FROM_FILE("writter_page1.txt")
+
 
 WRITTER_PAGE2
     WRITTER_ENCODE_PAGE(

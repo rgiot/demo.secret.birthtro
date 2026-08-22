@@ -729,9 +729,29 @@ writter_char_{symb}_length equ CURRENT_CHAR_LENGTH
 
     CURRENT_PAGE_NUMBER = 1
 
-    macro ADD_PAGE_FROm_FILE file_name
-WRITTER
-        include {file_name}
+    macro WRITTER_ADD_PAGE_FROM_FILE file_name
+WRITTER_PAGE{CURRENT_PAGE_NUMBER}
+    CURRENT_PAGE_NUMBER += 1
+    CURRENT_PAGE_CONTENT = load({file_name})
+    CURRENT_PAGE_LINES = list_split_by_value(CURRENT_PAGE_CONTENT, "\n")
+
+    if list_len(CURRENT_PAGE_LINES) != WRITTER_GRID_HEIGHT
+        fail "Page must have exactly ", WRITTER_GRID_HEIGHT, " lines"
+    endif
+
+    line0 = string_from_list(list_get(CURRENT_PAGE_LINES, 0))
+    line1 = string_from_list(list_get(CURRENT_PAGE_LINES, 1))
+    line2 = string_from_list(list_get(CURRENT_PAGE_LINES, 2))
+    line3 = string_from_list(list_get(CURRENT_PAGE_LINES, 3))
+    line4 = string_from_list(list_get(CURRENT_PAGE_LINES, 4))
+    line5 = string_from_list(list_get(CURRENT_PAGE_LINES, 5))
+    line6 = string_from_list(list_get(CURRENT_PAGE_LINES, 6))
+    line7 = string_from_list(list_get(CURRENT_PAGE_LINES, 7))
+    line8 = string_from_list(list_get(CURRENT_PAGE_LINES, 8))
+    line9 = string_from_list(list_get(CURRENT_PAGE_LINES, 9))
+    
+    WRITTER_ENCODE_PAGE(line0, line1, line2, line3, line4, line5, line6, line7, line8, line9)
+
     endm
 
 
