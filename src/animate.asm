@@ -238,10 +238,34 @@ replace_background_sprite_{sprite_nb}_{step_nb}
 
 add_to_change equ duration(ld a, 0) + duration(add l) + duration(ld l, a)
 
+
+;;
+;; The animation cannot run if the scroll is too low because it takes too much tim
+cancel_animation_0_if_needed
+    ld a, (demo_frame_run.wait_lines-1)
+    cp ANIMATION_SCROLLER_POSITION_THRESHOLD
+    ret c
+
+    BREAKPOINT
+    ; we go back one step in the animation
+    ld hl, (replace_background_sprite_0.ptr)
+    dec hl : dec hl
+    ld (replace_background_sprite_0.ptr), hl
+
+    pop hl ; we consume the return address of the drwining routine to really leave
+    ret
+
+
     ;; To speed up spirtes drwing, we want dedicated macros
     macro GENERATE_SPRITE_DISPLAY_CODE_DELTA sprite_nb, src, dst
 ; Replace the bytes to go from sprite {src} to sprite {dst} for sprite number {sprite_nb}
 replace_background_sprite_{sprite_nb}_{src}_{dst}
+
+        call cancel_animation_0_if_needed
+
+
+
+
         current_sprite_location = SPRITE{sprite_nb}_LOCATION 
 
         ; XXX There is a bug in basm when using @lru instead of current_lru => the lru is wrongly altered

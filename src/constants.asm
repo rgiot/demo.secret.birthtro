@@ -148,3 +148,6 @@ WRITTER_TRANSITION_NB_CALLS_FULL equ int(WRITTER_TRANSITION_NB_STEPS_FULL / WRIT
 SPRITE0_LOCATION equ 0xc000 + 96*(SPRITE0_Y_OFFSET>>3) + 0x800*(SPRITE0_Y_OFFSET%8) + SPRITE0_X_OFFSET
 
 SPRITE0_NB_FRAMES equ 3
+
+; we cancel the animation if the scroller is too low in the scren. It means when curve is higher than the threshold
+ANIMATION_SCROLLER_POSITION_THRESHOLD equ 30
