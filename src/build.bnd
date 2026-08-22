@@ -41,6 +41,7 @@
     - {{ MUSIC_DATA }}
     - {{ MUSIC_CFG }}
     - split_scroller_text.txt
+    - "writter_page*.txt"
   cmd: |
     basm --snapshot sna.asm -o {{SNA}} 
         -DFACE_SCR=\"{{FACE_SCR}}\" -DFACE_PAL=\"{{FACE_PAL}}\"
