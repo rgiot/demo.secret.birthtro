@@ -40,6 +40,7 @@
     - {{ LEFT_EYE0_SPR }} {{ LEFT_EYE1_SPR }} {{ LEFT_EYE2_SPR }}
     - {{ MUSIC_DATA }}
     - {{ MUSIC_CFG }}
+    - split_scroller_text.txt
   cmd: |
     basm --snapshot sna.asm -o {{SNA}} 
         -DFACE_SCR=\"{{FACE_SCR}}\" -DFACE_PAL=\"{{FACE_PAL}}\"

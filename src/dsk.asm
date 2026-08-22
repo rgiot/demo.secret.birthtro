@@ -1,6 +1,7 @@
 
 	include "demosystem/linker_common.asm" ; TODO include it inside basm as it is so useful
-	
+
+	fail "Music has moved in bank. need to update this file"	
 	
 	org 0x100
 	

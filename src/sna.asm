@@ -25,6 +25,7 @@ range 0xc000, 0xffff, screen_main
 
     BANKSET 1
 range 0x4000, 0x7fff, demo_code_c5
+range 0x8000, 0xb000, paged_music_for_c6
 
     BANKSET 0
 section demo_code_main
@@ -36,6 +37,18 @@ section screen_buffer
     BANKSET 1
 section demo_code_c5
     include "animate.asm"
+
+section paged_music_for_c6
+	rorg 0x4000
+	
+	; music
+    include MUSIC_CFG
+MUSIC
+    include MUSIC_DATA
+    include "PlayerAkg.asm"
+
+	assert $<0x8000
+	rend
 
 
 
@@ -50,3 +63,4 @@ section demo_code_c5
 	SAVE_SECTION(demo_code_main, "C0.300")
 	SAVE_SECTION(screen_buffer, "C0.8000")
 	SAVE_SECTION(demo_code_c5,"C5.4000")
+	SAVE_SECTION(paged_music_for_c6,"C6.4000")

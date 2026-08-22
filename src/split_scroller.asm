@@ -546,9 +546,6 @@ scroller_select_new_char
 	ld hl, scroller_text
 .text_location equ $-2
 	ld a, (hl)
-
-	BREAKPOINT
-
 	cp 255 : jr nz, .save_next_char_position
 
 	ld hl, scroller_text
@@ -777,16 +774,22 @@ letter_{char}_line_0 equ letter_ipm{char}_line_0
 
 
 	macro FONT_MAPPING_ENTRY(char)
+		; XXX we cannot directly use {char} because it is replaced with surroundings ''
 		@letter={char}
 		dw letter_ipm{@letter}
-		dw letter_{@letter} ; XXX we cannot directly use {char} because it is replaced with surroundings ''
+
+		ifdef letter_{@letter} 
+			dw letter_{@letter} 
+		else
+			dw letter_ipm{@letter} ; fallback to IPM version
+		endif
 	endm
 
 	;; Macro to generate the table that maps chars to their font data
 	;; take as input a lowercase string and generate the charset command and the table with the mapping for each char to its font data
 	;; Generation order space, lower1, upper1, lower2, upper2, ...
 	macro FONT_MAPPING_GENERATE lowercase_chars
-complete_charset = " " ; very first char is space
+complete_charset = " .,!" ; very first char is space, then  punctuation
 
 		; generate the string to provide to charset directive
 		repeat string_len({lowercase_chars}), i, 0
@@ -797,12 +800,17 @@ complete_charset = " " ; very first char is space
 
 
 
+	PRINT "SCROLLER CHARSET: ", complete_charset
+
 		; really execute charset_directive
 		charset complete_charset, 0
 
 		; generate the table of correspondance of each char
 FONT_CHAR_TABLE
 		dw letter_sp
+		dw letter_dot
+		dw letter_comma
+		dw letter_exclamation
 		repeat string_len({lowercase_chars}), i, 0
 			FONT_MAPPING_ENTRY({eval}list_get({lowercase_chars}, {i}))
 		endr
@@ -851,12 +859,12 @@ function KEEP_CHAR char
 	return (!IS_EOL({char})) && (!IS_INVALID({char}))
 endfunction
 
-SCROLLER_RAW_TEXT equ load("split_scroller_text.txt") 				; Read the text (as a binary file) with line return
 SCROLLER_TEXT equ string_from_list(list_filter(SCROLLER_RAW_TEXT, "KEEP_CHAR"))      ; Remove them. Warning, they are not replaced by a space!
 print SCROLLER_RAW_TEXT
 print SCROLLER_TEXT
 
-print "SCROLLER_TEXT = ", SCROLLER_TEXT
+print "SCROLLER TEXT RAW= ", string_from_list(SCROLLER_RAW_TEXT)
+print "SCROLLER TEXT = ", SCROLLER_TEXT
 scroller_text
 .start
 	db SCROLLER_TEXT ; hope it is mapped properly as it is a string

@@ -295,7 +295,7 @@ The scroller uses two font variants for smooth animation:
 - **IPM precision** (4-nop pixels) — slower scroll, smoother animation
 - **NOP precision** (1-nop pixels) — faster scroll
 
-Character definitions use `#` for pixels and spaces for empty:
+Character definitions use `#` for pixels and `.` for empty:
 
 ```asm
 FONT_CREATE_IPM_CHAR( a,
@@ -326,11 +326,7 @@ FONT_CREATE_IPM_CHAR( yourchar,
 )
    ```
 
-2. Define the NOP precision version. Either **reuse the same design**:
-   ```asm
-   NOP_FONT_SAME_AS_IPM(yourchar)
-   ```
-   
+2. Define the NOP precision version. Either **reuse the same design** by strictly doing nothing.
    Or write a **different, more detailed design** with `FONT_CREATE_CHAR` (1-nop pixels, same 8 rows):
    ```asm
 FONT_CREATE_CHAR( yourchar,
@@ -377,17 +373,13 @@ bndbuild test_sna
 
 **What you're doing:** Changing what text scrolls.
 
-**File:** `src/split_scroller_text.asm`
+**File:** `src/split_scroller_text.txt`
 
 **To change the text:**
 
-Find the `scroller_text` label and edit the string:
-
-```asm
-scroller_text
-    db "Hello world this is text"
-    db 255  # End marker
-```
+Just edit the file using ASCII chars.
+You can use several lines if needed.
+Tink to add a space at the end of a line if you want to spearte last car of a line from first char of the next line.
 
 **Text case note:** The scroller switches fonts based on uppercase/lowercase:
 - Uppercase letters use IPM precision (blocky - oldschool)

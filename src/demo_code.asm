@@ -95,14 +95,6 @@ demo_init_screen
     ld bc, 0xbc00 + 13 : out (c),c : ld bc, 0xbd00 : out (c), c
     ret
 
-; Prepare the player to play the music
-demo_init_music
-    ld hl, MUSIC : xor a
-    call PLY_AKG_Init
-    ret
-
-
-
 demo_adapt_for_crtc
     call ds_crtc_detector
     cp 1 : jr z, .patch_crtc1
@@ -157,7 +149,7 @@ demo_frame_run
     ld b, 20
 .wait_lines
     defs 64 - duration(djnz $)-1
-    BREAKPOINT : djnz .wait_lines
+    djnz .wait_lines
 
     defs 64 - 6
 
@@ -244,13 +236,30 @@ demo_frame_init
     ret
 
 
+
+; Prepare the player to play the music
+demo_init_music
+    assert $<=0x4000 || $>=0x8000
+    ld bc, 0x7fc6: out (c), c
+    ld hl, MUSIC : xor a
+    call PLY_AKG_Init
+    ld bc, 0x7fc0: out (c), c
+    assert $<=0x4000 || $>=0x8000
+    ret
+
+
+
+
 demo_play_music
     ld a, 0 : .activated equ $-1 ; music is not played at the very beginning
     or a : ret z
 
 
-    
-    di : call PLY_AKG_Play : ei
+    assert $<=0x4000 || $>=0x8000
+    ld bc, 0x7fc6: out (c), c    
+        di : call PLY_AKG_Play : ei
+    ld bc, 0x7fc0: out (c), c
+    assert $<=0x4000 || $>=0x8000
     ret
 
     ; all common stuffs
@@ -258,11 +267,7 @@ demo_play_music
     include "lib.asm"
     include "palettes.asm"
 
-    ; music
-    include MUSIC_CFG
-MUSIC
-    include MUSIC_DATA
-    include "PlayerAkg.asm"
+
 
     ; effects code and data
     include "spectral_sprites.asm"
