@@ -1,3 +1,5 @@
+	;; XXX The priority is to desinged the NOP precice font. The interest of the scroller is there
+	
 	;; ATM the punctuation is NOP only. Maybe you hae to find a way to make a IPM version too
 	
 		FONT_CREATE_CHAR( dot,
@@ -45,6 +47,19 @@
 			"#.#."
 		)
 
+
+		FONT_CREATE_IPM_CHAR( b,
+			"###.",
+			"#.#.",
+			"#.#.",
+			"##..",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"###."
+		)
+
+
 		FONT_CREATE_IPM_CHAR( c,
 			"###.",
 			"#.#.",
@@ -56,28 +71,53 @@
 			"###."
 		)
 
-		FONT_CREATE_IPM_CHAR( l,
+
+		FONT_CREATE_IPM_CHAR( d,
+			"##..",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"##.."
+		)
+
+
+		FONT_CREATE_IPM_CHAR( e,
+			"###.",
 			"#...",
 			"#...",
-			"#...",
-			"#...",
+			"##..",
 			"#...",
 			"#...",
 			"#...",
 			"###."
 		)
 
+		FONT_CREATE_IPM_CHAR( f,
+			"###.",
+			"#...",
+			"#...",
+			"##..",
+			"#...",
+			"#...",
+			"#...",
+			"#..."
+		)
 
-		FONT_CREATE_IPM_CHAR( u,
-			"#.#.",
-			"#.#.",
-			"#.#.",
-			"#.#.",
-			"#.#.",
+
+		FONT_CREATE_IPM_CHAR( g,
+			"###.",
+			"#...",
+			"#...",
+			"#...",
+			"###.",
 			"#.#.",
 			"#.#.",
 			"###."
 		)
+
 
 		FONT_CREATE_IPM_CHAR( h,
 			"#.#.",
@@ -102,6 +142,39 @@
 			"###."
 		)
 
+		FONT_CREATE_IPM_CHAR( j,
+			".##.",
+			"..#.",
+			"..#.",
+			"..#.",
+			"..#.",
+			"..#.",
+			"#.#.",
+			".##."
+		)
+
+
+		FONT_CREATE_IPM_CHAR( k,
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"##..",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#."
+		)
+
+		FONT_CREATE_IPM_CHAR( l,
+			"#...",
+			"#...",
+			"#...",
+			"#...",
+			"#...",
+			"#...",
+			"#...",
+			"###."
+		)
 
 
 		FONT_CREATE_IPM_CHAR( m,
@@ -115,6 +188,29 @@
 			"#.#."
 		)
 
+		FONT_CREATE_IPM_CHAR( n,
+			"###.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#."
+		)
+
+		FONT_CREATE_IPM_CHAR( o,
+			"###.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"###."
+		)
+
+
 		FONT_CREATE_IPM_CHAR( p,
 			"###.",
 			"#.#.",
@@ -125,7 +221,6 @@
 			"#...",
 			"#..."
 		)
-		NOP_FONT_SAME_AS_IPM(p)
 
 		FONT_CREATE_IPM_CHAR( r,
 			"###.",
@@ -161,6 +256,55 @@
             ".#.."
 		)
 	;	NOP_FONT_SAME_AS_IPM(t) ; => no need anymore, it is implied
+
+
+		FONT_CREATE_IPM_CHAR( u,
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"###."
+		)
+
+
+		FONT_CREATE_IPM_CHAR( v,
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			".#..",
+			".#.."
+		)
+
+
+				FONT_CREATE_IPM_CHAR( w,
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"###.",
+			"#.#."
+		)
+
+
+		FONT_CREATE_IPM_CHAR( y,
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			"#.#.",
+			".#..",
+			".#..",
+			".#..",
+			".#.."
+		)
+
 
 
 		; our nop resolution font
