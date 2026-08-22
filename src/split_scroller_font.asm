@@ -1,4 +1,6 @@
-	;; XXX The priority is to desinged the NOP precice font. The interest of the scroller is there
+	;; XXX The priority is to designed the NOP precice font. The interest of the scroller is there
+	;; of course some characters can be indentical than the IPM one, in that case there is nothing to do.
+	;; but there shold be not a lot of them
 	
 	;; ATM the punctuation is NOP only. Maybe you hae to find a way to make a IPM version too
 	
@@ -44,6 +46,17 @@
 			".####...." ,
 			".####...."  ,
 			"####....."  
+		)
+
+	FONT_CREATE_CHAR(acute,
+			"....####...." ,
+			"....####...." ,
+			"..####......" ,
+			"............" ,
+			"............" ,
+			"............" ,
+			"............" ,
+			"............" 
 		)
 
 		FONT_CREATE_CHAR(exclamation,
@@ -221,16 +234,17 @@
 			"#.#."
 		)
 
-		FONT_CREATE_IPM_CHAR( o,
-			"###.",
+				FONT_CREATE_IPM_CHAR( o,
+			".#..",
 			"#.#.",
 			"#.#.",
 			"#.#.",
 			"#.#.",
 			"#.#.",
 			"#.#.",
-			"###."
+			".#.."
 		)
+
 
 
 		FONT_CREATE_IPM_CHAR( p,
@@ -343,6 +357,30 @@
 
 
 
+		FONT_CREATE_CHAR( c,
+			".##########.....",
+			"####....####....",
+			"####............",
+			"####............",
+			"####............",
+			"####............",
+			"####....####....",
+			".##########....."
+		)
+
+; Also serves for 0 (so write O instead of 0 in the scroller text)
+		FONT_CREATE_CHAR( o,   
+			"..########......",
+			"####....####....",
+			"####....####....",
+			"####....####....",
+			"####....####....",
+			"####....####....",
+			"####....####....",
+			"..########......"
+		)
+
+
 		FONT_CREATE_CHAR( i,  /*Here we use only one out column instead of 3 in the origial font*/
 			"####.....",
 			"####.....",
@@ -370,6 +408,22 @@
 
 
 
+
+
+
+		FONT_CREATE_CHAR( x,
+			"####....####....",
+			"####....####....",
+			"####....####....",
+			"...######.......",
+			"####....####....",
+			"####....####....",
+			"####....####....",
+			"####....####...."
+		)
+		FONT_REGISTER_NOP_CHAR(x) ; This letter is unknown because absent in IPM version
+
+
 		; our nop resolution font
 		FONT_CREATE_CHAR( s,
 			".###########....",
@@ -383,7 +437,26 @@
 		)
 
 
+		FONT_CREATE_CHAR( 2,
+			"###########.....",
+			"........####....",
+			"........####....",
+			".##########.....",
+			"####............",
+			"####............",
+			"####............",
+			".###########...."
+		)
+		FONT_REGISTER_NOP_CHAR(2) ; This letter is unknown because absent in IPM version
 
-
-
-
+		FONT_CREATE_CHAR( 6,
+			".##########.....",
+			"####....####....",
+			"####............",
+			"###########.....",
+			"####....####....",
+			"####....####....",
+			"####....####....",
+			".##########....."
+		)
+		FONT_REGISTER_NOP_CHAR(6) ; This letter is unknown because absent in IPM version

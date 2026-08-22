@@ -341,12 +341,59 @@ FONT_CREATE_CHAR( yourchar,
 )
    ```
    
-   Use `NOP_FONT_SAME_AS_IPM` when the IPM shape is good enough. Write a `FONT_CREATE_CHAR` when you want a sharper, more detailed variant (as is done for `a` and `i` in the current font file).
+   
+   Write a `FONT_CREATE_CHAR` when you want a sharper, more detailed variant (as is done for `a` and `i` in the current font file).
 
-3. Register it in the font table at the bottom of `src/split_scroller_font.asm`:
-   ```asm
-   FONT_MAPPING_GENERATE("ahirstyourchar")  # Add your char ID here
-   ```
+   If you design a nop precise character that **is not** present in the IPM variant,
+   you also have to register it (x is like that for example): `FONT_REGISTER_NOP_CHAR(X)` (respect the uppercasing).
+
+
+I strongly suggest to create a NOP variant char from the IPM variant in order to keep a bit of consistency. But it's not mandatory.
+
+So from 
+```
+FONT_CREATE_IPM_CHAR( c,
+   "###.",
+   "#.#.",
+   "#...",
+   "#...",
+   "#...",
+   "#...",
+   "#.#.",
+   "###."
+)
+```
+
+we can create the very same one as a nop precise variante byt repeating each char 4 times (vscode cna do itself if you ask "repeat each caracter of each string 4 times")
+
+```
+FONT_CREATE_CHAR( c,
+   "############....",
+   "####....####....",
+   "####............",
+   "####............",
+   "####............",
+   "####............",
+   "####....####....",
+   "############...."
+)
+```
+And then you can arve a bit inside to make it a bit smoother
+
+```
+FONT_CREATE_CHAR( c,
+   ".##########.....",
+   "####....####....",
+   "####............",
+   "####............",
+   "####............",
+   "####............",
+   "####....####....",
+   ".##########....."
+)
+```
+
+it is thuse more clever to design the IPM variant first (or keep the one I have made by cloning the oriignal version)
 
 **Character design constraints (both variants):**
 - All 8 rows must have the same total nop duration

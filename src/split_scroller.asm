@@ -770,6 +770,10 @@ letter_{char} equ letter_ipm{char}
 letter_{char}_line_0 equ letter_ipm{char}_line_0
 	endm
 
+	registered_scroller_unique_char  = ""
+	macro FONT_REGISTER_NOP_CHAR char
+		registered_scroller_unique_char = string_concat(registered_scroller_unique_char, "{char}")
+	endm
 
 
 
@@ -785,11 +789,20 @@ letter_{char}_line_0 equ letter_ipm{char}_line_0
 		endif
 	endm
 
+
+	macro FONT_MAPPING_ENTRY_REGISTERED(char)
+		; XXX we cannot directly use {char} because it is replaced with surroundings ''
+		@letter={char}
+		dw letter_{@letter}
+
+	endm
+
+
 	;; Macro to generate the table that maps chars to their font data
 	;; take as input a lowercase string and generate the charset command and the table with the mapping for each char to its font data
 	;; Generation order space, lower1, upper1, lower2, upper2, ...
-	macro FONT_MAPPING_GENERATE lowercase_chars
-complete_charset = " .,!:)" ; very first char is space, then  punctuation
+	macro FONT_MAPPING_GENERATE lowercase_chars, registered_scroller_unique_char
+complete_charset = " .,!:)'" ; very first char is space, then  punctuation
 
 		; generate the string to provide to charset directive
 		repeat string_len({lowercase_chars}), i, 0
@@ -797,10 +810,21 @@ complete_charset = " .,!:)" ; very first char is space, then  punctuation
 			complete_charset = string_concat(complete_charset, char(int(list_get({lowercase_chars}, {i}))+('A'-'a'))) ; add the upper case version of the char to the charset
 		endr
 
+	PRINT "SCROLLER CHARSET a: ", complete_charset
 
 
 
-	PRINT "SCROLLER CHARSET: ", complete_charset
+		repeat string_len({registered_scroller_unique_char}), i, 0
+		current_char = int(list_get({registered_scroller_unique_char}, {i}))
+		if current_char != '2' && current_char != '6'
+			current_char += ('A'-'a') ; add the upper case version of the char to the charset
+		endif
+			complete_charset = string_concat(complete_charset, char(current_char))
+		endr
+
+
+
+	PRINT "SCROLLER CHARSET b: ", complete_charset
 
 		; really execute charset_directive
 		charset complete_charset, 0
@@ -813,8 +837,13 @@ FONT_CHAR_TABLE
 		dw letter_exclamation
 		dw letter_column
 		dw letter_closing
+		dw letter_acute
+
 		repeat string_len({lowercase_chars}), i, 0
 			FONT_MAPPING_ENTRY({eval}list_get({lowercase_chars}, {i}))
+		endr
+		repeat string_len({registered_scroller_unique_char}), i, 0
+			FONT_MAPPING_ENTRY_REGISTERED({eval}list_get({registered_scroller_unique_char}, {i}))
 		endr
 	endm
 
@@ -842,7 +871,7 @@ letter_impsp equ letter_sp
 
 ; Generate the data for the mapping beteen a char and its code
 FONT_MAPPING
-	FONT_MAPPING_GENERATE({eval}registered_scroller_char)
+	FONT_MAPPING_GENERATE({eval}registered_scroller_char, {eval}registered_scroller_unique_char)
 
 
 function IS_EOL char
@@ -854,7 +883,7 @@ function IS_NOT_EOL char
 endfunction
 
 function IS_INVALID char
-	return -1 == list_position_value(complete_charset, {char})
+	return -1 == list_position_value(complete_charset, {char}) 
 endfunction
 
 function KEEP_CHAR char
