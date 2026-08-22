@@ -585,6 +585,8 @@ writter_or_sprite_w{w}
         endr
     endm
 
+    ; collect the chars of the font
+    writter_complete_charset = ""
     ;;
     ;; Generate the data for the given char for the writter.
     ;; The number of columns can be different for each char, but the same for all the lines of the current char.
@@ -602,6 +604,13 @@ writter_or_sprite_w{w}
     ;; already removed every writter bit, and ORing preserves both the
     ;; background bits and the right pixel of the previous char in a shared byte.
     macro WRITTER_CREATE_CHAR(symb, line0, line1, line2, line3, line4, line5, line6, line7)
+
+        if "{symb}" == "sp"
+            writter_complete_charset = string_concat(writter_complete_charset, " ")
+        else
+            writter_complete_charset = string_concat(writter_complete_charset, "{symb}")
+        endif
+
         CURRENT_CHAR_LENGTH = string_len({line0})
 
         ; ensure the line is not > 8
@@ -650,19 +659,16 @@ writter_char_{symb}_length equ CURRENT_CHAR_LENGTH
 
 
     ;; Macro to generate the table that maps the writter chars to their data.
-    macro WRITTER_MAPPING_GENERATE chars
-writter_complete_charset = " "
-    
-        repeat string_len({chars}), i, 0
-            writter_complete_charset = string_concat(writter_complete_charset, string_get({chars}, {i}))
-        endrepeat
-
+    macro WRITTER_MAPPING_GENERATE 
+   
         print "WRITTER CHARSET", writter_complete_charset
         charset writter_complete_charset, 0
 
+        assert string_get(writter_complete_charset, 0) == ' ', "The first char of the writter charset must be a space"
+
         dw writter_char_sp
-        repeat string_len({chars}), i, 0
-            WRITTER_MAPPING_ENTRY({eval}string_get({chars}, {i})) 
+        repeat string_len(writter_complete_charset)-1, i, 1 ; we skip sp
+            WRITTER_MAPPING_ENTRY({eval}string_get(writter_complete_charset, {i})) 
         endrepeat
     endm
 
