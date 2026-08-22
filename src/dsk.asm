@@ -1,8 +1,6 @@
 
 	include "demosystem/linker_common.asm" ; TODO include it inside basm as it is so useful
 
-	fail "Music has moved in bank. need to update this file"	
-	
 	org 0x100
 	
 	
@@ -15,12 +13,14 @@
 
 	BREAKPOINT
 
+	ld bc, 0x7fc6 : out (c), c
+	SELECTED_CRUNCHER = CRUNCHER_ZX0 : UNCRUNCH(C6_4000, 0x4000)
 	ld bc, 0x7fc5 : out (c), c
 	SELECTED_CRUNCHER = CRUNCHER_ZX0 : UNCRUNCH(C5_4000, 0x4000)
 
 	ld bc, 0x7fc0 : out (c), c
 	SELECTED_CRUNCHER = CRUNCHER_ZX0 : UNCRUNCH(C0_8000, 0x8000)
-	SELECTED_CRUNCHER = CRUNCHER_ZX0_BACKWARD : UNCRUNCH(C0_300, 0x0300)
+	SELECTED_CRUNCHER = CRUNCHER_ZX0_BACKWARD : UNCRUNCH(C0_300, 0x0300) ; backward
 
 	jp 0x300
 
@@ -29,6 +29,7 @@
 	
 	SELECTED_CRUNCHER = CRUNCHER_ZX0_BACKWARD : LOAD_N_CRUNCH(C0_300, "C0.300")
 	SELECTED_CRUNCHER = CRUNCHER_ZX0 : LOAD_N_CRUNCH(C5_4000, "C5.4000")
+	SELECTED_CRUNCHER = CRUNCHER_ZX0 : LOAD_N_CRUNCH(C6_4000, "C6.4000")
 	assert $<0x4000, "we will have bank issues there"
 	assert $<0x8000
 	SELECTED_CRUNCHER = CRUNCHER_ZX0 : LOAD_N_CRUNCH(C0_8000, "C0.8000")

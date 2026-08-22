@@ -22,7 +22,7 @@
 {% set MUSIC_DATA="../data/music/ops.asm" %}
 {% set MUSIC_CFG="../data/music/ops_playerconfig.asm" %}
 
-{%set SNA_GENERATED=["C0.300", "C0.8000", "C5.4000"]%}
+{%set SNA_GENERATED=["C0.300", "C0.8000", "C5.4000", "C6.4000"]%}
 
 - tgt: test_sna
   dep: {{ SNA }}

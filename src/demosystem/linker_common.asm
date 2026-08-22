@@ -116,8 +116,12 @@ ZX7
 	;; TODO :
 	;;  remove dependecy to SELECTED_CRUNCHER by passing it as parameter
 	macro LOAD_N_CRUNCH_WITH cruncher_directive, label, fname
+		ifndef SELECTED_CRUNCHER
+			fail "You need to specify the variable SELECTED_CRUNCHER before using this macro"
+		endif
+
 		@content = load({fname})
-		{label}
+		{label}_{SELECTED_CRUNCHER}
 		.start
 			{cruncher_directive}
 				db @content
@@ -464,22 +468,22 @@ ZX7
 			case CRUNCHER_LZSA2:
 			case CRUNCHER_ZX0:
 			case CRUNCHER_ZX7:
-				UNCRUNCH_STANDARD_NOT_BACKWARD({from}, {to})
+				UNCRUNCH_STANDARD_NOT_BACKWARD({from}_{SELECTED_CRUNCHER}, {to})
 				break
 			case CRUNCHER_ZX0_BACKWARD:
-				UNCRUNCH_STANDARD_BACKWARD({from}, {to})
+				UNCRUNCH_STANDARD_BACKWARD({from}_{SELECTED_CRUNCHER}, {to})
 				break
 			case CRUNCHER_UPKR:
-				UNCRUNCH_UPKR({from}, {to})
+				UNCRUNCH_UPKR({from}_{SELECTED_CRUNCHER}, {to})
 				break
 			case CRUNCHER_LZ4:
-				UNCRUNCH_LZ4({from}, {to})
+				UNCRUNCH_LZ4({from}_{SELECTED_CRUNCHER}, {to})
 				break
 			case CRUNCHER_SHRINKLER
-				UNCRUNCH_SHRINKLER({from}, {to})
+				UNCRUNCH_SHRINKLER({from}_{SELECTED_CRUNCHER}, {to})
 				break
 			default:
-				fail "Unhandled case: ", SELECTED_CRUNCHER
+				fail "Unhandled uncrunch case: ", SELECTED_CRUNCHER
 		ends
 	endm
 
