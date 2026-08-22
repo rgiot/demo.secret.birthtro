@@ -727,6 +727,14 @@ writter_char_{symb}_length equ CURRENT_CHAR_LENGTH
         WRITTER_ENCODE_LINE({line9})
     endm
 
+    CURRENT_PAGE_NUMBER = 1
+
+    macro ADD_PAGE_FROm_FILE file_name
+WRITTER
+        include {file_name}
+    endm
+
+
 ; 6 pixels space
 WRITTER_CREATE_CHAR(
     sp,

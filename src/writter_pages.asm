@@ -1,8 +1,11 @@
 
+
+; The very virst page is no tvisible at all
+; we don't care of its content
 WRITTER_PAGE0
     WRITTER_ENCODE_PAGE(
-        "aaaaaaaaaaaaaaaaaaa",
-        "rrrrrrrrrrrrrrrrrrr",
+        "abcdefghijklmnopqrstuvwxyz",
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         "iiiiiiiiiiiiiiiiiii",
         "                   ",
         "ariariariariariariariari",
@@ -15,8 +18,8 @@ WRITTER_PAGE0
 
 WRITTER_PAGE1
     WRITTER_ENCODE_PAGE(
-        " a ",
-        " r ",
+        "abcdefghijklmnopqrstuvwxyz",
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         " i ",
         "                   ",
         "ariariariariariariariari",

@@ -246,7 +246,6 @@ cancel_animation_0_if_needed
     cp ANIMATION_SCROLLER_POSITION_THRESHOLD
     ret c
 
-    BREAKPOINT
     ; we go back one step in the animation
     ld hl, (replace_background_sprite_0.ptr)
     dec hl : dec hl
@@ -514,8 +513,7 @@ replace_background_sprite_0
 	ei
 	ret
 .over
-    BREAKPOINT
-    ld a, ANIMATION_STATE_FINISHED
+    BREAKPOINT : ld a, ANIMATION_STATE_FINISHED
     ld (animation_state), a
     ret
 
