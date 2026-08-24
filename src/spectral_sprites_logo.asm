@@ -4,39 +4,52 @@
 ;;     if needed, remove the call to double_columns and manually duplicate the line to double the horizontal resolution
 ;; use " " for an empty bloc
 ;; use "#" for a drawn bloc
-spectral_sprites_model equ [
-    "####    ####    ####  ",
-    "   ##   ##  #       # ",
-    "####    ##  ##  ##  ##",
-    "##  ##  ##  ##  ##  ##",
-    "#####   ##  ##  ####  "
-]
 
 
+SELECTED_LOGO=3
 
-;; spectral_sprites_model equ [
-;;     "##  ####   ##    ###  ",
-;;     "    #   #   #   ##    ",
-;;     "##      ##       #### ",
-;;     "##      ##          ##",
-;;     "##      ##      ##### "
-;; ]
+switch  SELECTED_LOGO
+case 0:
+
+    spectral_sprites_model equ [
+        "####    ####    ####  ",
+        "   ##   ##  #       # ",
+        "####    ##  ##  ##  ##",
+        "##  ##  ##  ##  ##  ##",
+        "#####   ##  ##  ####  "
+    ]
+
+break
+case 1:
+
+    spectral_sprites_model equ [
+        "##  ####   ##    ###  ",
+        "    #   #   #   ##    ",
+        "##      ##       #### ",
+        "##      ##          ##",
+        "##      ##      ##### "
+    ]
+break
+case 2:
+
+ spectral_sprites_model equ [
+     "         ####         ",
+     "            ##        ",
+     "        ######        ",
+     "        ##  ##        ",
+     "        ##  ##        "
+ ]
+
+break
+case 3:
 
 
-;; spectral_sprites_model equ [
-;;     "         ####         ",
-;;     "            ##        ",
-;;     "        ######        ",
-;;     "        ##  ##        ",
-;;     "        ##  ##        "
-;; ]
+ spectral_sprites_model equ [
+     "####     ####   ##  ##",
+     "   ##       ##  ##  ##",
+     "####    ##  ##   #### ",
+     "##  ##  ##  ##    ##  ",
+     "####     ####     ##  "
+ ]
 
-
-
-;; spectral_sprites_model equ [
-;;     "####     ####   ##  ##",
-;;     "   ##       ##  ##  ##",
-;;     "####    ##  ##   #### ",
-;;     "##  ##  ##  ##    ##  ",
-;;     "####     ####     ##  "
-;; ]
+ endswitch
