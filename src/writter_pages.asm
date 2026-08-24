@@ -1,5 +1,5 @@
 
-
+/*
 ; The very virst page is no tvisible at all
 ; we don't care of its content
 WRITTER_PAGE0
@@ -15,27 +15,15 @@ WRITTER_PAGE0
         "aaaa rrrrrrr iiii",
         "aaaa rrrrrrrr iiii"
     )
+*/
+
+    repeat 2
+        WRITTER_ADD_PAGE_FROM_FILE("writter_page1.txt")
+    endrepeat
+    WRITTER_ADD_PAGE_FROM_FILE("writter_page2.txt")
+    WRITTER_ADD_PAGE_FROM_FILE("writter_page3.txt")
+    WRITTER_ADD_PAGE_FROM_FILE("writter_page4.txt")
+    WRITTER_ADD_PAGE_FROM_FILE("writter_page5.txt")
 
 
-    WRITTER_ADD_PAGE_FROM_FILE("writter_page1.txt")
 
-
-WRITTER_PAGE2
-    WRITTER_ENCODE_PAGE(
-        " a ",
-        " r ",
-        " i ",
-        "                   ",
-        "ariariariariariariariari",
-        "rr iiii",
-        "rrrrr iiii",
-        "rrrrrr iiii",
-        "rrrrrrr iiii",
-        "rrrrrrrr iiii"
-    )
-
-WRITTER_PAGES
-    dw WRITTER_PAGE0
-    dw WRITTER_PAGE1
-    dw WRITTER_PAGE2
-    dw 0

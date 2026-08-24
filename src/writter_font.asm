@@ -3,6 +3,59 @@
 ; of course a graphician one would be better
 
 
+
+
+WRITTER_CREATE_CHAR(
+    column,
+    "    ",
+    " ## ",
+    " ## ",
+    "    ",
+    "    ",
+    " ## ",
+    " ## ",
+    "    "
+)
+
+
+WRITTER_CREATE_CHAR(
+    dot,
+    "    ",
+    "    ",
+    "    ",
+    "    ",
+    "    ",
+    " ## ",
+    " ## ",
+    "    "
+)
+
+WRITTER_CREATE_CHAR(
+    comma,
+    "    ",
+    "    ",
+    "    ",
+    "    ",
+    "    ",
+    " ## ",
+    " ## ",
+    "##  "
+)
+
+WRITTER_CREATE_CHAR(
+    acute,
+    "    ",
+    "  ##",
+    " ## ",
+    " ## ",
+    "    ",
+    "    ",
+    "    ",
+    "    "
+)
+
+
+
 ; Lowercase
 WRITTER_CREATE_CHAR(
     a,

@@ -513,7 +513,7 @@ replace_background_sprite_0
 	ei
 	ret
 .over
-    BREAKPOINT : ld a, ANIMATION_STATE_FINISHED
+    ld a, ANIMATION_STATE_FINISHED
     ld (animation_state), a
     ret
 

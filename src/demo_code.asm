@@ -9,7 +9,6 @@
 
 ;; We assume everythin is properly loaded in memory, and we just need to run the demo
 demo_start
-
     ; kill the system
     di
         ld hl, 0xC9fb
@@ -24,7 +23,7 @@ demo_start
 
     ; Initialize the various components of effects
 demo_init
-    call demo_adapt_for_crtc ; Need to be the very first stuff
+    BREAKPOINT : call demo_adapt_for_crtc ; Need to be the very first stuff
     call demo_init_screen
     call demo_init_music
     if ENABLE_COMPLETE_SCREEN_COPY
@@ -104,7 +103,7 @@ demo_adapt_for_crtc
 .patch_crtc3
 .patch_crtc4
     ld hl, demo_init_screen.crtc_r2_value
-    dec (hl)
+    inc (hl)
     ret
 .patch_crtc1
     ld a, 6 : ld (scroller_show.crtc_register), a

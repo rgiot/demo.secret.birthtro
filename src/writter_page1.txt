@@ -1,10 +1,10 @@
-abcdefghijklmnopqrstuvwxyz
-ABCDEFGHIJKLMNOPQRSTUVWXYZ
- i 
-                   
-ariariariariariariariari
-rr iiii
-rrrrr iiii
-rrrrrr iiii
-rrrrrrr iiii
-rrrrrrrr iiii
+Welcome in:
+PATERNITY.BAS
+hoMage to Eliot's
+greatest production
+
+This demo has been released at
+the Benediction Coding Party
+ 
+A nice event organized by Eliot
+And welcome to NAME 

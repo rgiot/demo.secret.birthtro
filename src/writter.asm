@@ -585,6 +585,41 @@ writter_or_sprite_w{w}
         endr
     endm
 
+
+    ; TODO update when a new char is used
+    function writter_char_to_code char
+        if {char} == " "
+            return "sp"
+        elseif {char} == ":"
+            return "column"
+        elseif {char} == "."
+            return "dot"
+        elseif {char} == "'"
+            return "acute"
+        elseif {char} == ","
+            return "comma"
+        else
+            return {char}
+        endif
+    endfunction
+
+    ; TODO update when a new char is used
+    function writter_code_to_char code
+        if {code} == "sp"
+            return " "
+        elseif {code} == "column"
+            return ":"
+        elseif {code} == "dot"
+            return "."
+        elseif {code} == "acute"
+            return "'"
+        elseif {code} == "comma"
+            return ","
+        else
+            return {code}
+        endif
+    endfunction
+
     ; collect the chars of the font
     writter_complete_charset = ""
     ;;
@@ -605,11 +640,9 @@ writter_or_sprite_w{w}
     ;; background bits and the right pixel of the previous char in a shared byte.
     macro WRITTER_CREATE_CHAR(symb, line0, line1, line2, line3, line4, line5, line6, line7)
 
-        if "{symb}" == "sp"
-            writter_complete_charset = string_concat(writter_complete_charset, " ")
-        else
-            writter_complete_charset = string_concat(writter_complete_charset, "{symb}")
-        endif
+        current_code="{symb}"
+        current_char = writter_code_to_char(current_code)
+        writter_complete_charset = string_concat(writter_complete_charset, current_char)
 
         CURRENT_CHAR_LENGTH = string_len({line0})
 
@@ -664,15 +697,17 @@ writter_char_{symb}_length equ CURRENT_CHAR_LENGTH
         print "WRITTER CHARSET", writter_complete_charset
         charset writter_complete_charset, 0
 
-        assert string_get(writter_complete_charset, 0) == ' ', "The first char of the writter charset must be a space"
 
-        dw writter_char_sp
-        repeat string_len(writter_complete_charset)-1, i, 1 ; we skip sp
-            WRITTER_MAPPING_ENTRY({eval}string_get(writter_complete_charset, {i})) 
+        repeat string_len(writter_complete_charset), i, 0 ; we skip sp
+            current_char = string_get(writter_complete_charset, {i})
+            current_code = writter_char_to_code(current_char)
+            
+            print current_char, "->", current_code
+            WRITTER_MAPPING_ENTRY({eval}current_code) 
         endrepeat
     endm
 
-
+ 
 
     ;; A line is shown horizontally centered and is encoded this way
     ;; - Number of bytes to skip in the line (1 byte)
@@ -680,23 +715,39 @@ writter_char_{symb}_length equ CURRENT_CHAR_LENGTH
     ;; - Number of chars in the line (1 byte)
     ;; - For each char its code (1 byte/char, mapped through the writter charset, see WRITTER_MAPPING_GENERATE)
     macro WRITTER_ENCODE_LINE content
-        ; Compute the total number of pixels in the string
-        CURRENT_TOTAL_PIXELS_SIZE = 0
-        repeat string_len({content}), i, 0
-            current_char = string_get({content}, {i})
-            if current_char == ' '
-                current_char = 'sp'
-            endif
-            CURRENT_TOTAL_PIXELS_SIZE += writter_char_{current_char}_length
-        endrepeat
+        print "{content}"
+        if string_len({content}) == 0
+            ; do not do nothing, but emit a line with a single space char (the first char of the writter charset)
+            db 0 ; nb bytes to skip
+            db 0 ; nb pixels to skip
+            db 1 ; nb chars
+            db ' '
+        else
+            ; Compute the total number of pixels in the string
+            CURRENT_TOTAL_PIXELS_SIZE = 0
+            repeat string_len({content}), i, 0
+                current_char = string_get({content}, {i})
+                current_code = writter_char_to_code(current_char)
+                print current_char
+                print current_code
+                assert  writter_char_{current_code}_length <= 8
+                CURRENT_TOTAL_PIXELS_SIZE += writter_char_{current_code}_length
+            endrepeat
 
-        assert CURRENT_TOTAL_PIXELS_SIZE <= WRITTER_GRID_WIDTH_PIXELS, "Line is too long for the writter grid"
-        ; centering offset: half of the unused pixels of the grid
-        CURRENT_SKIP_PIXELS_SIZE = (WRITTER_GRID_WIDTH_PIXELS - CURRENT_TOTAL_PIXELS_SIZE) / 2
-        db CURRENT_SKIP_PIXELS_SIZE>>1 ; nb bytes to skip
-        db CURRENT_SKIP_PIXELS_SIZE&1  ; nb pixels to skip
-        db string_len({content})       ; nb chars
-        db {content}                    ; char codes, mapped through the currently active charset
+            assert CURRENT_TOTAL_PIXELS_SIZE <= WRITTER_GRID_WIDTH_PIXELS, "Line ", {content}, "  is too long for the writter grid"
+            ; centering offset: half of the unused pixels of the grid
+            CURRENT_SKIP_PIXELS_SIZE = (WRITTER_GRID_WIDTH_PIXELS - CURRENT_TOTAL_PIXELS_SIZE) / 2
+            db CURRENT_SKIP_PIXELS_SIZE>>1 ; nb bytes to skip
+            db CURRENT_SKIP_PIXELS_SIZE&1  ; nb pixels to skip
+            db string_len({content})       ; nb chars
+            db {content}                    ; char codes, mapped through the currently active charset
+        endif
+
+
+
+
+
+        print "WRITTER_ENCODE_LINE: ", peek($-4), ", ", peek($-3), ", ", peek($-2), ", ", peek($-1), ", ", {content}
     endm
 
     ;; A page is build with 10 lines.
@@ -705,6 +756,7 @@ writter_char_{symb}_length equ CURRENT_CHAR_LENGTH
     ;; TODO here it would be better to modify basm to work with unamed arguments.
     ;;       this way we could work with a loop instead of hardcoding all cases
     macro WRITTER_ENCODE_PAGE line0, line1, line2, line3, line4, line5, line6, line7, line8, line9
+        print "WRITTER_ENCODE_PAGE ", {line0}, ", ", {line1}, ", ", {line2}, ", ", {line3}, ", ", {line4}, ", ", {line5}, ", ", {line6}, ", ", {line7}, ", ", {line8}, ", ", {line9}
 .line0
         WRITTER_ENCODE_LINE({line0})
 .line1      
@@ -729,11 +781,12 @@ writter_char_{symb}_length equ CURRENT_CHAR_LENGTH
 
 
 
-function IS_NOT_CR char
-    return {char} != 10
+
+function IS_NOT_CRLF char
+    return {char} != 10 && {char} != 13
 endfunction
 
-    CURRENT_PAGE_NUMBER = 1
+    CURRENT_PAGE_NUMBER = 0
 
     macro WRITTER_ADD_PAGE_FROM_FILE file_name
 WRITTER_PAGE{CURRENT_PAGE_NUMBER}
@@ -742,22 +795,22 @@ WRITTER_PAGE{CURRENT_PAGE_NUMBER}
     CURRENT_PAGE_LINES = list_split_by_value(CURRENT_PAGE_CONTENT, "\n")
 
     if list_len(CURRENT_PAGE_LINES) != WRITTER_GRID_HEIGHT
-        fail "Page must have exactly ", WRITTER_GRID_HEIGHT, " lines"
+        fail "Page must have exactly ", WRITTER_GRID_HEIGHT, " lines. Here you have", list_len(CURRENT_PAGE_LINES)
     endif
 
 
-    line0 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 0), "IS_NOT_CR"))
-    line1 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 1), "IS_NOT_CR"))
-    line2 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 2), "IS_NOT_CR"))
-    line3 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 3), "IS_NOT_CR"))
-    line4 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 4), "IS_NOT_CR"))
-    line5 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 5), "IS_NOT_CR"))
-    line6 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 6), "IS_NOT_CR"))
-    line7 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 7), "IS_NOT_CR"))
-    line8 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 8), "IS_NOT_CR"))
-    line9 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 9), "IS_NOT_CR"))
+    line0 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 0), "IS_NOT_CRLF"))
+    line1 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 1), "IS_NOT_CRLF"))
+    line2 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 2), "IS_NOT_CRLF"))
+    line3 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 3), "IS_NOT_CRLF"))
+    line4 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 4), "IS_NOT_CRLF"))
+    line5 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 5), "IS_NOT_CRLF"))
+    line6 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 6), "IS_NOT_CRLF"))
+    line7 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 7), "IS_NOT_CRLF"))
+    line8 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 8), "IS_NOT_CRLF"))
+    line9 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 9), "IS_NOT_CRLF"))
 
-   ; WRITTER_ENCODE_PAGE(line0, line1, line2, line3, line4, line5, line6, line7, line8, line9)
+    WRITTER_ENCODE_PAGE(line0, line1, line2, line3, line4, line5, line6, line7, line8, line9)
 
     endm
 
@@ -776,6 +829,17 @@ WRITTER_CREATE_CHAR(
 )
     include "writter_font.asm"
     include "writter_pages.asm"
+
+
+    macro WRITTER_GENERATE_PAGES
+WRITTER_PAGES
+        repeat CURRENT_PAGE_NUMBER, i, 0
+            dw WRITTER_PAGE{i}
+        endrepeat
+        dw 0
+    endm
+
+    WRITTER_GENERATE_PAGES()
 
 
     ; Instead of storing pairs of x,y, directly store screen addresses
