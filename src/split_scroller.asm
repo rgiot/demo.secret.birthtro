@@ -5,6 +5,8 @@
 
 ;; Show the split raster scroller
 scroller_show
+	nop
+	nop
 	ld (.backup_sp), sp
 
 	; split raster configuration

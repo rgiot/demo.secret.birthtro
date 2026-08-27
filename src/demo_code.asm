@@ -24,7 +24,7 @@ demo_start
     ; Initialize the various components of effects
 demo_init
     BREAKPOINT : call demo_adapt_for_crtc ; Need to be the very first stuff
-    call demo_init_screen
+    BREAKPOINT : call demo_init_screen
     call demo_init_music
     if ENABLE_COMPLETE_SCREEN_COPY
         call demo_init_copy_screen ; TODO remove later to make it appear progressively
@@ -96,14 +96,13 @@ demo_init_screen
 
 demo_adapt_for_crtc
     call ds_crtc_detector
+    BREAKPOINT
     cp 1 : jr z, .patch_crtc1
-    cp 3 : jr z, .patch_crtc3
+   cp 3 : jr z, .patch_crtc3
     cp 4 : jr z, .patch_crtc4
     ret
 .patch_crtc3
 .patch_crtc4
-    ld hl, demo_init_screen.crtc_r2_value
-    inc (hl)
     ret
 .patch_crtc1
     ld a, 6 : ld (scroller_show.crtc_register), a

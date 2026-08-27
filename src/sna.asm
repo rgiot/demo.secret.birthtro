@@ -11,7 +11,13 @@ SHIFT_SCREEN_FOR_DEBUG equ false ;true
 HIDE_SCROLLER equ false
 SHOW_DEBUG equ false
 
-    SNASET CRTC_TYPE, 4  ; Demo is coded for CRTC0 but emulatro is requested to be CRTC1. adaptation must work and make the scroller visible
+	if false
+    	SNASET CRTC_TYPE, 3; Demo is coded for CRTC0 but emulatro is requested to be CRTC1. adaptation must work and make the scroller visible
+		SNASET CPC_TYPE, 4 ; 6128 plus
+	else
+		SNASET CRTC_TYPE, 0
+		SNASET CPC_TYPE, 2 ; CPC
+	endif
     run demo_start
     
 
