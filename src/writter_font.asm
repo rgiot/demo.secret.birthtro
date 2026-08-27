@@ -66,7 +66,7 @@ WRITTER_CREATE_CHAR(
     "###  ## ",
     "###  ## ",
     " ###### ",
-    "      "
+    "        "
 )
 
 WRITTER_CREATE_CHAR(
@@ -78,7 +78,7 @@ WRITTER_CREATE_CHAR(
     "###  ## ",
     "###  ## ",
     "######  ",
-    "      "
+    "        "
 )
 
 WRITTER_CREATE_CHAR(
@@ -150,7 +150,7 @@ WRITTER_CREATE_CHAR(
     "###  ## ",
     "###  ## ",
     "###  ## ",
-    "       "
+    "        "
 )
 
 WRITTER_CREATE_CHAR(
@@ -228,7 +228,7 @@ WRITTER_CREATE_CHAR(
 WRITTER_CREATE_CHAR(
     o,
     "          ",
-    " #######   ",
+    " #######  ",
     "       ## ",
     "###    ## ",
     "###    ## ",
@@ -287,14 +287,14 @@ WRITTER_CREATE_CHAR(
 
 WRITTER_CREATE_CHAR(
     t,
-    "         ",
-    "   ###   ",
-    " ####### ",
-    "   ###   ",
-    "   ###   ",
-    "   ###   ",
-    "   ###   ",
-    "         "
+    "        ",
+    "  ###   ",
+    "####### ",
+    "  ###   ",
+    "  ###   ",
+    "  ###   ",
+    "  ###   ",
+    "        "
 )
 
 WRITTER_CREATE_CHAR(
@@ -487,7 +487,7 @@ WRITTER_CREATE_CHAR(
     "    ### ",
     "##  ### ",
     "######  ",
-    "      "
+    "        "
 )
 
 WRITTER_CREATE_CHAR(
@@ -619,7 +619,7 @@ WRITTER_CREATE_CHAR(
     "###  ## ",
     "###  ## ",
     " #####  ",
-    "      "
+    "        "
 )
 
 WRITTER_CREATE_CHAR(
@@ -643,7 +643,7 @@ WRITTER_CREATE_CHAR(
     "######## ",
     "###  ### ",
     "##    ## ",
-    "#       "
+    "#        "
 )
 
 WRITTER_CREATE_CHAR(
