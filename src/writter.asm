@@ -656,7 +656,7 @@ writter_or_sprite_w{w}
         assert CURRENT_CHAR_LENGTH == string_len({line4}), "All lines must have the same length"
         assert CURRENT_CHAR_LENGTH == string_len({line5}), "All lines must have the same length"
         assert CURRENT_CHAR_LENGTH == string_len({line6}), "All lines must have the same length"
-        assert CURRENT_CHAR_LENGTH == string_len({line7}), "All lines must have the same length"
+         assert CURRENT_CHAR_LENGTH == string_len({line7}), "All lines must have the same length"
 
         current_char_lines = []
         current_char_lines = list_push(current_char_lines, writter_string_to_bitvalues({line0}))
