@@ -3,8 +3,8 @@ PATERNITY.BAS
 hoMage to Eliot's
 greatest production
 
-This demo has been released at
-the Benediction Coding Party
- 
-A nice event organized by Eliot
-And welcome to NAME 
+This demo has been
+released at the
+Benediction Coding
+Party
+A nice event
