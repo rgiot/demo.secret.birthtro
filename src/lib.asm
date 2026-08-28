@@ -1,3 +1,4 @@
+    assert $<0x4000 || $>0x8000, "Safety to use from code in banks"
 
 ; compute next line address.
 ; input: hl screen address in 0xc000-0xffff
@@ -51,6 +52,8 @@ vsync
         return address
     endfunction
 
+call_hl jp hl
+
 
 
 	align 256
@@ -102,3 +105,6 @@ screen_table2
         db current_low
         db current_high - 0x40 ; shit from 0xC000 to 0x8000
     endr
+
+
+    assert $<0x4000 || $>0x8000, "Safety to use from code in banks"

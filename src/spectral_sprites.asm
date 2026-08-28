@@ -167,7 +167,6 @@ spectral_sprite_move_along_curve
 
     ret
 
-call_hl jp hl
 
 
 ;; Address delta to move a bloc down to the next one. A bloc is SPECTRAL_BLOC_HEIGHT lines tall and

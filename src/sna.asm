@@ -30,6 +30,7 @@ range 0x8000, 0xbfff, screen_buffer
 range 0xc000, 0xffff, screen_main
 
     BANKSET 1
+range 0x0000, 0x3fff, demo_code_c4
 range 0x4000, 0x7fff, demo_code_c5
 range 0x8000, 0xb000, paged_music_for_c6
 
@@ -41,6 +42,10 @@ section screen_buffer
 
 
     BANKSET 1
+section demo_code_c4
+	rorg 0x4000
+    	include "spectral_sprites.asm"	
+	endr
 section demo_code_c5
     include "animate.asm"
 
@@ -67,6 +72,7 @@ MUSIC
 	endm
 
 	SAVE_SECTION(demo_code_main, "C0.300")
+	SAVE_SECTION(demo_code_c4, "C4.4000")
 	SAVE_SECTION(screen_buffer, "C0.8000")
 	SAVE_SECTION(demo_code_c5,"C5.4000")
 	SAVE_SECTION(paged_music_for_c6,"C6.4000")

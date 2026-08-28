@@ -23,14 +23,14 @@ demo_start
 
     ; Initialize the various components of effects
 demo_init
-    BREAKPOINT : call demo_adapt_for_crtc ; Need to be the very first stuff
-    BREAKPOINT : call demo_init_screen
+    call demo_adapt_for_crtc ; Need to be the very first stuff
+    call demo_init_screen
     call demo_init_music
     if ENABLE_COMPLETE_SCREEN_COPY
         call demo_init_copy_screen ; TODO remove later to make it appear progressively
     endif
 
-    call show_static_sprite             ; init the spectral sprites
+    CALL_IN_BANK(show_static_sprite, 0xc4)             ; init the spectral sprites
 
     call scroller_generate_initial_code ; init the split scroller
 
@@ -96,9 +96,8 @@ demo_init_screen
 
 demo_adapt_for_crtc
     call ds_crtc_detector
-    BREAKPOINT
     cp 1 : jr z, .patch_crtc1
-   cp 3 : jr z, .patch_crtc3
+    cp 3 : jr z, .patch_crtc3
     cp 4 : jr z, .patch_crtc4
     ret
 .patch_crtc3
@@ -128,7 +127,7 @@ demo_run
 demo_frame_run
     DEBUG(GA_RED)
     ; We provide at maximum one halt to the sinus raster
-    call spectral_sprite_move_along_curve
+    CALL_IN_BANK(spectral_sprite_move_along_curve, 0xc4)
     DEBUG(GA_WHITE)
     halt
 
@@ -168,7 +167,6 @@ demo_frame_run
 
     endif
 
- ;   call spectral_sprite_move_along_curve ; x2 movement speed
 
     DEBUG(GA_RED)
 
@@ -268,7 +266,6 @@ demo_play_music
 
 
     ; effects code and data
-    include "spectral_sprites.asm"
     include "split_scroller.asm"
     include "writter.asm"
     include "events.asm"
