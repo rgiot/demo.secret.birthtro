@@ -30,7 +30,9 @@ demo_init
         call demo_init_copy_screen ; TODO remove later to make it appear progressively
     endif
 
-    CALL_IN_BANK(show_static_sprite, 0xc4)             ; init the spectral sprites
+ ; Now we have several logos, the init is done in real time
+ ;   ld a, 3
+;    CALL_IN_BANK(show_static_sprite, 0xc4)             ; init the spectral sprites
 
     call scroller_generate_initial_code ; init the split scroller
 
@@ -127,7 +129,7 @@ demo_run
 demo_frame_run
     DEBUG(GA_RED)
     ; We provide at maximum one halt to the sinus raster
-    CALL_IN_BANK(spectral_sprite_move_along_curve, 0xc4)
+    CALL_IN_BANK(spectral_sprite_handle, 0xc4)
     DEBUG(GA_WHITE)
     halt
 
@@ -262,10 +264,10 @@ demo_play_music
     include "constants.asm"
     include "lib.asm"
     include "palettes.asm"
+    include "events.asm"
 
 
 
     ; effects code and data
     include "split_scroller.asm"
     include "writter.asm"
-    include "events.asm"

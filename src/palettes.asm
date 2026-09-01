@@ -104,10 +104,14 @@ palette_sprites_monochrome_only db GENERATE_PALETTE(BACKGROUND_IMG_PALETTE, fals
 palette_sprites_monochrome_and_background db GENERATE_PALETTE(BACKGROUND_IMG_PALETTE, true, SPECTRAL_SPRITES_MONOCHROME_PALETTE, true, WRITTER_PALETTE, false)
 palette_sprites_spectral_and_background db GENERATE_PALETTE(BACKGROUND_IMG_PALETTE, true, SPECTRAL_SPRITES_PALETTE, true, WRITTER_PALETTE, false)
 palette_writter_only db GENERATE_PALETTE(BACKGROUND_IMG_PALETTE, false, SPECTRAL_SPRITES_PALETTE, false, WRITTER_PALETTE, true)
+palette_all_but_spectral db GENERATE_PALETTE(BACKGROUND_IMG_PALETTE, true, SPECTRAL_SPRITES_MONOCHROME_PALETTE, false, WRITTER_PALETTE, true)
+
 
 DEBUG_PALETTE(palette_background_only)
 DEBUG_PALETTE(palette_all_visible)
 DEBUG_PALETTE(palette_all_hidden)
 DEBUG_PALETTE(palette_sprites_monochrome_only)
 DEBUG_PALETTE(palette_sprites_monochrome_and_background)
+DEBUG_PALETTE(palette_sprites_spectral_and_background)
+DEBUG_PALETTE(palette_all_but_spectral)
 DEBUG_PALETTE(palette_writter_only)

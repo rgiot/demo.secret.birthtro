@@ -44,7 +44,8 @@ section screen_buffer
     BANKSET 1
 section demo_code_c4
 	rorg 0x4000
-    	include "spectral_sprites.asm"	
+    	include "spectral_sprites.asm"
+		assert $<0x8000
 	endr
 section demo_code_c5
     include "animate.asm"

@@ -526,7 +526,7 @@ replace_background_sprite_0
 
 
     if false
-    // seems to not work ATM
+    ; seems to not work ATM
 enum ANIMATION_STATE
     PLAYING
     FINISHED

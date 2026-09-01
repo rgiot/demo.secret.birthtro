@@ -5,7 +5,7 @@ enum EVENT
 	DRAW_BACKGROUND
 	SHOW_SPECTRAL
 	DISABLE_EVENTS
-	
+	ACTIVATE_SELECT_NEXT_LOGO
 endenum
 
 
@@ -31,6 +31,7 @@ macro REGISTER_EVENT timeout, kind, ...
 		case EVENT_DRAW_BACKGROUND
 		case EVENT_DISABLE_EVENTS
 		case EVENT_SHOW_SPECTRAL
+		case EVENT_ACTIVATE_SELECT_NEXT_LOGO
 			assert {#} == 2
 			break
 		default
@@ -112,6 +113,12 @@ event_routine_{EVENT_DISABLE_EVENTS}
 	ld (event_handler), a
 	ret
 
+event_routine_{EVENT_ACTIVATE_SELECT_NEXT_LOGO}
+	SELECT_BANK(0xc4)
+	ld a, 1
+	ld (spectral_sprite_move_along_curve.activate_select_next_logo), a
+	RESTORE_BANK()
+	ret
 
 SECONDS equ 50
 
@@ -122,9 +129,10 @@ events_list
 	REGISTER_EVENT(15*SECONDS, EVENT_SHOW_SPECTRAL)
 	REGISTER_EVENT(3*SECONDS, EVENT_CHANGE_PALETTE, palette_all_visible) ; XXX need to be sure the background is completely drawn
 	REGISTER_EVENT(42*SECONDS, EVENT_CHANGE_SCROLLER_PALETTE, SCROLLER_COLORED_RASTERS_DATA)
+	REGISTER_EVENT(15*SECONDS, EVENT_ACTIVATE_SELECT_NEXT_LOGO)
 	REGISTER_EVENT(1*SECONDS, EVENT_DISABLE_EVENTS) ; TODO replace by a restart event ?
 
 
-EVENTS_FIRST_TIMEOUT equ read_word(events_list+0)
+EVENTS_FIRST_TIMEOUT equ read_word(events_list+0) ; XXX keep it AFTER the list of events, otherwise it will be a wrong value
 
 

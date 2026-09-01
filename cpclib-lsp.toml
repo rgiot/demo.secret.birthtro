@@ -1,3 +1,4 @@
+log = "CPCLIB-LSP.LOG"
 # cpclib-lsp configuration file.
 # Every field's default reproduces the LSP's exact out-of-the-box behavior -
 # delete any section/field you don't want to override.
@@ -15,6 +16,7 @@ code_lens = true
 breakpoint_directive = "BREAKPOINT"
 peephole_goal = "neutral"
 run_emulator = "ace"
+entry = ""
 
 [asm.warnings]
 # ADD/ADC/SBC/CP/SUB/AND/OR/XOR with an explicit "A," prefix that isn't
@@ -65,3 +67,22 @@ port = 8765
 missing_build_structure = true
 # A dependency that's neither an existing file nor a target this file builds.
 missing_dependency = true
+
+[music]
+# Arkos-Tracker-compatible source-file extensions recognized by the "Play in
+# emulator" / "Build DSK" file browser context menu and command palette
+# entries. Add/remove entries to taste - the VS Code extension's own menu
+# entries are a static regex kept manually in sync with this default, so
+# changing this alone won't add a new extension to the context menu without
+# also updating the extension.
+song_extensions = ["aks", "sks", "128", "vt2", "wyz"]
+# Emulator launched by "▶ Play in emulator". Any emulator
+# cpclib_runner::emucontrol accepts is valid (the player boots from a
+# snapshot, unlike basic.run_emulator's auto-RUN disc).
+run_emulator = "ace"
+# Only relevant to a song using Arkos Tracker's experimental "SID" feature
+# (detected automatically). Safety margin (in scanlines) the generated SID
+# player waits between engine updates - too low for a given song and the
+# player freezes. 72 is Arkos Tracker's own official SID example's default;
+# raise it and rebuild if a SID song's generated player freezes.
+sid_wait_line_count = 72

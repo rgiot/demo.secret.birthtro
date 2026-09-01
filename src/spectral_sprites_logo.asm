@@ -6,12 +6,7 @@
 ;; use "#" for a drawn bloc
 
 
-SELECTED_LOGO=3
-
-switch  SELECTED_LOGO
-case 0:
-
-    spectral_sprites_model equ [
+spectral_sprites_model1 equ [
         "####    ####    ####  ",
         "   ##   ##  #       # ",
         "####    ##  ##  ##  ##",
@@ -19,20 +14,16 @@ case 0:
         "#####   ##  ##  ####  "
     ]
 
-break
-case 1:
 
-    spectral_sprites_model equ [
+spectral_sprites_model2 equ [
         "##  ####   ##    ###  ",
         "    #   #   #   ##    ",
         "##      ##       #### ",
         "##      ##          ##",
         "##      ##      ##### "
     ]
-break
-case 2:
 
- spectral_sprites_model equ [
+spectral_sprites_model3 equ [
      "         ####         ",
      "            ##        ",
      "        ######        ",
@@ -40,11 +31,7 @@ case 2:
      "        ##  ##        "
  ]
 
-break
-case 3:
-
-
- spectral_sprites_model equ [
+ spectral_sprites_model4 equ [
      "####     ####   ##  ##",
      "   ##       ##  ##  ##",
      "####    ##  ##   #### ",
@@ -52,4 +39,10 @@ case 3:
      "####     ####     ##  "
  ]
 
- endswitch
+
+SPECTRAL_LOGOS_MODELS equ [
+    spectral_sprites_model1,
+    spectral_sprites_model2,
+    spectral_sprites_model3,
+    spectral_sprites_model4
+]

@@ -28,3 +28,16 @@ macro CALL_IN_BANK routine, bank
 	ld bc, 0x7f00 + 0xc0 : out (c), c
 	assert $<=0x4000
 endm
+
+
+macro SELECT_BANK, bank
+	assert $<0x4000 || $>=0x8000
+	ld bc, 0x7f00 + {bank} : out (c), c
+	assert $<0x4000 || $>=0x8000
+endm
+
+macro RESTORE_BANK
+	assert $<0x4000 || $>=0x8000
+	ld bc, 0x7f00 + 0xc0 : out (c), c
+	assert $<0x4000 || $>=0x8000
+endm

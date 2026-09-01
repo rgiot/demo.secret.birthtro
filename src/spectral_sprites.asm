@@ -1,7 +1,26 @@
 ;;
 ; July 2026
 ; Krusty/Benediction
-; reimported from test2_dynamic.asm 
+;
+; This file holds everything that actually EMITS bytes for the spectral sprites (code + data):
+; it is assembled into its own 16KB bank (demo_code_c4, mapped at 0x0000-0x3fff, see sna.asm)
+; because 4 logos' worth of per-column code no longer fits alongside the rest of the demo.
+; It must be entirely self-contained: while this bank is paged in, bank 0's own 0x0000-0x3fff
+; (including screen_table_hi/lo and bc26_hl from lib.asm) is paged OUT, so we keep small local
+; copies of the couple of helpers we need. Only the real screen (0xc000-0xffff) stays mapped
+; the same in every bank, which is why writing sprite pixels still works from here.
+; Reached from bank 0 exclusively through CALL_IN_BANK(routine, 0xc4), with interrupts disabled
+; around the call (this bank also replaces the RST 0x38 vector, so an interrupt firing while it
+; is paged in would jump into logo data instead of the real handler).
+
+
+
+
+include "spectral_sprites_logo.asm"
+NB_SPECTRAL_LOGOS equ list_len(SPECTRAL_LOGOS_MODELS)
+
+
+
 
 
 ;; Each char is duplicated to have a thinner movement
@@ -16,9 +35,6 @@ function double_columns column
     ;enditerate
     return duplicated
 endfunction
-
-
-    include "spectral_sprites_logo.asm"
 
 
     ;; The action to execute when updating the screen to make move the sprites
@@ -121,51 +137,39 @@ function spectral_curve_integral, curve, offset
     return acc
 endfunction
 
-;; The list of actions to execute for each column of the picture to make it move up/down
-spectral_sprites_up_actions equ spectral_sprites_compute_up_actions(spectral_sprites_model)
-spectral_sprites_down_actions equ spectral_sprites_compute_down_actions(spectral_sprites_model)
-
-
-
-
-
-spectral_sprite_move_along_curve
-    ld hl, delta_x_curve
-.curve_pos equ $-2
-
-    ; Scroll the curve read position by ONE entry for the next frame (the wave travels one
-    ; curve entry per frame). delta_x_curve is page-aligned, so only the low byte moves and it
-    ; wraps within the 256-entry table. hl itself is left on this frame's start position.
-    ld a, l : inc a: ld (.curve_pos), a ; XXX why not inc l : ld (.curve_pos), hl ?
-
-    ; Walk the non-blank columns. Each consecutive one samples the curve SPECTRAL_CURVE_STEPX
-    ; entries further along (a uniform phase stride) and starts pre-biased by the curve integral
-    ; up to its own phase, so they all oscillate around SPECTRAL_START_LINE (no per-column tilt).
-    SPECTRAL_MOVE_K = 0
-    repeat SPECTRAL_SPRITE_WIDTH, colid, 0
-        ; Blank columns (see spectral_sprites_column_is_blank) have no move routine, no jump
-        ; table, and nothing to draw: skip both the dispatch AND their curve phase entirely.
-        if !spectral_sprites_column_is_blank(list_get(spectral_sprites_up_actions, {colid}))
-    ld a, (hl) ; curve value that drives this column this frame
-    push hl
-        ld hl, spectral_sprite_column{colid}_table
-        ld d, 0 : ld e, a
-        add hl, de
-        ld e, (hl) : inc hl : ld d, (hl)
-        ex de, hl
-        ld a, SPECTRAL_START_LINE + spectral_curve_integral(SPECTRAL_DELTA_CURVE, SPECTRAL_MOVE_K*SPECTRAL_CURVE_STEPX)
-.col{colid}_pos equ $-1
-        call call_hl
-        ld (.col{colid}_pos), a
-    pop hl
-    repeat SPECTRAL_CURVE_STEPX
-        inc l ; advance to the next column's curve phase
-    endr
-    SPECTRAL_MOVE_K = SPECTRAL_MOVE_K + 1
-        endif
-    endrepeat
-
+; local copy of lib.asm's bc26_hl (next screen line address), see there for details
+spectral_bc26_hl
+    ld a, h
+    add 8
+    ld h, a
+    ret nc
+    ld bc, 0xc000 + 96
+    add hl, bc
     ret
+
+
+    macro SPECTRAL_BC26_HL
+        ld a, h
+        add 8
+        ld h, a
+        jr nc, @leave
+        ld bc, 0xc000 + 96
+        add hl, bc
+@leave
+    endm
+
+
+    align 256
+spectral_screen_table_hi
+    repeat 8*SCREEN_HEIGHT_CHARS, lineid, 0
+        db high(compute_screen_address(0xc000, 96, 0, {lineid}))
+    endr
+
+    align 256
+spectral_screen_table_lo
+    repeat 8*SCREEN_HEIGHT_CHARS, lineid, 0
+        db low(compute_screen_address(0xc000, 96, 0, {lineid}))
+    endr
 
 
 
@@ -175,78 +179,6 @@ spectral_sprite_move_along_curve
 ;; so no per-line bc26_hl is needed between blocs. When SPECTRAL_BLOC_HEIGHT==8 this is a single +SCREEN_WIDTH.
 SPECTRAL_BLOC_STRIDE equ (SPECTRAL_BLOC_HEIGHT/8)*SCREEN_WIDTH
     assert SPECTRAL_BLOC_HEIGHT % 8 == 0, "SPECTRAL_BLOC_HEIGHT must be a multiple of 8 for SPECTRAL_BLOC_STRIDE"
-
-;; XXX Claude written from initial handwritten done
-;; Draw the static sprite in the middle of the screen.
-;; Drawn COLUMN by column (runtime loop, kept compact rather than unrolled): each column starts
-;; at its own line spectral_column_top_line[col] = SPECTRAL_START_LINE + curve bias, the very same
-;; pre-shift the move routine applies, so the static picture already matches the animated baseline.
-;; The model is read from spectral_sprites_matrix (row-major, so a column is walked with stride
-;; SPECTRAL_SPRITE_WIDTH).
-show_static_sprite
-    ld ix, spectral_column_top_line     ; per-column top raster line (START + curve bias)
-    ld iy, spectral_sprites_matrix      ; model, base cell of the current column
-    ld c, SPECTRAL_START_COLUMN         ; byte x of the current column within a line
-    ld b, SPECTRAL_SPRITE_WIDTH         ; number of columns to walk
-.col_loop
-    push bc
-        ; screen address of this column's top = base(top line) + x
-        ld a, (ix + 0)
-        ld h, high(screen_table_hi) : ld l, a : ld d, (hl) ; d = high byte of the line base
-        ld h, high(screen_table_lo)             : ld e, (hl) ; e = low  byte of the line base
-        ld l, c : ld h, 0 : add hl, de          ; hl = column top screen address
-
-        ; walk the column's model rows, drawing a bloc wherever there is a '#'
-        push iy
-        ld b, SPECTRAL_SPRITE_HEIGHT
-.row_loop
-        push bc
-            ld a, (iy + 0) : cp '#'
-            jr nz, .empty
-            push hl : call show_bloc : pop hl   ; draw; keep hl on this bloc's top
-.empty
-            ld de, SPECTRAL_BLOC_STRIDE  : add hl, de  ; down to the next bloc
-            ld de, SPECTRAL_SPRITE_WIDTH : add iy, de  ; next model row of this column
-            pop bc
-        djnz .row_loop
-        pop iy
-        inc iy                                  ; next model column
-        pop bc
-    ld a, c : add SPECTRAL_BLOC_WIDTH : ld c, a          ; next column x
-    inc ix                                      ; next column top line
-    djnz .col_loop
-    ret
-
-
-;;
-;; Show a complete bloc to build the background.
-;; We don't care if it is slow. This is executed only once time
-;; Input:
-;;   - HL: screen address
-show_bloc
-    ld b, SPECTRAL_BLOC_HEIGHT/2
-    assert SPECTRAL_BLOC_WIDTH % 2 = 0, "SPECTRAL_BLOC_WIDTH must be even "
-.yloop
-    push bc
-
-        repeat SPECTRAL_BLOC_WIDTH
-            if SPECTRAL_PLAIN
-                set SPECTRAL_SPRITE_RIGHT_BIT_POS, (hl)
-            endif
-            set SPECTRAL_SPRITE_LEFT_BIT_POS, (hl) : inc hl
-        endrepeat
-        call bc26_hl
-        repeat SPECTRAL_BLOC_WIDTH
-            dec hl : set SPECTRAL_SPRITE_RIGHT_BIT_POS, (hl)
-            if SPECTRAL_PLAIN
-                set SPECTRAL_SPRITE_LEFT_BIT_POS, (hl)
-            endif
-        endrepeat
-        call bc26_hl
-    pop bc
-    djnz .yloop
-
-    ret
 
 
 
@@ -297,10 +229,10 @@ show_bloc
             db {move_direction}
         endif
         push af
-        ld h, high(screen_table_hi)
+        ld h, high(spectral_screen_table_hi)
         ld l, a
         ld d, (hl) ; high byte of the current line's screen address
-        ld h, high(screen_table_lo)
+        ld h, high(spectral_screen_table_lo)
         ld e, (hl) ; low byte of the current line's screen address (l is still the line index)
         ld hl, SPECTRAL_START_COLUMN + ({colid}*SPECTRAL_BLOC_WIDTH) ; get the screen address of the column to move
         add hl, de
@@ -392,112 +324,492 @@ show_bloc
         endif
 
         TICKER STOP CURRENT_METHOD_DURATION
-        SPECTRAL_MOVE_METHODS_DURATION{colid} = list_push(SPECTRAL_MOVE_METHODS_DURATION{colid}, CURRENT_METHOD_DURATION)
+        SPECTRAL_MOVE_METHODS_DURATION = list_push(SPECTRAL_MOVE_METHODS_DURATION, CURRENT_METHOD_DURATION)
         ;unset CURRENT_METHOD_DURATION
 
         ret
     endm
 
-    ;; Make move up the column of one pixel
+    ;; v0: no de-duplication yet (see file header). Each (logo_id, colid) gets its own routine.
     ;; Input:
     ;;  - a: line of the column to move up
     ;; Ouptut
     ;;  - a = new line of the moved column
-    macro SPECTRAL_SPRITE_UP_COLUMN_CODE, colid, column
-spectral_sprite_up_column_{colid}
-        print "Handle spectral_sprite_up_column_", {colid}
+    macro SPECTRAL_SPRITE_UP_COLUMN_CODE, logo_id, colid, column
+spectral_sprite_up_column_{logo_id}_{colid}
         SPECTRAL_SPRITE_MOVE_COLUMN_CODE_BODY({colid}, {eval}{column}, opcode(dec a), true)
     endm
 
-    ;; Make move down the column of one pixel
+    ;; v0: no de-duplication yet (see SPECTRAL_SPRITE_UP_COLUMN_CODE)
     ;; Input:
     ;;  - a: line of the column to move down
     ;; Ouptut
     ;;  - a = new line of the moved column
-    macro SPECTRAL_SPRITE_DOWN_COLUMN_CODE, colid, column
-spectral_sprite_down_column_{colid}
-        print "Handle spectral_sprite_down_column_", {colid}
+    macro SPECTRAL_SPRITE_DOWN_COLUMN_CODE, logo_id, colid, column
+spectral_sprite_down_column_{logo_id}_{colid}
         SPECTRAL_SPRITE_MOVE_COLUMN_CODE_BODY({colid}, {eval}{column}, opcode(inc a), false)
     endm
 
 
-    ;; generate the routine if it does not exists
-    macro SPECTRAL_SPRITE_NOOP_CODE colid, duration
+    ;; noop routines are still shared by duration (a plain macro parameter, not a bare
+    ;; "=" variable), so this dedup is unaffected by the v0 simplification below.
+    ;; The `ret` MUST stay inside the ifndef: once a given duration already has a routine,
+    ;; this macro must emit NO bytes at all (only the alias below), otherwise a stray `ret`
+    ;; gets injected into whatever code follows every time two columns share a duration.
+    macro SPECTRAL_SPRITE_NOOP_CODE, logo_id, colid, duration
         ifndef spectral_column_noop_{duration}
 spectral_column_noop_{duration}
     nop {duration}
+    ret
         endif
-        ret
 
-spectral_sprite_noop_column_{colid} equ spectral_column_noop_{duration}
+spectral_sprite_noop_column_{logo_id}_{colid} equ spectral_column_noop_{duration}
     endm
 
-    ; Generate the code to move up/down all NON-BLANK columns of the picture. Blank columns
-    ; (no '#' anywhere in spectral_sprites_model for that column) never draw anything, so
-    ; there's no point generating a move routine, a jump table, or dispatching to them at
-    ; runtime (see spectral_sprite_move_along_curve).
-    repeat SPECTRAL_SPRITE_WIDTH, colid, 0
+    ;; The jump table dispatched by spectral_sprite_move_along_curve for one column.
+    macro SPECTRAL_SPRITE_COLUMN_TABLE, logo_id, colid
+spectral_sprite_column{logo_id}_{colid}_table
+    dw spectral_sprite_down_column_{logo_id}_{colid}
+    dw spectral_sprite_noop_column_{logo_id}_{colid}
+    dw spectral_sprite_up_column_{logo_id}_{colid}
+    endm
 
-        ; this is an accumulator for the duration of the move methods.
-        ; it will help to stablize
-        SPECTRAL_MOVE_METHODS_DURATION{{colid}} = []
+    ;; Instantiates one logo: {logo_id} is its number (0, 1, ...) and {model} its ASCII-art shape
+    ;; (see spectral_sprites_logo.asm). Generates spectral_sprites_matrix_{logo_id},
+    ;; spectral_column_top_line_{logo_id} and spectral_sprite_move_along_curve_{logo_id}.
+    ;; v0: NO de-duplication of per-column code across columns/logos yet (each (logo_id, colid)
+    ;; is generated unconditionally); this is intentionally simplified to get a working baseline
+    ;; before re-introducing the ifndef-based sharing.
+    macro SPECTRAL_SPRITE_GENERATE_LOGO, logo_id, model
+        assert list_len({model}) = SPECTRAL_SPRITE_HEIGHT, "spectral logo {logo_id}: model must have {SPECTRAL_SPRITE_HEIGHT} lines"
+        assert string_len(list_get({model}, 0)) = SPECTRAL_SPRITE_WIDTH, "spectral logo {logo_id}: model first line must have {SPECTRAL_SPRITE_WIDTH} characters"
 
-        if !spectral_sprites_column_is_blank(list_get(spectral_sprites_up_actions, {colid}))
-            SPECTRAL_SPRITE_UP_COLUMN_CODE(
-                {colid},
-                {eval}list_get(spectral_sprites_up_actions, {colid})
-            )
-            SPECTRAL_SPRITE_DOWN_COLUMN_CODE(
-                {colid},
-                {eval}list_get(spectral_sprites_down_actions, {colid})
-            )
+        SPECTRAL_LOGO_UP_ACTIONS = spectral_sprites_compute_up_actions({model})
+        SPECTRAL_LOGO_DOWN_ACTIONS = spectral_sprites_compute_down_actions({model})
 
-            print "DURATIONS ",{colid}, " ", SPECTRAL_MOVE_METHODS_DURATION{{colid}}
-            assert list_get( SPECTRAL_MOVE_METHODS_DURATION{{colid}}, 0) == list_get( SPECTRAL_MOVE_METHODS_DURATION{{colid}}, 1), "Move up and down must have the same duration for column {colid}"
-        
-            SPECTRAL_SPRITE_NOOP_CODE({colid}, {eval}list_get(SPECTRAL_MOVE_METHODS_DURATION{colid},0))
-        
-        endif
+        ; Generate the code to move up/down all NON-BLANK columns of this logo. Blank columns
+        ; (no '#' anywhere in {model} for that column) never draw anything, so there's no point
+        ; generating a move routine, a jump table, or dispatching to them at runtime.
+        repeat SPECTRAL_SPRITE_WIDTH, colid, 0
+            if !spectral_sprites_column_is_blank(list_get(SPECTRAL_LOGO_UP_ACTIONS, {colid}))
+                ; this is an accumulator for the duration of the move methods, it helps stabilize timing
+                SPECTRAL_MOVE_METHODS_DURATION = []
 
+                SPECTRAL_SPRITE_UP_COLUMN_CODE(
+                    {logo_id}, {colid},
+                    {eval}list_get(SPECTRAL_LOGO_UP_ACTIONS, {colid})
+                )
+                SPECTRAL_SPRITE_DOWN_COLUMN_CODE(
+                    {logo_id}, {colid},
+                    {eval}list_get(SPECTRAL_LOGO_DOWN_ACTIONS, {colid})
+                )
+
+                assert list_get(SPECTRAL_MOVE_METHODS_DURATION, 0) == list_get(SPECTRAL_MOVE_METHODS_DURATION, 1), "Move up and down must have the same duration for column {colid}"
+
+                SPECTRAL_SPRITE_NOOP_CODE({logo_id}, {colid}, {eval}list_get(SPECTRAL_MOVE_METHODS_DURATION, 0))
+                SPECTRAL_SPRITE_COLUMN_TABLE({logo_id}, {colid})
+            endif
+        endrepeat
+
+spectral_sprites_matrix_{logo_id} db {model}
+
+        ;; Top raster line of each column of this logo: SPECTRAL_START_LINE plus the curve
+        ;; integral up to that column's phase (blank columns draw nothing, so their entry is a
+        ;; harmless placeholder). Consumed by show_static_sprite via spectral_column_top_line_table.
+spectral_column_top_line_{logo_id}
+        SPECTRAL_TOP_K = 0
+        repeat SPECTRAL_SPRITE_WIDTH, colid, 0
+            if spectral_sprites_column_is_blank(list_get(SPECTRAL_LOGO_UP_ACTIONS, {colid}))
+                db SPECTRAL_START_LINE ; blank column: value unused
+            else
+                db SPECTRAL_START_LINE + spectral_curve_integral(SPECTRAL_DELTA_CURVE, SPECTRAL_TOP_K*SPECTRAL_CURVE_STEPX)
+                SPECTRAL_TOP_K = SPECTRAL_TOP_K + 1
+            endif
+        endrepeat
+
+        ;; Runtime move dispatch for this logo (see the single, model-agnostic implementation
+        ;; the original single-logo code used to have).
+spectral_sprite_move_along_curve_{logo_id}
+        ld hl, delta_x_curve
+.curve_pos equ $-2
+
+        ; TODO optimize there it is stupid tio incremnt this way
+        ; Scroll the curve read position by ONE entry for the next frame (the wave travels one
+        ; curve entry per frame). delta_x_curve is page-aligned, so only the low byte moves and it
+        ; wraps within the 256-entry table. hl itself is left on this frame's start position.
+        ld a, l : inc a: ld (.curve_pos), a
+
+        ; Walk the non-blank columns. Each consecutive one samples the curve SPECTRAL_CURVE_STEPX
+        ; entries further along (a uniform phase stride) and starts pre-biased by the curve
+        ; integral up to its own phase, so they all oscillate around SPECTRAL_START_LINE.
+        SPECTRAL_MOVE_K = 0
+        repeat SPECTRAL_SPRITE_WIDTH, colid, 0
+            if !spectral_sprites_column_is_blank(list_get(SPECTRAL_LOGO_UP_ACTIONS, {colid}))
+    ld a, (hl) ; curve value that drives this column this frame
+    push hl
+        ld hl, spectral_sprite_column{logo_id}_{colid}_table
+        ld d, 0 : ld e, a
+        add hl, de
+        ld e, (hl) : inc hl : ld d, (hl)
+        ex de, hl
+        ld a, SPECTRAL_START_LINE + spectral_curve_integral(SPECTRAL_DELTA_CURVE, SPECTRAL_MOVE_K*SPECTRAL_CURVE_STEPX)
+.col{{colid}}_pos equ $-1
+        call call_hl
+        ld (.col{{colid}}_pos), a
+    pop hl
+    repeat SPECTRAL_CURVE_STEPX
+        inc l ; advance to the next column's curve phase
+    endr
+    SPECTRAL_MOVE_K = SPECTRAL_MOVE_K + 1
+            endif
+        endrepeat
+
+        ret
+    endm
+
+    ;; Instantiate every logo listed in SPECTRAL_LOGOS_MODELS: logo 0 uses entry 0, etc.
+    repeat NB_SPECTRAL_LOGOS, SPECTRAL_LOGO_ID, 0
+        SPECTRAL_SPRITE_GENERATE_LOGO({SPECTRAL_LOGO_ID}, {eval}list_get(SPECTRAL_LOGOS_MODELS, {SPECTRAL_LOGO_ID}))
+    endrepeat
+
+;; Per-logo data pointers, indexed by logo number: what makes show_static_sprite work for any
+;; logo without a dedicated routine per logo.
+spectral_sprites_matrix_table
+    repeat NB_SPECTRAL_LOGOS, SPECTRAL_LOGO_ID, 0
+        dw spectral_sprites_matrix_{SPECTRAL_LOGO_ID}
+    endrepeat
+
+spectral_column_top_line_table
+    repeat NB_SPECTRAL_LOGOS, SPECTRAL_LOGO_ID, 0
+        dw spectral_column_top_line_{SPECTRAL_LOGO_ID}
     endrepeat
 
 
 
-    repeat SPECTRAL_SPRITE_WIDTH, colid, 0
-        if !spectral_sprites_column_is_blank(list_get(spectral_sprites_up_actions, {colid}))
-    ; each of these methods have EXACTLY the same duration. So the code is completely stable whatever is the step
-spectral_sprite_column{colid}_table
-    dw spectral_sprite_down_column_{colid}
-    dw spectral_sprite_noop_column_{colid}
-    dw spectral_sprite_up_column_{colid}
-        endif
+
+enum SPECTRAL_SPRITE_STATE
+    DISPLAYING_START
+    DISPLAYING_CONTINUE
+    DISPLAYING_CONTINUE2
+    ERASING
+    ERASING_CONTINUE
+    WAVING
+endenum
+
+
+spectral_sprite_handle
+    ld a, SPECTRAL_SPRITE_STATE_DISPLAYING_START : .state equ $-1
+    cp SPECTRAL_SPRITE_STATE_DISPLAYING_START : jq z, .displaying_start
+    cp SPECTRAL_SPRITE_STATE_DISPLAYING_CONTINUE : jq z, show_static_sprite_continue_0
+    cp SPECTRAL_SPRITE_STATE_DISPLAYING_CONTINUE2 : jq z, show_static_sprite_continue_1
+    cp SPECTRAL_SPRITE_STATE_ERASING : jq z, .erasing
+    cp SPECTRAL_SPRITE_STATE_ERASING_CONTINUE  : jq z, .erasing_continue
+    ;cp SPECTRAL_SPRITE_STATE_WAVING : jq z, .waving
+    jq spectral_sprite_move_along_curve
+
+
+.displaying_start
+    ; next state will be display continuation
+    ld a, SPECTRAL_SPRITE_STATE_DISPLAYING_CONTINUE : ld (.state), a
+
+
+    ; reset the logo to display
+    ld a, -1 : .selected_logo equ $-1 ; we want the very first value to be 0
+    inc a
+    cp NB_SPECTRAL_LOGOS : jr nz, .no_reset_animation
+    xor a
+.no_reset_animation
+    ld (.selected_logo), a
+
+    ; get the correct information
+    ; iy = spectral_sprites_matrix_<logo>, ix = spectral_column_top_line_<logo>
+    add a, a : ld l, a : ld h, 0
+
+    push hl
+        ld de, spectral_sprite_move_along_curve.table
+        add hl, de
+        ld e, (hl) : inc hl : ld d, (hl)
+        ld (spectral_sprite_move_along_curve.routine), de
+    pop hl
+
+
+    push hl
+        ld de, spectral_sprites_matrix_table : add hl, de
+        ld e, (hl) : inc hl : ld d, (hl)
+        ld (show_static_sprite_continue_0.iy_value), de
+        ld (show_static_sprite_continue_1.iy_value), de ; xxx ok to keep the same
+    pop hl
+    ld de, spectral_column_top_line_table : add hl, de
+    ld e, (hl) : inc hl : ld d, (hl)
+    ld (show_static_sprite_continue_0.ix_value), de
+    ld (show_static_sprite_continue_1.ix_value), de ; XXX ok to keep the same
+
+    ; reset the display routine
+    ld a, SPECTRAL_SPRITE_WIDTH
+    ld (show_static_sprite_continue_0.col_counter), a
+    ld (show_static_sprite_continue_1.col_counter), a
+
+    ld a, SPECTRAL_START_COLUMN
+    ld (show_static_sprite_continue_0.column_start), a
+    ld (show_static_sprite_continue_1.column_start), a
+
+    ; start to display the logo
+    jp show_static_sprite_continue_0
+
+
+.erasing
+    ; continue as soon as we do not reach the starting configuration
+    repeat NB_SPECTRAL_LOGOS, logo_id, 0
+        ld a, (spectral_sprite_move_along_curve_{{logo_id}}.curve_pos)
+        or a
+        jq nz, .continue_movement
     endrepeat
 
 
+.really_start_erasing
+    ld hl, 0xc000 : ld (.erasing_start_address), hl
+    xor a : ld (.erase_counter), a
 
-    assert list_len(spectral_sprites_model) = SPECTRAL_SPRITE_HEIGHT, "spectral_sprites_model must have {SPECTRAL_SPRITE_HEIGHT} lines"
-    assert list_len(list_get(spectral_sprites_model, 0)) = SPECTRAL_SPRITE_WIDTH, "spectral_sprites_model first line must have {SPECTRAL_SPRITE_WIDTH} characters"
+    ld a, SPECTRAL_SPRITE_STATE_ERASING_CONTINUE : ld (.state), a
+    ld hl, palette_all_but_spectral : ld (demo_frame_init.selected_palette), hl
+    ret
 
-spectral_sprites_matrix db spectral_sprites_model
 
-;; Top raster line of each column of the sprite: SPECTRAL_START_LINE plus the curve integral up
-;; to that column's phase (blank columns draw nothing, so their entry is a harmless placeholder).
-;; Consumed by show_static_sprite; kept in step with the move routine's per-column init.
-spectral_column_top_line
-    SPECTRAL_TOP_K = 0
-    repeat SPECTRAL_SPRITE_WIDTH, colid, 0
-        if spectral_sprites_column_is_blank(list_get(spectral_sprites_up_actions, {colid}))
-            db SPECTRAL_START_LINE ; blank column: value unused
-        else
-            db SPECTRAL_START_LINE + spectral_curve_integral(SPECTRAL_DELTA_CURVE, SPECTRAL_TOP_K*SPECTRAL_CURVE_STEPX)
-            SPECTRAL_TOP_K = SPECTRAL_TOP_K + 1
-        endif
+.erasing_continue
+
+    ASSERT SCREEN_HEIGHT_LINES % 3 == 0, "SCREEN_HEIGHT_LINES must be a multiple of 3 for the spectral sprites"
+    ld b,3
+.erase_loop
+
+
+    ; XXX write a statefull erase
+    ld hl, 0xc000 : .erasing_start_address equ $-2
+    ; erase one char line in a row
+    push hl
+        call .erase_row
+    pop hl
+    push bc
+        call spectral_bc26_hl
+    pop bc
+    ld (.erasing_start_address), hl
+
+
+    djnz .erase_loop
+
+
+    ld a, 0 : .erase_counter equ $-1
+    inc a : ld (.erase_counter), a
+
+    cp SCREEN_HEIGHT_LINES/3 - (4*3)  ; thanks to the curve we do not have to erase the whole screen
+    ret nz
+
+
+.erasing_end
+    ld a, SPECTRAL_SPRITE_STATE_DISPLAYING_START : ld (.state), a
+    ret
+
+
+; Input
+; HL: row of the column to erase
+.erase_row
+    repeat SCREEN_WIDTH
+        ld a, (hl) : and SPECTRAL_SPRITE_ERASE_MASK_BOTH_POS: ld (hl), a : inc hl
+    endr
+    ret
+
+
+
+.continue_movement
+    jp spectral_sprite_move_along_curve ; continue to move
+
+;; Draw the requested logo, statically, in the middle of the screen (see
+;; spectral_sprite_move_along_curve_{logo_id} for the per-logo animated counterpart). Drawn
+;; COLUMN by column: each column starts at its own line spectral_column_top_line_<logo>[col].
+;; The model is read from spectral_sprites_matrix_<logo> (row-major, so a column is walked with
+;; stride SPECTRAL_SPRITE_WIDTH).
+;; Display is done now in several steps
+
+
+assert SPECTRAL_SPRITE_HEIGHT == 5
+SPECTRAL_SPRITE_HEIGHT_HALF1 equ 3
+SPECTRAL_SPRITE_HEIGHT_HALF2 equ 2
+
+
+repeat 2, LOGO_DISPLAY_PART, 0
+show_static_sprite_continue_{{LOGO_DISPLAY_PART}}
+
+    if {LOGO_DISPLAY_PART} == 0
+        CURRENT_SPECTRAL_SPRITE_HEIGHT = SPECTRAL_SPRITE_HEIGHT_HALF1
+    else
+        CURRENT_SPECTRAL_SPRITE_HEIGHT = SPECTRAL_SPRITE_HEIGHT_HALF2
+    endif
+
+    OTHER_SPECTRAL_SPRITE_HEIGHT = SPECTRAL_SPRITE_HEIGHT - CURRENT_SPECTRAL_SPRITE_HEIGHT
+
+
+    BREAKPOINT
+
+    ld bc, 0 : .ix_value equ $-2 ; top_line_table
+    ld hl, 0 : .iy_value equ $-2 ; matrix
+    exx
+
+
+    ld c, SPECTRAL_START_COLUMN : .column_start equ $-1        ; byte x of the current column within a line
+  ;  ld b, SPECTRAL_SPRITE_WIDTH         ; number of columns to walk
+.col_loop
+    push bc
+        ; screen address of this column's top = base(top line) + x
+        exx :
+          ld a, (bc)
+          inc bc
+          ld (.ix_value), bc
+
+            ; Ensure 2nd half is displayed after first half
+            ; so we shift it
+            if {LOGO_DISPLAY_PART} == 1
+                add SPECTRAL_BLOC_HEIGHT*OTHER_SPECTRAL_SPRITE_HEIGHT
+            endif
+
+
+
+          push hl
+
+            if {LOGO_DISPLAY_PART} == 1
+                ld de, OTHER_SPECTRAL_SPRITE_HEIGHT*SPECTRAL_SPRITE_WIDTH
+                add hl, de
+            endif
+            ld de, SPECTRAL_SPRITE_WIDTH
+
+        exx
+        ld h, high(spectral_screen_table_hi) : ld l, a : ld d, (hl) ; d = high byte of the line base
+        ld h, high(spectral_screen_table_lo)             : ld e, (hl) ; e = low  byte of the line base
+        ld l, c : ld h, 0 : add hl, de          ; hl = column top screen address
+
+        ; walk the column's model rows, drawing a bloc wherever there is a '#'
+            ld b, CURRENT_SPECTRAL_SPRITE_HEIGHT ; XXX we only draw half of the sprite because it is too costly. We'll draw the other half after
+.row_loop
+            push bc
+                exx : ld a, (hl) : exx : cp '#'
+                jp nz, .empty
+               push hl 
+                
+                
+.show_bloc
+                    ;ld b, SPECTRAL_BLOC_HEIGHT/2
+                    ;assert SPECTRAL_BLOC_WIDTH % 2 = 0, "SPECTRAL_BLOC_WIDTH must be even "
+
+                    push bc
+    ;                repeat SPECTRAL_BLOC_HEIGHT/2
+                    ld b, SPECTRAL_BLOC_HEIGHT/2
+.yloop
+                        push bc
+
+                            repeat SPECTRAL_BLOC_WIDTH
+                                if SPECTRAL_PLAIN
+                                    set SPECTRAL_SPRITE_RIGHT_BIT_POS, (hl)
+                                endif
+                                set SPECTRAL_SPRITE_LEFT_BIT_POS, (hl) : inc hl
+                            endrepeat
+                            SPECTRAL_BC26_HL()
+                            repeat SPECTRAL_BLOC_WIDTH
+                                dec hl : set SPECTRAL_SPRITE_RIGHT_BIT_POS, (hl)
+                                if SPECTRAL_PLAIN
+                                    set SPECTRAL_SPRITE_LEFT_BIT_POS, (hl)
+                                endif
+                            endrepeat
+                            SPECTRAL_BC26_HL()
+                        pop bc
+                    djnz .yloop
+;                    endrepeat
+                    pop bc
+
+                pop hl   ; draw; keep hl on this bloc's top
+.empty
+                ld de, SPECTRAL_BLOC_STRIDE  : add hl, de  ; down to the next bloc
+                exx
+                    add hl, de  ; next model row of this column
+                exx
+            pop bc
+            ;ld a, c : dec a : ld c,a 
+            dec b
+            jp nz, .row_loop
+        exx
+            pop hl
+            inc hl                                  ; next model column
+        exx
+    pop bc
+    ld a, c : add SPECTRAL_BLOC_WIDTH : ld (.column_start), a         ; next column x
+  
+    
+    ; check if it is finished
+    ld a, 0 : .col_counter equ $-1
+    dec a
+    jr z, .done
+
+    ld (.col_counter), a
+    exx
+        ld (.iy_value), hl
+    exx
+    
+    ;djnz .col_loop
+    ret
+
+.done
+
+   if {LOGO_DISPLAY_PART} == 0
+        ld a, SPECTRAL_SPRITE_STATE_DISPLAYING_CONTINUE2
+    else
+
+        ld a, 1 : .color_wait equ $-1
+        or a
+        jr z, .change_color
+        dec a : ld (.color_wait), a
+        jr .after_change_color
+
+
+.change_color
+        ld hl, palette_all_visible : ld (demo_frame_init.selected_palette), hl
+.after_change_color
+        ld a, SPECTRAL_SPRITE_STATE_WAVING : 
+    endif
+    
+    ld (spectral_sprite_handle.state), a
+    
+
+    ret
+endr
+
+spectral_sprite_move_along_curve
+
+    ld a, 0 : .activate_select_next_logo equ $-1
+    or a
+    jr z, .continue
+
+    ; handle potential logo change
+
+    ld hl, 1 : .change_counter equ $-2
+    dec hl
+    ld (.change_counter), hl
+    ld a, h : or l
+    jr nz, .continue
+
+    ld hl, SPECTRAL_SPRITE_DISPLAY_DURATION_LOGO
+    ld (.change_counter), hl
+
+    ; change the logo state to erase current logo and replace it
+    ld a, SPECTRAL_SPRITE_STATE_ERASING
+    ld (spectral_sprite_handle.state), a
+
+.continue
+
+
+
+    jp spectral_sprite_move_along_curve_0 : .routine equ $-2
+
+.table
+    repeat NB_SPECTRAL_LOGOS, SPECTRAL_LOGO_ID, 0
+        dw spectral_sprite_move_along_curve_{SPECTRAL_LOGO_ID}
     endrepeat
-
-
-
-
-
 
     align 256
 ; spectral curve
@@ -506,9 +818,3 @@ spectral_column_top_line
 ;  4=> increase
 ; XXX limitation Needs to be setup in memory BEF
 delta_x_curve db SPECTRAL_DELTA_CURVE
-
-;SPECTRAL_START_ADDRESS equ peek(screen_table + 2*SPECTRAL_START_LINE + 0) \
-;                        + (peek(screen_table + 2*SPECTRAL_START_LINE + 1) << 8);\
-;                        + SPECTRAL_START_COLUMN
-
-
