@@ -600,6 +600,8 @@ writter_or_sprite_w{w}
             return "acute"
         elseif {char} == ","
             return "comma"
+        elseif {char} == "!"
+            return "exclam"
         else
             return {char}
         endif
@@ -613,6 +615,8 @@ writter_or_sprite_w{w}
             return ":"
         elseif {code} == "dot"
             return "."
+        elseif {code} == "exclam"
+            return "!"
         elseif {code} == "acute"
             return "'"
         elseif {code} == "comma"

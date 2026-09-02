@@ -31,6 +31,18 @@ WRITTER_CREATE_CHAR(
 )
 
 WRITTER_CREATE_CHAR(
+    exclam,
+    " ### ",
+    " ### ",
+    " ### ",
+    " ### ",
+    "     ",
+    " ### ",
+    " ### ",
+    "     "
+)
+
+WRITTER_CREATE_CHAR(
     comma,
     "     ",
     "     ",
