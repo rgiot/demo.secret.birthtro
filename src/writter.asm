@@ -146,7 +146,7 @@ writter_draw_page_step
         ret                                    ; the new line's first char is drawn on a later call
 
 .copy_step
-
+/*
     ; the transition tables contain the addresses of the blocks in the VISIBLE
     ; screen (0xC000); the source address in the buffer is obtained by
     ; resetting bit 6 of the high byte.
@@ -168,7 +168,7 @@ writter_draw_page_step
     or a : jr z, .delay_step1_done
     dec a : ld (.delay_step1), a
     ret
-
+*/
 .delay_step1_done
     call copy_blocks_step1
 
@@ -298,8 +298,8 @@ writter_advance_to_next_row
     ld (copy_blocks_step2.copy_table_position), bc
     
     ld a, WRITTER_COPY_DELAY_STEPS
-    ld (writter_draw_page_step.delay_step1), a
-    ld (writter_draw_page_step.delay_erase2), a
+    ;ld (writter_draw_page_step.delay_step1), a
+    ;ld (writter_draw_page_step.delay_erase2), a
     ld (writter_draw_page_step.delay_step2), a
     xor a                                    ; ensure Z is set for the caller (WRITTER_STATE_WAIT is nonzero)
     ret
