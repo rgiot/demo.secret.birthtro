@@ -233,9 +233,11 @@ writter_draw_page_step
     add a, b
     srl a                                            ; a = bytes to advance ; carry = new side
     ld c, a : ld b, 0
+    push af                                          ; save the new-side carry: "add hl, bc" below also sets carry, it would clobber it
     ld hl, (writter_cursor)
     add hl, bc
     ld (writter_cursor), hl
+    pop af
     ld a, 0 : adc a, 0
     ld (writter_side), a
 
@@ -656,7 +658,7 @@ writter_or_sprite_w{w}
         assert CURRENT_CHAR_LENGTH == string_len({line4}), "All lines must have the same length"
         assert CURRENT_CHAR_LENGTH == string_len({line5}), "All lines must have the same length"
         assert CURRENT_CHAR_LENGTH == string_len({line6}), "All lines must have the same length"
-         assert CURRENT_CHAR_LENGTH == string_len({line7}), "All lines must have the same length"
+        assert CURRENT_CHAR_LENGTH == string_len({line7}), "All lines must have the same length"
 
         current_char_lines = []
         current_char_lines = list_push(current_char_lines, writter_string_to_bitvalues({line0}))
@@ -670,6 +672,9 @@ writter_or_sprite_w{w}
 
         CURRENT_EVEN_WIDTH = (CURRENT_CHAR_LENGTH+1)>>1
         CURRENT_ODD_WIDTH = (CURRENT_CHAR_LENGTH+2)>>1
+
+
+        print "WRITTER_CREATE_CHAR: ", current_code, " ", CURRENT_CHAR_LENGTH, " pixels, even width=", CURRENT_EVEN_WIDTH, ", odd width=", CURRENT_ODD_WIDTH
 
 writter_char_{symb}:
 .nb_pixels db CURRENT_CHAR_LENGTH
