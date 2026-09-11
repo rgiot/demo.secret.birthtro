@@ -11,12 +11,16 @@
 		ld sp, $
 	ei
 
-	BREAKPOINT
 
-	ld bc, 0x7fc6 : out (c), c
-	SELECTED_CRUNCHER = CRUNCHER_ZX0 : UNCRUNCH(C6_4000, 0x4000)
+	SELECTED_CRUNCHER = CRUNCHER_ZX0 : MOVE_CRUNCHED_DATA(C4_4000, 0x8000)
+	ld bc, 0x7fc4 : out (c), c
+	SELECTED_CRUNCHER = CRUNCHER_ZX0 : INDIRECT_UNCRUNCH(0x8000, C4_4000, 0x4000)
+
+
 	ld bc, 0x7fc5 : out (c), c
 	SELECTED_CRUNCHER = CRUNCHER_ZX0 : UNCRUNCH(C5_4000, 0x4000)
+	ld bc, 0x7fc6 : out (c), c
+	SELECTED_CRUNCHER = CRUNCHER_ZX0 : UNCRUNCH(C6_4000, 0x4000)
 
 	ld bc, 0x7fc0 : out (c), c
 	SELECTED_CRUNCHER = CRUNCHER_ZX0 : UNCRUNCH(C0_8000, 0x8000)
@@ -33,6 +37,9 @@
 	assert $<0x4000, "we will have bank issues there"
 	assert $<0x8000
 	SELECTED_CRUNCHER = CRUNCHER_ZX0 : LOAD_N_CRUNCH(C0_8000, "C0.8000")
+	SELECTED_CRUNCHER = CRUNCHER_ZX0 : LOAD_N_CRUNCH(C4_4000, "C4.4000")
+	assert $>0x4000, "if not there is no need any more to move the data"
+	assert $<0x8000
 
 
 

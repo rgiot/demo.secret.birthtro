@@ -86,9 +86,9 @@ ZX7
 	;; Sometimes there are conflicts between the crunched data areas and the uncrunched data areas. Mainly because of banks overlap or lack of free memory.
 	;; To avoid this, we first move the crunched data to a safe area, then uncrunch from there.
 	macro MOVE_CRUNCHED_DATA from, to
-		ld hl, {from}.start
+		ld hl, {from}_{SELECTED_CRUNCHER}.start
 		ld de, {to}
-		ld bc, {from}.length
+		ld bc, {from}_{SELECTED_CRUNCHER}.length
 		ldir
 	endm
 
@@ -506,19 +506,19 @@ ZX7
 			case CRUNCHER_LZSA2:
 			case CRUNCHER_ZX0:
 			case CRUNCHER_ZX7:
-				INDIRECT_UNCRUNCH_STANDARD_NOT_BACKWARD({moved_from}, {from}, {to})
+				INDIRECT_UNCRUNCH_STANDARD_NOT_BACKWARD({moved_from}, {from}_{SELECTED_CRUNCHER}, {to})
 				break
 			case CRUNCHER_ZX0_BACKWARD:
-				INDIRECT_UNCRUNCH_STANDARD_BACKWARD({moved_from}, {from}, {to})
+				INDIRECT_UNCRUNCH_STANDARD_BACKWARD({moved_from}, {from}_{SELECTED_CRUNCHER}, {to})
 				break
 			case CRUNCHER_UPKR:
-				INDIRECT_UNCRUNCH_UPKR({moved_from}, {from}, {to})
+				INDIRECT_UNCRUNCH_UPKR({moved_from}, {from}_{SELECTED_CRUNCHER}, {to})
 				break
 			case CRUNCHER_LZ4:
-				INDIRECT_UNCRUNCH_LZ4({moved_from}, {from}, {to})
+				INDIRECT_UNCRUNCH_LZ4({moved_from}, {from}_{SELECTED_CRUNCHER}, {to})
 				break
 			case CRUNCHER_SHRINKLER
-				INDIRECT_UNCRUNCH_SHRINKLER({moved_from}, {from}, {to})
+				INDIRECT_UNCRUNCH_SHRINKLER({moved_from}, {from}_{SELECTED_CRUNCHER}, {to})
 				break
 			default:
 				fail "Unhandled case: ", SELECTED_CRUNCHER
