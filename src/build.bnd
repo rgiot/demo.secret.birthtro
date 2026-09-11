@@ -19,15 +19,15 @@
 {% set LEFT_EYE0_SPR="../data/" ~ FACE ~ "_eye0.spr" %}
 {% set LEFT_EYE1_SPR="../data/" ~ FACE ~ "_eye1.spr" %}
 {% set LEFT_EYE2_SPR="../data/" ~ FACE ~ "_eye2.spr" %}
-{% set MUSIC_DATA="../data/music/ops.asm" %}
-{% set MUSIC_CFG="../data/music/ops_playerconfig.asm" %}
+
+{% set MUSIC_DATA="../data/music/birhtro.asm" %}
+{% set MUSIC_CFG="../data/music/birhtro_playerconfig.asm" %}
 
 {%set SNA_GENERATED=["C0.300", "C0.8000", "C5.4000", "C6.4000"]%}
 
 - tgt: test_sna
   dep: {{ SNA }}
   cmd: -emu --emulator ace   --snapshot {{SNA}} run
-
 - tgt: debug_sna
   dep: {{ SNA }}
   cmd: -emu --emulator ace   --snapshot {{SNA}} debug

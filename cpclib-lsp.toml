@@ -57,8 +57,9 @@ code_lens = true
 # Useful when a debug session misbehaves: the log shows every message in both
 # directions, which turns "the panes are empty" into something diagnosable.
 log = "CPCLIB-DAP.LOG"
-emulator = "amspiritlite"
+#emulator = "amspiritlite"
 #emulator = "1984js"
+emulator = "sugarbox"
 endpoint = ""
 port = 8765
 
