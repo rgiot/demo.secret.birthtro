@@ -16,10 +16,9 @@ WRITTER_PAGE0
         "aaaa rrrrrrrr iiii"
     )
 */
-
-    repeat 2
-        WRITTER_ADD_PAGE_FROM_FILE("writter_page1.txt")
-    endrepeat
+    WRITTER_ADD_PAGE_FROM_FILE("writter_page0.txt")
+    WRITTER_ADD_PAGE_FROM_FILE("writter_page0.txt")
+    WRITTER_ADD_PAGE_FROM_FILE("writter_page1.txt")
     WRITTER_ADD_PAGE_FROM_FILE("writter_page2.txt")
     WRITTER_ADD_PAGE_FROM_FILE("writter_page3.txt")
     WRITTER_ADD_PAGE_FROM_FILE("writter_page4.txt")

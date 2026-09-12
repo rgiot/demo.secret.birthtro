@@ -105,7 +105,7 @@ WRITTER_GRID_START_ROW equ (SCREEN_HEIGHT_CHARS - WRITTER_GRID_HEIGHT) >> 1
 
 ; once a page is fully drawn, it stays on screen this many frames before the
 ; next page (from WRITTER_PAGES) starts being drawn
-WRITTER_PAGE_WAIT_FRAMES equ 3
+WRITTER_PAGE_WAIT_FRAMES equ 3*50
 
 
 ; This is the content of  python ../tests/writter_handling/writter_appearance_table.py 
