@@ -7,12 +7,43 @@
   cmd: 
     - img2cpc --mode 0 --overscan  Baby_Face_v3.bmp scr  --output face3_cpc.scr --palette face3_cpc.pal
 
+
+
+- tgt: face4_cpc.scr face4_cpc.pal
+  dep: Baby_Face_v4.png
+  cmd: 
+    - img2cpc --mode 0 --overscan  Baby_Face_v4.png scr  --output face4_cpc.scr --palette face4_cpc.pal
+
+
+
+- tgt: face5_cpc.scr face5_cpc.pal
+  dep: Baby_Face_v5.png
+  cmd: 
+    - img2cpc --mode 0 --overscan  Baby_Face_v5.png scr  --output face5_cpc.scr --palette face5_cpc.pal
+
+# Temporary build while there is no eyes drawned
 - tgt: face3_eye0.spr face3_eye1.spr face3_eye2.spr
   dep: face3_eye0.png face3_eye1.png face3_eye2.png face3_cpc.pal
   cmd:
     - img2cpc --mode 0 --ga-pal face3_cpc.pal face3_eye0.png sprite --output face3_eye0.spr
     - img2cpc --mode 0 --ga-pal face3_cpc.pal face3_eye1.png sprite --output face3_eye1.spr
     - img2cpc --mode 0 --ga-pal face3_cpc.pal face3_eye2.png sprite --output face3_eye2.spr
+
+
+
+- tgt: face4_eye0.spr face4_eye1.spr face4_eye2.spr
+  dep: face3_eye0.spr face3_eye1.spr face3_eye2.spr
+  cmd: 
+    - cp face3_eye0.spr face4_eye0.spr
+    - cp face3_eye1.spr face4_eye1.spr
+    - cp face3_eye2.spr face4_eye2.spr
+
+- tgt: face5_eye0.spr face5_eye1.spr face5_eye2.spr
+  dep: face3_eye0.spr face3_eye1.spr face3_eye2.spr
+  cmd: 
+    - cp face3_eye0.spr face5_eye0.spr
+    - cp face3_eye1.spr face5_eye1.spr
+    - cp face3_eye2.spr face5_eye2.spr
 
 - tgt: clean
   phony: true

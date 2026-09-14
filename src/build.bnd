@@ -5,7 +5,7 @@
 
 # Variables to be set by the user. They control the image used as well as its dimensions
 # Wrong values imply wrong results, so be careful when changing them
-{% set FACE="face3" %} # Change here the prefix of the background if needed to change the picture
+{% set FACE="face5" %} # Change here the prefix of the background if needed to change the picture
 
 # of course, each sprite share the same parameter...
 {%set SPRITE0_WIDTH=48//2 %} # Number of bytes  in the width of the sprite (we obtain the number of pixels by multiplying it by 4)
