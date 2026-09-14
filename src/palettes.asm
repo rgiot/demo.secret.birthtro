@@ -115,3 +115,197 @@ DEBUG_PALETTE(palette_sprites_monochrome_and_background)
 DEBUG_PALETTE(palette_sprites_spectral_and_background)
 DEBUG_PALETTE(palette_all_but_spectral)
 DEBUG_PALETTE(palette_writter_only)
+
+
+
+
+
+
+
+/*
+
+SCROLLER_COLORED_PALETTE_1 equ [
+        GA_COL_05,
+		GA_COL_14,
+		GA_COL_23,
+		GA_COL_25,
+		GA_COL_26,
+		GA_COL_23,
+		GA_COL_14,
+		GA_COL_05
+]
+
+
+SCROLLER_COLORED_PALETTE_2 equ [
+        GA_COL_03,
+		GA_COL_06,
+		GA_COL_23,
+		GA_COL_24,
+		GA_COL_26,
+		GA_COL_16,
+		GA_COL_07,
+		GA_COL_03
+]
+
+
+SCROLLER_COLORED_PALETTE_2 equ [
+        GA_COL_09,
+		GA_COL_18,
+		GA_COL_21,
+		GA_COL_25,
+		GA_COL_26,
+		GA_COL_22,
+		GA_COL_19,
+		GA_COL_09
+]
+
+
+
+SCROLLER_COLORED_PALETTE_3 equ [
+        GA_COL_05,
+		GA_COL_14,
+		GA_COL_19,
+		GA_COL_22,
+		GA_COL_25,
+		GA_COL_23,
+		GA_COL_11,
+		GA_COL_01
+]
+
+
+
+SCROLLER_COLORED_PALETTE_4 equ [
+        GA_COL_01,
+		GA_COL_05,
+		GA_COL_14,
+		GA_COL_17,
+		GA_COL_26,
+		GA_COL_25,
+		GA_COL_16,
+		GA_COL_03
+]
+
+
+
+SCROLLER_COLORED_PALETTE_5 equ [
+        GA_COL_09,
+		GA_COL_12,
+		GA_COL_15,
+		GA_COL_24,
+		GA_COL_26,
+		GA_COL_19,
+		GA_COL_10,
+		GA_COL_01
+]
+
+
+SCROLLER_COLORED_PALETTE_6 equ [
+        GA_COL_03,
+		GA_COL_07,
+		GA_COL_16,
+		GA_COL_25,
+		GA_COL_26,
+		GA_COL_17,
+		GA_COL_08,
+		GA_COL_04
+]
+
+
+
+SCROLLER_COLORED_PALETTE_7 equ [
+        GA_COL_04,
+		GA_COL_08,
+		GA_COL_17,
+		GA_COL_25,
+		GA_COL_26,
+		GA_COL_23,
+		GA_COL_14,
+		GA_COL_05
+]
+
+
+SCROLLER_COLORED_PALETTE_8 equ [
+        GA_COL_09,
+		GA_COL_18,
+		GA_COL_21,
+		GA_COL_25,
+		GA_COL_26,
+		GA_COL_23,
+		GA_COL_14,
+		GA_COL_05
+]
+
+
+
+SCROLLER_COLORED_PALETTE_9 equ [
+        GA_COL_04,
+		GA_COL_13,
+		GA_COL_19,
+		GA_COL_25,
+		GA_COL_26,
+		GA_COL_23,
+		GA_COL_14,
+		GA_COL_05
+]
+
+
+SCROLLER_COLORED_PALETTE_10 equ [
+        GA_COL_01,
+		GA_COL_05,
+		GA_COL_14,
+		GA_COL_17,
+		GA_COL_26,
+		GA_COL_25,
+		GA_COL_16,
+		GA_COL_03
+]
+
+
+SCROLLER_COLORED_PALETTE_11 equ [
+        GA_COL_05,
+		GA_COL_10,
+		GA_COL_22,
+		GA_COL_23,
+		GA_COL_26,
+		GA_COL_17,
+		GA_COL_07,
+		GA_COL_04
+]
+
+
+SCROLLER_COLORED_PALETTE_12 equ [
+        GA_COL_03,
+		GA_COL_12,
+		GA_COL_15,
+		GA_COL_24,
+		GA_COL_26,
+		GA_COL_25,
+		GA_COL_16,
+		GA_COL_04
+]
+
+
+SCROLLER_COLORED_PALETTE_13 equ [
+        GA_COL_01,
+		GA_COL_02,
+		GA_COL_11,
+		GA_COL_20,
+		GA_COL_26,
+		GA_COL_23,
+		GA_COL_14,
+		GA_COL_05
+]
+
+SCROLLER_COLORED_PALETTE_14 equ [
+        GA_COL_01,
+		GA_COL_05,
+		GA_COL_14,
+		GA_COL_23,
+		GA_COL_26,
+		GA_COL_17,
+		GA_COL_08,
+		GA_COL_04
+]
+
+
+*/
