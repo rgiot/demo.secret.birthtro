@@ -920,12 +920,16 @@ SCROLLER_MONOCHROME_RASTERS_DATA
 .stop
 	db GA_BLACK ; The very last one is black to hide everything
 
-SCROLLER_COLORED_RASTERS_DATA
+
+
+	; TODO add something to ensure we have not memory issue there
+	repeat NB_SCROLLER_PALETTE, palette, 0
+SCROLLER_COLORED_RASTERS_DATA_{{palette}}
 .start
-	db SCROLLER_COLORED_PALETTE
+	db SCROLLER_COLORED_PALETTE_{{palette}}
 .stop
 	db GA_BLACK ; The very last one is black to hide everything
-
+	endr
 
 
 	align 256
