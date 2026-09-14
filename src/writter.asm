@@ -90,7 +90,7 @@ writter_draw_page_step
     inc hl
     ld a, d : or e
     jr nz, .next_page_found
-        ld hl, WRITTER_PAGES
+        ld hl, WRITTER_PAGES + 2 + 2 ; XXX We skip the first empty pages
         ld a, (hl) : ld e, a
         inc hl
         ld a, (hl) : ld d, a
