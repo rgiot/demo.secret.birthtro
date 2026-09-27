@@ -21,6 +21,12 @@
   cmd: 
     - img2cpc --mode 0 --overscan  Baby_Face_v5.png scr  --output face5_cpc.scr --palette face5_cpc.pal
 
+- tgt: face6_cpc.scr face6_cpc.pal
+  dep: Baby_Face_v6.png
+  cmd: 
+    - img2cpc --mode 0 --overscan  Baby_Face_v6.png scr  --output face6_cpc.scr --palette face6_cpc.pal
+
+
 # Temporary build while there is no eyes drawned
 - tgt: face3_eye0.spr face3_eye1.spr face3_eye2.spr
   dep: face3_eye0.png face3_eye1.png face3_eye2.png face3_cpc.pal
@@ -45,8 +51,25 @@
     - cp face3_eye1.spr face5_eye1.spr
     - cp face3_eye2.spr face5_eye2.spr
 
+- tgt: face6_eye0.spr face6_eye1.spr face6_eye2.spr
+  dep: face6_eye0.png face6_eye1.png face6_eye2.png
+  cmd: 
+    - img2cpc --mode 0 --ga-pal face6_cpc.pal face6_eye0.png sprite --output face6_eye0.spr
+    - img2cpc --mode 0 --ga-pal face6_cpc.pal face6_eye1.png sprite --output face6_eye1.spr
+    - img2cpc --mode 0 --ga-pal face6_cpc.pal face6_eye2.png sprite --output face6_eye2.spr
+
+
+# loader
+- dep : loader/loading.png
+  tgt : loading.scr loading.pal loading.inks
+  cmd:
+    - img2cpc --mode 0 --pen15 8 --pen14 10 --pen13 12 --pen12 17 --pen11 20  --unlock-pens loader/loading.png scr --output loading.scr --palette loading.pal --inks loading.inks
+
+
 - tgt: clean
   phony: true
   cmd:
     - -rm face3_cpc.scr face3_cpc.pal 
     - -rm face3_eye0.spr face3_eye1.spr face3_eye2.spr
+
+
