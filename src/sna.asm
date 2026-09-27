@@ -11,6 +11,10 @@ SHIFT_SCREEN_FOR_DEBUG equ false ;true
 HIDE_SCROLLER equ false
 SHOW_DEBUG equ false
 
+SPECTRAL_BANK equ 0xc4
+ANIMATE_BANK equ 0xc5
+
+
 	if false
     	SNASET CRTC_TYPE, 3; Demo is coded for CRTC0 but emulatro is requested to be CRTC1. adaptation must work and make the scroller visible
 		SNASET CPC_TYPE, 4 ; 6128 plus
@@ -44,11 +48,15 @@ section screen_buffer
     BANKSET 1
 section demo_code_c4
 	rorg 0x4000
-    	include "spectral_sprites.asm"
+   		include "spectral_sprites.asm"
 		assert $<0x8000
 	endr
+
 section demo_code_c5
-    include "animate.asm"
+	rorg 0x4000
+    	include "animate.asm"
+		assert $<0x8000
+	endr
 
 section paged_music_for_c6
 	rorg 0x4000

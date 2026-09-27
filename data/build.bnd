@@ -69,7 +69,8 @@
 - tgt: clean
   phony: true
   cmd:
-    - -rm face3_cpc.scr face3_cpc.pal 
-    - -rm face3_eye0.spr face3_eye1.spr face3_eye2.spr
+    - -rm face?_cpc.scr face?_cpc.pal 
+    - -rm face?_eye0.spr face?_eye1.spr face?_eye2.spr
+    - -rm loading.scr loading.pal loading.inks
 
 

@@ -30,10 +30,6 @@ demo_init
         call demo_init_copy_screen ; TODO remove later to make it appear progressively
     endif
 
- ; Now we have several logos, the init is done in real time
- ;   ld a, 3
-;    CALL_IN_BANK(show_static_sprite, 0xc4)             ; init the spectral sprites
-
     call scroller_generate_initial_code ; init the split scroller
 
     if true ; does not work at all
@@ -129,7 +125,7 @@ demo_run
 demo_frame_run
     DEBUG(GA_RED)
     ; We provide at maximum one halt to the sinus raster
-    CALL_IN_BANK(spectral_sprite_handle, 0xc4)
+    CALL_IN_BANK(spectral_sprite_handle, SPECTRAL_BANK)
     DEBUG(GA_WHITE)
     halt
 
@@ -196,10 +192,10 @@ demo_frame_run
     ld a, ANIMATION_STATE_PLAYING
     ld (animation_state), a
     xor a : ld (.reset_animation), a
-    CALL_IN_BANK(reset_background_sprite_0, 0xc5)
+    CALL_IN_BANK(reset_background_sprite_0, ANIMATE_BANK)
 .no_reset_animation
 
-   CALL_IN_BANK(replace_background_sprite_0, 0xc5)
+   CALL_IN_BANK(replace_background_sprite_0, ANIMATE_BANK)
 .no_animated_background
     DEBUG(GA_BLACK)
 

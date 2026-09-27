@@ -114,10 +114,28 @@ event_routine_{EVENT_DISABLE_EVENTS}
 	ret
 
 event_routine_{EVENT_ACTIVATE_SELECT_NEXT_LOGO}
-	SELECT_BANK(0xc4)
+	SELECT_BANK(SPECTRAL_BANK)
 	ld a, 1
 	ld (spectral_sprite_move_along_curve.activate_select_next_logo), a
 	RESTORE_BANK()
+	ret
+
+
+event_routine_restart
+	jp $
+	
+	; reset the event handler to the first event
+	ld bc, EVENTS_FIRST_TIMEOUT : ld (event_handler.current_counter), bc
+	ld hl, events_list + 2 : ld (event_handler.event_table_position), hl
+	
+	; reset the initial palette
+	ld hl, PALETTE_INITIAL : ld (demo_frame_init.selected_palette), hl
+	ld hl, SCROLLER_INITIAL_RASTERS_DATA : ld (scroller_show), hl
+
+	; reset the writter
+	ld a, 0 : ld (demo_frame_run.writter_enable), a
+	ld a, 0 : ld (demo_frame_run.animated_background_activated), a
+
 	ret
 
 SECONDS equ 50

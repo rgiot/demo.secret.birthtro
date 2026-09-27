@@ -550,6 +550,8 @@ scroller_select_new_char
 	ld a, (hl)
 	cp 255 : jr nz, .save_next_char_position
 
+	call event_routine_restart
+
 	ld hl, scroller_text
 	ld a,(hl)
 

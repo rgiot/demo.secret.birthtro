@@ -59,7 +59,8 @@ code_lens = true
 log = "CPCLIB-DAP.LOG"
 #emulator = "amspiritlite"
 #emulator = "1984js"
-emulator = "sugarbox"
+#emulator = "sugarbox"
+emulator = "ace"
 endpoint = ""
 port = 8765
 

@@ -14,7 +14,7 @@
     ;; it is important that the caller update the lru list if the value is found, to update the timestamp to 0
     function lru_get_slot lru, value
         l = {lru}
-        print l
+      ;  print l
         repeat list_len(l), i, 0
             item = list_get(l, {i})
             if list_get(item, 0) == {value}
@@ -72,7 +72,7 @@
     function lru_put, lru, value
         l = {lru}
         value = {value}
-        print "BEFORE", l
+     ;   print "BEFORE", l
 
         value_slot = lru_get_slot(l, value)
         if value_slot != -1
@@ -111,7 +111,7 @@
             endif
         endrepeat
 
-        print "AFTER", l
+        ;   print "AFTER", l
         return l
     endfunction
 
@@ -131,16 +131,16 @@ replace_background_sprite_{sprite_nb}_{step_nb}
                 repeat SPRITE{sprite_nb}_WIDTH, x, 0
 
                     @current_value = list_get(SPRITE{sprite_nb}_STEP{step_nb}_CONTENT, {y} * SPRITE{sprite_nb}_WIDTH + {x}) 
-                    print "current lru: ", current_lru, " current y: ", {y}, " current x: ", {x}, " current value: ", @current_value
+                ;    print "current lru: ", current_lru, " current y: ", {y}, " current x: ", {x}, " current value: ", @current_value
 
                     ; we do not cler LRU cache when value is too rarely used, to avoid thrashing the cache
                     @current_value_used_few_times = list_get(SPRITE{sprite_nb}_STEP{step_nb}_HISTOGRAM, @current_value) <=2
                     if @current_value_used_few_times
-                        print "Scarce value, writing directly to memory: ", @current_value
+                        ;    print "Scarce value, writing directly to memory: ", @current_value
                         ; if the value is used few times, we do not use the LRU cache, we just write it directly
                         ld (hl), @current_value
                     else
-                        print "Value is used more than twice, using LRU cache: ", @current_value
+                     ;   print "Value is used more than twice, using LRU cache: ", @current_value
                         ; check if the value is in the LRU cache
 
                         @slot = lru_get_slot(current_lru, @current_value)
@@ -149,7 +149,7 @@ replace_background_sprite_{sprite_nb}_{step_nb}
                             ; we need to update the LRU cache to mark this value as recently used
                             current_lru = lru_put(current_lru, @current_value)
                             @slot = lru_get_slot(current_lru, @current_value)
-                            print "added value to the LRU cache, new slot is ", @slot, " new LRU cache is ", current_lru
+                            ;    print "added value to the LRU cache, new slot is ", @slot, " new LRU cache is ", current_lru
                             ; update the corresponding register
                             switch @slot
                                 case 0
@@ -168,9 +168,9 @@ replace_background_sprite_{sprite_nb}_{step_nb}
                                     fail "Invalid slot number"
                             endswitch
                         else
-                            print "value is in slot ", @slot, " of the LRU cache"
+                            ;    print "value is in slot ", @slot, " of the LRU cache"
                             current_lru = lru_put(current_lru, @current_value)
-                            print "update couneter for value ", @current_value, " in slot ", @slot, " of the LRU cache ", current_lru
+                            ;    print "update couneter for value ", @current_value, " in slot ", @slot, " of the LRU cache ", current_lru
                         endif
 
                         ; write in memory the proper value from the LRU cache
@@ -193,7 +193,7 @@ replace_background_sprite_{sprite_nb}_{step_nb}
                     endif
 
 
-                    print "current_sprite_location=",current_sprite_location 
+                   ; print "current_sprite_location=",current_sprite_location 
                     if low(current_sprite_location) != 255
                         inc l
                     else
@@ -322,7 +322,7 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 
 
 						@current_value = @current_value_dst
-						print "current lru: ", current_lru, " current y: ", {y}, " current x: ", {x}, " current value: ", @current_value
+						;print "current lru: ", current_lru, " current y: ", {y}, " current x: ", {x}, " current value: ", @current_value
 
 						; read screen and remove former background
 						ld a, (hl) : and b
@@ -330,11 +330,11 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 						; we do not cler LRU cache when value is too rarely used, to avoid thrashing the cache
 						@current_value_used_few_times = list_get(SPRITE{sprite_nb}_FROM{src}_TO{dst}_HISTOGRAM, @current_value) <=2
 						if @current_value_used_few_times
-							print "Scarce value, writing directly to memory: ", @current_value
+							; print "Scarce value, writing directly to memory: ", @current_value
 							; if the value is used few times, we do not use the LRU cache, we just write it directly
 							ld (hl), @current_value
 						else
-							print "Value is used more than twice, using LRU cache: ", @current_value
+							; print "Value is used more than twice, using LRU cache: ", @current_value
 							; check if the value is in the LRU cache
 
 							@slot = lru_get_slot(current_lru, @current_value)
@@ -343,7 +343,7 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 								; we need to update the LRU cache to mark this value as recently used
 								current_lru = lru_put(current_lru, @current_value)
 								@slot = lru_get_slot(current_lru, @current_value)
-								print "added value to the LRU cache, new slot is ", @slot, " new LRU cache is ", current_lru
+								; print "added value to the LRU cache, new slot is ", @slot, " new LRU cache is ", current_lru
 								; update the corresponding register
 								switch @slot
 									case 0
@@ -359,9 +359,9 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 										fail "Invalid slot number"
 								endswitch
 							else
-								print "value is in slot ", @slot, " of the LRU cache"
+								; print "value is in slot ", @slot, " of the LRU cache"
 								current_lru = lru_put(current_lru, @current_value)
-								print "update couneter for value ", @current_value, " in slot ", @slot, " of the LRU cache ", current_lru
+								; print "update couneter for value ", @current_value, " in slot ", @slot, " of the LRU cache ", current_lru
 							endif
 
 							; write in memory the proper value from the LRU cache
@@ -403,7 +403,7 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
             current_sprite_location = previous_sprite_location ; go back to the beginning of the line
             current_sprite_location = compute_next_line(current_sprite_location) ; compute the next line
 
-			print {hex}current_sprite_location
+			;print {hex}current_sprite_location
 			assert current_sprite_location >= 0xc000
 
 			current_sprite_location_in_registers = false
@@ -464,13 +464,18 @@ SPRITE0_STEP{{frame}}_CONTENT equ load(LEFT_EYE{{frame}}_SPR)
 		repeat SPRITE0_NB_FRAMES, dest, 0
 			; We generate only consecutive sprites for the animation purposes
 			if {dest}!={src} && (({dest}=={src}+1) || ({src}=={dest}+1))
+
+                print "Generate sprite display code for sprite ", {src}, " to sprite ", {dest}
+
 				SPRITE0_FROM{{src}}_TO{{dest}}_HISTOGRAM equ histogram_delta(SPRITE0_STEP{{src}}_CONTENT, SPRITE0_STEP{{dest}}_CONTENT)
 				SPRITE0_FROM{{src}}_TO{{dest}}_ARGSORT equ list_argsort(SPRITE0_FROM{{src}}_TO{{dest}}_HISTOGRAM)
 
-				print "histogram of sprite ", {src}, " to sprite ", {dest}, " is ", SPRITE0_FROM{{src}}_TO{{dest}}_HISTOGRAM
-				print "argsort of sprite ", {src}, " to sprite ", {dest}, " is ", SPRITE0_FROM{{src}}_TO{{dest}}_ARGSORT
+				;print "histogram of sprite ", {src}, " to sprite ", {dest}, " is ", SPRITE0_FROM{{src}}_TO{{dest}}_HISTOGRAM
+				;print "argsort of sprite ", {src}, " to sprite ", {dest}, " is ", SPRITE0_FROM{{src}}_TO{{dest}}_ARGSORT
 
+                TMP_ADR=$
 				GENERATE_SPRITE_DISPLAY_CODE_DELTA(0, {src}, {dest}) ; only difference between the two sprites is shown
+                print "Generated sprite display code for sprite ", {src}, " to sprite ", {dest}, " at address ", {hex}TMP_ADR, " with size ", {hex}($-TMP_ADR)
 			endif
 
 		endrepeat
