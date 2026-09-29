@@ -44,7 +44,7 @@ interrupt_routine
 
 	push af
 	.counter+*: ld a, 0
-	inc a : and %11111 : ld (.counter), a
+	inc a : and %1111 : ld (.counter), a
 	jr nz, .cont
 
 	push hl, bc, de
