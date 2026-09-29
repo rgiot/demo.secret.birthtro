@@ -30,6 +30,8 @@ loading_set_palette
 		ld (0x39), hl
 	ei
 
+	di
+	jp Start
 	jp $
 
 palette
@@ -49,6 +51,17 @@ interrupt_routine
 
 	push hl, bc, de
 
+		call handle_color_swap
+
+	pop de, bc, hl
+
+.cont
+	pop af
+
+	ei
+	ret
+
+handle_color_swap
 	call SHUFFLE
 
 	ld b, 0x7f
@@ -63,16 +76,7 @@ interrupt_routine
 	inc a
 	cp 16
 	jr nz, .loop
-
-	pop de, bc, hl
-
-.cont
-	pop af
-
-	ei
 	ret
-
-
 
 ; claude generated code
 
@@ -167,6 +171,10 @@ RAND8_NOXOR:
         LD      (SEED),A
         RET
 
+
+
+	; include the music stuff, but we expect it to be smashed afterwhise
+	include "sid_player.asm"
 
 
 	org 0xc000
