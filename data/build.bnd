@@ -71,6 +71,7 @@
   cmd:
     - -rm face?_cpc.scr face?_cpc.pal 
     - -rm face?_eye0.spr face?_eye1.spr face?_eye2.spr
+    - -rm eye0.spr eye1.spr eye2.spr
     - -rm loading.scr loading.pal loading.inks
 
 
