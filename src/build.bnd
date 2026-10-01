@@ -32,6 +32,16 @@
   dep: {{ SNA }}
   cmd: -emu --emulator ace   --snapshot {{SNA}} debug
 
+
+
+- tgt: test_loading_sna
+  dep: loading.sna
+  cmd: -emu --emulator winape   --snapshot loading.sna run
+
+- tgt: loading.sna
+  dep: loading/loading.asm loading/sid_player.asm
+  cmd: basm loading/loading.asm --snapshot -o loading.sna
+
 - tgt: {{SNA}} {{SNA_GENERATED | join(" ")}} sna.lst  sna.map sna.sym
   dep:
     - "*.asm"

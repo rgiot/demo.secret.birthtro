@@ -869,8 +869,12 @@ SCROLLER_FONTS
 		)
 letter_impsp equ letter_sp
 
-
+	if false
 		include "split_scroller_font.asm"
+	else
+	
+		include "split_scroller_font_futuristic.asm"
+	endif
 
 
 ; Generate the data for the mapping beteen a char and its code
