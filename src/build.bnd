@@ -8,9 +8,9 @@
 {% set FACE="face6" %} # Change here the prefix of the background if needed to change the picture
 
 # of course, each sprite share the same parameter...
-{%set SPRITE0_WIDTH=52//2 %} # Number of bytes  in the width of the sprite (we obtain the number of pixels by multiplying it by 4)
+{%set SPRITE0_WIDTH=54//2 %} # Number of bytes  in the width of the sprite (we obtain the number of pixels by multiplying it by 4)
 {%set SPRITE0_HEIGHT=50 %} # Number of lines of the sprite
-{%set SPRITE0_X_OFFSET=10-5 %} # horizontal position in byte (so *2 to get the number of pixels) from left of the screen
+{%set SPRITE0_X_OFFSET=11 %} # horizontal position in byte (so *2 to get the number of pixels) from left of the screen
 {%set SPRITE0_Y_OFFSET=28-9 %} # vertical position in pixel from top of the screen
 
 # Automatially created variables
