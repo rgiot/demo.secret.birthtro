@@ -122,19 +122,52 @@ event_routine_{EVENT_ACTIVATE_SELECT_NEXT_LOGO}
 
 
 event_routine_restart
-	jp $
-	
-	; reset the event handler to the first event
+	; NB: called from scroller_select_new_char (not from the event handler), so
+	; there is no ix to preserve and the event handler state can be freely reset
+
+	; reset the event handler to the first event (and re-enable it if events were disabled)
+	ld a, 0x01 : ld (event_handler), a ; opcode of "ld bc, nn" (DISABLE_EVENTS replaced it by a ret)
 	ld bc, EVENTS_FIRST_TIMEOUT : ld (event_handler.current_counter), bc
 	ld hl, events_list + 2 : ld (event_handler.event_table_position), hl
-	
+
 	; reset the initial palette
 	ld hl, PALETTE_INITIAL : ld (demo_frame_init.selected_palette), hl
-	ld hl, SCROLLER_INITIAL_RASTERS_DATA : ld (scroller_show), hl
+	ld hl, SCROLLER_INITIAL_RASTERS_DATA : ld (scroller_show.selected_scroller_palette), hl
 
-	; reset the writter
-	ld a, 0 : ld (demo_frame_run.writter_enable), a
-	ld a, 0 : ld (demo_frame_run.animated_background_activated), a
+	; reset the music (it is restarted by the START_MUSIC event)
+	xor a : ld (demo_play_music.activated), a
+	ld bc, 0x7fc6 : out (c), c
+		di : call PLY_AKG_Stop : ei ; silence the PSG
+	ld bc, 0x7fc0 : out (c), c
+	call demo_init_music
+
+	; reset the writter: it restarts from the first page, with the full background copy
+	xor a
+	ld (demo_frame_run.writter_enable), a
+	ld (demo_frame_run.animated_background_activated), a
+	ld a, 1 : ld (demo_frame_run.reset_animation), a
+	ld a, ANIMATION_STATE_FINISHED : ld (animation_state), a
+	ld hl, WRITTER_PAGES+2 : ld (writter_next_page_ptr), hl
+	ld hl, transition_tables : ld (writter_advance_to_next_row.transtion_ptr), hl
+	ld a, WRITTER_TRANSITION_NB_CALLS_FULL : ld (writter_advance_to_next_row.nb_calls), a
+	ld hl, WRITTER_PAGE0 : call writter_draw_page_start
+
+	; reset the spectral sprites
+	SELECT_BANK(SPECTRAL_BANK)
+		; use the regular (progressive) erasing routine to remove the displayed logo ;
+		; it switches by itself to DISPLAYING_START once finished
+		ld hl, 0xc000 : ld (spectral_sprite_handle.erasing_start_address), hl
+		xor a : ld (spectral_sprite_handle.erase_counter), a
+		ld a, SPECTRAL_SPRITE_STATE_ERASING_CONTINUE : ld (spectral_sprite_handle.state), a
+		ld a, -1 : ld (spectral_sprite_handle.selected_logo), a
+		xor a : ld (spectral_sprite_move_along_curve.activate_select_next_logo), a
+		ld hl, 1 : ld (spectral_sprite_move_along_curve.change_counter), hl
+		ld a, 1 : ld (show_static_sprite_continue_1.color_wait), a
+		ld hl, joint_palette_spectral_writter_set : ld (show_static_sprite_continue_1.change_color_ptr), hl
+	RESTORE_BANK()
+	SELECT_BANK(ANIMATE_BANK)
+		call reset_background_sprite_0
+	RESTORE_BANK()
 
 	ret
 
