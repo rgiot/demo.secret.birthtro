@@ -315,9 +315,11 @@ ga_set_palette
 	WRITTER_COLOR_SET11 equ GA_COL_19
 	WRITTER_COLOR_SET12 equ GA_COL_23
 
-	repeat 12, step, 1
+	NB_JOINT_SPECTRAL_WRITTER_SETS equ 12
+
+	repeat NB_JOINT_SPECTRAL_WRITTER_SETS, step, 1
 		palette_spectral_writter_set{step}
-		GENERATE_PALETTE_JOINT_SPECTRAL_WRITTER(SPECTRAL_PALETTE_SET{{step}}, {eval}WRITTER_COLOR_SET{{step}})
+		GENERATE_PALETTE_JOINT_SPECTRAL_WRITTER(SPECTRAL_PALETTE_SET{{step}}, WRITTER_COLOR_SET{{step}})
 	endr
 
 
@@ -345,5 +347,15 @@ DEBUG_PALETTE(palette_writter_only)
 
 
 
+joint_palette_spectral_writter_set
+	if false
+		; the first set is the default one
+		dw palette_all_visible 
+	endif
+	; the other sets are the joint ones
+	repeat NB_JOINT_SPECTRAL_WRITTER_SETS, step, 1
+		dw palette_spectral_writter_set{{step}}
+	endr
+	dw 0
 
 

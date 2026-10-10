@@ -869,7 +869,7 @@ SCROLLER_FONTS
 		)
 letter_impsp equ letter_sp
 
-	if false
+	if true
 		include "split_scroller_font.asm"
 	else
 	

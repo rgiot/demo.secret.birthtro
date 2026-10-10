@@ -523,7 +523,7 @@ spectral_sprite_handle
 
     ; get the correct information
     ; iy = spectral_sprites_matrix_<logo>, ix = spectral_column_top_line_<logo>
-    add a, a : ld l, a : ld h, 0
+    add a : ld l, a : ld h, 0
 
     push hl
         ld de, spectral_sprite_move_along_curve.table
@@ -647,8 +647,6 @@ show_static_sprite_continue_{{LOGO_DISPLAY_PART}}
     OTHER_SPECTRAL_SPRITE_HEIGHT = SPECTRAL_SPRITE_HEIGHT - CURRENT_SPECTRAL_SPRITE_HEIGHT
 
 
-    BREAKPOINT
-
     ld bc, 0 : .ix_value equ $-2 ; top_line_table
     ld hl, 0 : .iy_value equ $-2 ; matrix
     exx
@@ -768,7 +766,19 @@ show_static_sprite_continue_{{LOGO_DISPLAY_PART}}
 
 
 .change_color
-        ld hl, palette_all_visible : ld (demo_frame_init.selected_palette), hl
+.change_color_ptr+*:
+        ld hl, joint_palette_spectral_writter_set
+        ld e, (hl) : inc hl
+        ld d, (hl)
+        ld a, d : or e : jr nz, .really_change_color
+.reset_change_color_table
+        ld hl, joint_palette_spectral_writter_set
+        ld e, (hl) : inc hl
+        ld d, (hl)
+.really_change_color
+        inc hl
+        ld (demo_frame_init.selected_palette), de
+        ld (.change_color_ptr), hl
 .after_change_color
         ld a, SPECTRAL_SPRITE_STATE_WAVING : 
     endif
