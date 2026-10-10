@@ -289,6 +289,14 @@ ga_set_palette
 		)
 	endm
 
+	macro GENERATE_PALETTE_JOINT_NO_SPECTRAL_WRITTER spectral, writter
+		db GENERATE_PALETTE(
+			BACKGROUND_IMG_PALETTE, true, 
+			{spectral}, false, 
+			{writter}, true
+		)
+	endm
+
 	SPECTRAL_PALETTE_SET1 equ [GA_COL_04, GA_COL_07, GA_COL_08, GA_COL_17]
 	SPECTRAL_PALETTE_SET2 equ [GA_COL_03, GA_COL_06, GA_COL_15, GA_COL_24]
 	SPECTRAL_PALETTE_SET3 equ [GA_COL_04, GA_COL_05, GA_COL_14, GA_COL_23]
@@ -319,7 +327,12 @@ ga_set_palette
 
 	repeat NB_JOINT_SPECTRAL_WRITTER_SETS, step, 1
 		palette_spectral_writter_set{step}
-		GENERATE_PALETTE_JOINT_SPECTRAL_WRITTER(SPECTRAL_PALETTE_SET{{step}}, WRITTER_COLOR_SET{{step}})
+			GENERATE_PALETTE_JOINT_SPECTRAL_WRITTER(SPECTRAL_PALETTE_SET{{step}}, WRITTER_COLOR_SET{{step}})
+
+		palette_no_spectral_writter_set{step}
+			GENERATE_PALETTE_JOINT_NO_SPECTRAL_WRITTER(SPECTRAL_PALETTE_SET{{step}}, WRITTER_COLOR_SET{{step}})
+
+
 	endr
 
 
@@ -355,6 +368,7 @@ joint_palette_spectral_writter_set
 	; the other sets are the joint ones
 	repeat NB_JOINT_SPECTRAL_WRITTER_SETS, step, 1
 		dw palette_spectral_writter_set{{step}}
+		dw palette_no_spectral_writter_set{{step}}
 	endr
 	dw 0
 

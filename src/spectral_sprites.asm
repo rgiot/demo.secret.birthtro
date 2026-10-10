@@ -778,7 +778,19 @@ show_static_sprite_continue_{{LOGO_DISPLAY_PART}}
 .really_change_color
         inc hl
         ld (demo_frame_init.selected_palette), de
+
+        ; get the spectral disabled palette
+        ld e, (hl) : inc hl
+        ld d, (hl) : inc hl
+
         ld (.change_color_ptr), hl
+
+        ; when spectral are disabled, we must keep the rest
+        ld hl, palette_all_but_spectral
+        ex hl, de
+        ld bc, 16
+        ldir
+
 .after_change_color
         ld a, SPECTRAL_SPRITE_STATE_WAVING : 
     endif
