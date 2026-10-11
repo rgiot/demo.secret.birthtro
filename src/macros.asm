@@ -25,9 +25,9 @@ macro CALL_IN_BANK routine, bank
 	if {bank} != 0xc0
 		assert $<0x4000
 		assert {bank} == 0xc5 || {bank} == 0xc4, "bank must be 0xc5 or 0xc4; just need to handle the others, no worries ;)"
-		ld bc, 0x7f00 + {bank} : out (c), c
+		ld bc, 0x7f00 + {bank} : ld (current_ram_config), bc : out (c), c
 		call {routine}
-		ld bc, 0x7f00 + 0xc0 : out (c), c
+		ld bc, 0x7f00 + 0xc0 : ld (current_ram_config), bc : out (c), c
 		assert $<=0x4000
 	endif
 endm
@@ -35,12 +35,12 @@ endm
 
 macro SELECT_BANK, bank
 	assert $<0x4000 || $>=0x8000
-	ld bc, 0x7f00 + {bank} : out (c), c
+	ld bc, 0x7f00 + {bank} : ld (current_ram_config), bc : out (c), c ; the variable is written first so the interrupt handler never restores a stale bank
 	assert $<0x4000 || $>=0x8000
 endm
 
 macro RESTORE_BANK
 	assert $<0x4000 || $>=0x8000
-	ld bc, 0x7f00 + 0xc0 : out (c), c
+	ld bc, 0x7f00 + 0xc0 : ld (current_ram_config), bc : out (c), c
 	assert $<0x4000 || $>=0x8000
 endm

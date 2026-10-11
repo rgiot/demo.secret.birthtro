@@ -17,6 +17,7 @@ demo_start
     ei
 
     call demo_init
+
     ; Really run the demo
     jp demo_run
 
@@ -168,8 +169,7 @@ demo_frame_run
 
     DEBUG(GA_RED)
 
-    call demo_play_music
-
+    call demo_play_music_frame
 
     DEBUG(GA_GREEN)
 
@@ -244,17 +244,102 @@ demo_init_music
 
 
 
+    assert $<0x4000
+
+;; The music is played once per frame, by demo_frame_run.
+;; While the restart code is running, it is played by the interrupt handler instead
+;; (see event_routine_restart) as the frame loop does not play it at the right pace.
+demo_play_music_frame
+    ld a, 0 : .played_by_interrupt equ $-1
+    or a : jr z, .play
+        xor a : ld (.played_by_interrupt), a ; already played during this frame
+        ret
+.play
+    di : call demo_play_music : ei
+    ret
+
+;; Number of interrupts (6 per frame) between two plays of the music: it is played at 50Hz.
+MUSIC_INTERRUPT_PERIOD equ 6
+
+demo_interrupt_counter db 0
+
+;; Bank configuration (gate array command) currently selected.
+;; The music lives in another bank, so the handler has to restore the one of the interrupted code.
+;; Maintained by SELECT_BANK/RESTORE_BANK/CALL_IN_BANK
+current_ram_config dw 0x7fc0
+
+;; Install/remove the handler that plays the music under interrupt.
+demo_install_interrupt_handler
+    di
+        xor a : ld (demo_interrupt_counter), a
+        ld a, 0xc3 : ld (0x38), a
+        ld hl, demo_interrupt_handler : ld (0x39), hl
+    ei
+    ret
+
+demo_remove_interrupt_handler
+    di
+        ld hl, 0xc9fb : ld (0x38), hl ; ei : ret
+    ei
+    ret
+
+demo_interrupt_handler
+    push af : push bc : push de : push hl : push ix : push iy
+    ex af, af' : exx
+    push af : push bc : push de : push hl
+
+    ld a, (demo_interrupt_counter)
+    inc a
+    cp MUSIC_INTERRUPT_PERIOD
+    jr c, .save_counter
+        call demo_play_music
+        ld a, 1 : ld (demo_play_music_frame.played_by_interrupt), a
+        xor a
+.save_counter
+    ld (demo_interrupt_counter), a
+
+    pop hl : pop de : pop bc : pop af
+    exx : ex af, af'
+    pop iy : pop ix : pop hl : pop de : pop bc : pop af
+    ei
+    ret
+
+
+;; Called by the interrupt handler (interrupts are disabled)
 demo_play_music
     ld a, 0 : .activated equ $-1 ; music is not played at the very beginning
     or a : ret z
 
+    ld bc, 0x7fc6: out (c), c
+        ; a restart has been requested: lower the volume progressively, then stop and rewind the music
+        ld a, 0 : .fading equ $-1
+        or a : jr z, .play
 
-    assert $<=0x4000 || $>=0x8000
-    ld bc, 0x7fc6: out (c), c    
-        di : call PLY_AKG_Play : ei
-    ld bc, 0x7fc0: out (c), c
-    assert $<=0x4000 || $>=0x8000
+        ld a, 5 : .fade_delay equ $-1 ; the volume is lowered every 5 plays
+        dec a : ld (.fade_delay), a
+        jr nz, .play
+        ld a, 5 : ld (.fade_delay), a
+
+        ld a, (PLY_AKG_FADE) : inc a : ld (PLY_AKG_FADE), a
+        cp 16 : jr nz, .play
+
+        ; fade out is over: stop the PSG, rewind the music, and wait for the next START_MUSIC event
+        call PLY_AKG_Stop
+        ld hl, MUSIC : xor a
+        call PLY_AKG_Init
+        xor a
+        ld (PLY_AKG_FADE), a
+        ld (.fading), a
+        ld (.activated), a
+        jr .end
+
+.play
+        call PLY_AKG_Play
+.end
+    ld bc, (current_ram_config) : out (c), c
     ret
+
+    assert $<0x4000
 
     ; all common stuffs
     include "constants.asm"

@@ -122,6 +122,8 @@ event_routine_{EVENT_ACTIVATE_SELECT_NEXT_LOGO}
 
 
 event_routine_restart
+	; the music is played under interrupt while the reset code is running
+	call demo_install_interrupt_handler
 	; NB: called from scroller_select_new_char (not from the event handler), so
 	; there is no ix to preserve and the event handler state can be freely reset
 
@@ -134,12 +136,9 @@ event_routine_restart
 	ld hl, PALETTE_INITIAL : ld (demo_frame_init.selected_palette), hl
 	ld hl, SCROLLER_INITIAL_RASTERS_DATA : ld (scroller_show.selected_scroller_palette), hl
 
-	; reset the music (it is restarted by the START_MUSIC event)
-	xor a : ld (demo_play_music.activated), a
-	ld bc, 0x7fc6 : out (c), c
-		di : call PLY_AKG_Stop : ei ; silence the PSG
-	ld bc, 0x7fc0 : out (c), c
-	call demo_init_music
+	; fade out the music (handled by demo_play_music, that stops and rewinds it at the end)
+	; if the music has not started yet, there is nothing to fade
+	ld a, (demo_play_music.activated) : ld (demo_play_music.fading), a
 
 	; reset the writter: it restarts from the first page, with the full background copy
 	xor a
@@ -169,6 +168,7 @@ event_routine_restart
 		call reset_background_sprite_0
 	RESTORE_BANK()
 
+	call demo_remove_interrupt_handler
 	ret
 
 SECONDS equ 50

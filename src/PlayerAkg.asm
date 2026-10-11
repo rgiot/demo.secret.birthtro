@@ -1642,6 +1642,14 @@ PLY_AKG_Channel{channelNumber}_SetInstrumentStep:
 
         ;Saves the software period and volume for the PSG to send later.
         ld a,e
+        ;Fade out: the volume (0-16) is decreased by PLY_AKG_FADE, with a floor of 0
+        push hl
+        ld hl, PLY_AKG_FADE
+        sub (hl)
+        pop hl
+        jr nc,PLY_AKG_Channel{channelNumber}_NoFadeUnderflow
+        xor a
+PLY_AKG_Channel{channelNumber}_NoFadeUnderflow:
         ld (PLY_AKG_PSGReg{{channelNumber} + 7}),a          ;Reaches register/label 8/9/10.
 
         if {channelNumber} != 3
@@ -3752,5 +3760,8 @@ PLY_AKG_Channel{channelNumber}_SoundEffectSpeed                 equ PLY_AKG_ROM_
 
         ENDIF ;PLY_AKG_Rom
 
+
+;Fade out value (0-16) subtracted from the volume of each channel. 0 = no fade.
+PLY_AKG_FADE db 0
 
 PLY_AKG_End:
