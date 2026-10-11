@@ -66,12 +66,27 @@ Sync2
 PlayReturn
         ;Nops: 3.
 
-/*
-		push hl
-	;	BREAKPOINT
-		call handle_color_swap
-		pop hl
-*/
+        ; TODO stabilize + remove the count of nops
+
+	ld hl, color_table : .ptr equ $-2
+	ld b, 0x7f
+	ld a, NB_INKS_TO_KEEP
+	repeat NB_COLORS_PER_PALETTE
+		ld c, (hl)
+		out (c), a : out (c), c
+		inc hl : inc a
+	endrepeat
+
+
+	; next palette of the table, or the first one when the end is reached
+	ld bc, color_table_end
+	or a : sbc hl, bc : add hl, bc ; Z if hl == color_table_end ; add does not change Z
+	jr nz, .save_ptr
+	ld hl, color_table
+.save_ptr
+	ld (.ptr), hl
+
+
         ;The player has finished. Here you can perform your effects while still being perfectly synced (good luck!).
         ;The trick is to call the SID code every 36 nops *at worst*.
         ;Please read CAREFULLY the notes in the player. Doing SID is very tricky.

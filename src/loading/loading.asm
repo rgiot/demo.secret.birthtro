@@ -3,6 +3,7 @@
 
 
 	BORDER_COLOR equ GA_BLACK ; GA_MAUVE
+	ENABLE_SID equ true
 
 	org 0x4000
 	run $
@@ -37,7 +38,7 @@ loading_set_palette
 		ld (0x39), hl
 	ei
 
-	if false 
+	if ENABLE_SID
 		; Play the sid music
 		di
 		jp Start
@@ -97,8 +98,8 @@ handle_color_swap
 
 
 	; next palette of the table, or the first one when the end is reached
-	ld de, color_table_end
-	or a : sbc hl, de : add hl, de ; Z if hl == color_table_end ; add does not change Z
+	ld bc, color_table_end
+	or a : sbc hl, bc : add hl, bc ; Z if hl == color_table_end ; add does not change Z
 	jr nz, .save_ptr
 	ld hl, color_table
 .save_ptr
