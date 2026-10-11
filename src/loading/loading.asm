@@ -81,23 +81,20 @@ interrupt_routine
 
 ; Number of precomputed palettes, played in loop. Only the colors of the pens 10 to 15 are changed
 NB_COLOR_PALETTES equ 50
-NB_INKS_TO_CHANGE equ 10
-NB_COLORS_PER_PALETTE equ 16-NB_INKS_TO_CHANGE
+NB_INKS_TO_KEEP equ 10
+NB_COLORS_PER_PALETTE equ 16-NB_INKS_TO_KEEP
 
 ;; Apply the next precomputed palette (no shuffle is done here, it would be too slow)
 handle_color_swap
 	ld hl, color_table : .ptr equ $-2
 	ld b, 0x7f
-	ld a, 10
-.loop
-	ld c, (hl)
-	out (c), a
-	out (c), c
+	ld a, NB_INKS_TO_KEEP
+	repeat NB_COLORS_PER_PALETTE
+		ld c, (hl)
+		out (c), a : out (c), c
+		inc hl : inc a
+	endrepeat
 
-	inc hl
-	inc a
-	cp 16
-	jr nz, .loop
 
 	; next palette of the table, or the first one when the end is reached
 	ld de, color_table_end
@@ -107,6 +104,11 @@ handle_color_swap
 .save_ptr
 	ld (.ptr), hl
 	ret
+
+
+	; include the music stuff, but we expect it to be smashed afterwhise
+	include "sid_player.asm"
+
 
 
 ;; Fill color_table with NB_COLOR_PALETTES successive shuffles of ARR.
@@ -230,8 +232,7 @@ RAND8_NOXOR:
 
 
 
-	; include the music stuff, but we expect it to be smashed afterwhise
-	include "sid_player.asm"
+
 
 
 	org 0xc000
