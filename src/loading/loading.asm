@@ -1,12 +1,16 @@
 
 	include "inner://ga.asm"
 
+
+	BORDER_COLOR equ GA_BLACK ; GA_MAUVE
+
 	org 0x4000
 	run $
 
 	ld hl, 0xc9fb : ld (0x38), hl
 
 
+	; Set the palette of the real screen
 loading_set_palette
 	ld hl , palette
 	ld b, 0x7f: xor a
@@ -18,11 +22,14 @@ loading_set_palette
 	jr nz , .loop
 
 	ld bc, 0x7f10 : out (c), c
-	ld hl, GA_MAUVE*256 + 0x8c
+	ld hl, BORDER_COLOR*256 + 0x8c
 	out (c), h : out (c), l
 
 
-	BREAKPOINT
+	; Generate the extra palettes
+	call generate_color_table ; must be done before the interrupt routine starts using the table
+
+	; setup the interrupt routine to swap colors
 	di
 		ld hl, interrupt_routine
 		ld a, list_get(assemble("jp 0"), 0)
@@ -30,23 +37,34 @@ loading_set_palette
 		ld (0x39), hl
 	ei
 
-	di
-	jp Start
-	jp $
+	if false 
+		; Play the sid music
+		di
+		jp Start
+	else
+		; stop just to get the interrupted code that handles the music
+		jp $
+	endif
 
 palette
-	incbin "../data/loading.pal"
+	incbin "../../data/loading.pal"
 	
 
 
 
-
-
 interrupt_routine
-
 	push af
+	; slow down to execute it once per frame
+.frame+*:	ld a, 0
+	inc a
+	ld (.frame), a
+	cp 6 : jp nz, .cont
+	xor a
+	ld (.frame), a
+
+
 	.counter+*: ld a, 0
-	inc a : and %1111 : ld (.counter), a
+	inc a : and %11 : ld (.counter), a
 	jr nz, .cont
 
 	push hl, bc, de
@@ -61,14 +79,18 @@ interrupt_routine
 	ei
 	ret
 
-handle_color_swap
-	call SHUFFLE
+; Number of precomputed palettes, played in loop. Only the colors of the pens 10 to 15 are changed
+NB_COLOR_PALETTES equ 50
+NB_INKS_TO_CHANGE equ 10
+NB_COLORS_PER_PALETTE equ 16-NB_INKS_TO_CHANGE
 
+;; Apply the next precomputed palette (no shuffle is done here, it would be too slow)
+handle_color_swap
+	ld hl, color_table : .ptr equ $-2
 	ld b, 0x7f
 	ld a, 10
-	ld hl, ARR
 .loop
-	ld c, (HL)
+	ld c, (hl)
 	out (c), a
 	out (c), c
 
@@ -76,7 +98,42 @@ handle_color_swap
 	inc a
 	cp 16
 	jr nz, .loop
+
+	; next palette of the table, or the first one when the end is reached
+	ld de, color_table_end
+	or a : sbc hl, de : add hl, de ; Z if hl == color_table_end ; add does not change Z
+	jr nz, .save_ptr
+	ld hl, color_table
+.save_ptr
+	ld (.ptr), hl
 	ret
+
+
+;; Fill color_table with NB_COLOR_PALETTES successive shuffles of ARR.
+;; Only the first NB_COLORS_PER_PALETTE colors are used for each palette
+generate_color_table
+	; the seed must not be 0
+	ld a, r : or 1 : ld (SEED), a
+
+	ld a, NB_COLOR_PALETTES : ld (.palettes_left), a
+	ld hl, color_table : ld (.dest), hl
+.loop
+	call SHUFFLE ; modifies AF, BC, DE, HL
+
+	ld hl, ARR
+	ld de, color_table : .dest equ $-2
+	ld bc, NB_COLORS_PER_PALETTE
+	ldir
+	ld (.dest), de
+
+	ld a, 0 : .palettes_left equ $-1
+	dec a : ld (.palettes_left), a
+	jr nz, .loop
+	ret
+
+color_table
+	defs NB_COLOR_PALETTES * NB_COLORS_PER_PALETTE
+color_table_end
 
 ; claude generated code
 
@@ -178,4 +235,4 @@ RAND8_NOXOR:
 
 
 	org 0xc000
-	incbin "../data/loading.scr"
+	incbin "../../data/loading.scr"

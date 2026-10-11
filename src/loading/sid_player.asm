@@ -66,12 +66,12 @@ Sync2
 PlayReturn
         ;Nops: 3.
 
-
+/*
 		push hl
 	;	BREAKPOINT
 		call handle_color_swap
 		pop hl
-
+*/
         ;The player has finished. Here you can perform your effects while still being perfectly synced (good luck!).
         ;The trick is to call the SID code every 36 nops *at worst*.
         ;Please read CAREFULLY the notes in the player. Doing SID is very tricky.
@@ -88,7 +88,7 @@ PlayReturn
         ld d,0
 ;This is the maximum the player can reach... with a safety margin. Other songs may take longer, or shorter.
 ;Decrease this as much as you can, but if the program freezes, it means it is too low!
-WAIT_LINE_COUNT =  72 - 55 /* 55 is the number of line for color swapping*/; XXX adapt ; ; ; 
+WAIT_LINE_COUNT =  72 /* 55 is the number of line for color swapping*/; XXX adapt ; ; ; 
         ld hl,WAIT_LINE_COUNT
         or a
         sbc hl,de
@@ -210,14 +210,14 @@ SaveSp  ld sp,0
 
 
 
-	include "../data/music/loading/signal_in_disarray_playerconfig.asm"
+	include "../../data/music/loading/signal_in_disarray_playerconfig.asm"
 Music_Start
-	include "../data/music/loading/signal_in_disarray.asm"
+	include "../../data/music/loading/signal_in_disarray.asm"
 Music_End
 
 
 Main_Player_Start:
-        include "loading/PlayerAkySid_CPC.asm"
+        include "PlayerAkySid_CPC.asm"
 Main_Player_End
 
 
