@@ -4,8 +4,9 @@
 
 	BORDER_COLOR equ GA_BLACK ; GA_MAUVE
 	ENABLE_SID equ true
+	ENABLE_SAMPLE equ true
 
-	org 0x4000
+	org 0x2000
 	run $
 
 	ld hl, 0xc9fb : ld (0x38), hl
@@ -30,6 +31,16 @@ loading_set_palette
 	; Generate the extra palettes
 	call generate_color_table ; must be done before the interrupt routine starts using the table
 
+
+di
+		ld hl, 0xc9fb : ld (0x38), hl
+	ei
+
+	if ENABLE_SAMPLE
+		call PlayBenedictionSample
+	endif
+
+
 	; setup the interrupt routine to swap colors
 	di
 		ld hl, interrupt_routine
@@ -37,6 +48,7 @@ loading_set_palette
 		ld (0x38), a
 		ld (0x39), hl
 	ei
+
 
 	if ENABLE_SID
 		; Play the sid music
@@ -106,6 +118,14 @@ handle_color_swap
 	ld (.ptr), hl
 	ret
 
+
+
+	include 'loading_benediction_sample.asm'
+
+	; not yet activated
+	if false
+		include 'loading_animate.asm'
+	endif
 
 	; include the music stuff, but we expect it to be smashed afterwhise
 	include "sid_player.asm"
