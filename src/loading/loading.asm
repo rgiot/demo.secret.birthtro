@@ -6,11 +6,12 @@
 	ENABLE_SID equ true
 	ENABLE_SAMPLE equ true
 
+
+	;; The system is not destroyed at all
+	;; so interuptions are cut all the time
+	;; TODO the palette should be set right from the basic
 	org 0x2000
-	run $
-
-	ld hl, 0xc9fb : ld (0x38), hl
-
+	di
 
 	; Set the palette of the real screen
 loading_set_palette
@@ -32,28 +33,29 @@ loading_set_palette
 	call generate_color_table ; must be done before the interrupt routine starts using the table
 
 
-di
-		ld hl, 0xc9fb : ld (0x38), hl
-	ei
-
 	if ENABLE_SAMPLE
+		; interruption are already disabled
 		call PlayBenedictionSample
 	endif
 
 
-	; setup the interrupt routine to swap colors
-	di
-		ld hl, interrupt_routine
-		ld a, list_get(assemble("jp 0"), 0)
-		ld (0x38), a
-		ld (0x39), hl
-	ei
-
+	if false
+		; setup the interrupt routine to swap colors
+		di
+			ld hl, interrupt_routine
+			ld a, list_get(assemble("jp 0"), 0)
+			ld (0x38), a
+			ld (0x39), hl
+		ei
+	endif
 
 	if ENABLE_SID
 		; Play the sid music
-		di
-		jp Start
+		;di ; XXX interruption are already disabled
+		call Start
+		jp $
+		db 'EOF'
+		ret
 	else
 		; stop just to get the interrupted code that handles the music
 		jp $
@@ -120,7 +122,6 @@ handle_color_swap
 
 
 
-	include 'loading_benediction_sample.asm'
 
 	; not yet activated
 	if false
@@ -252,6 +253,11 @@ RAND8_NOXOR:
         RET
 
 
+	assert $<0x9000
+
+
+	; we do not care if they are smashed by the sid player
+	include 'loading_benediction_sample.asm'
 
 
 

@@ -5,10 +5,8 @@
 ;
 
 PlayBenedictionSample	
-    di
 	    call Init_sons
 	    call Play
-	ei
 	ret
 
 

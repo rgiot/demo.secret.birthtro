@@ -2,7 +2,7 @@
 
         include "PlayerAkySidMacros_CPC.asm"
 
-PLY_AKYsid_RET_TABLES   equ #a000               ;Can be put anywhere. See PLY_AKYsid_RET_TABLES_END in the player about where it ends.
+PLY_AKYsid_RET_TABLES   equ #9000               ;Can be put anywhere. See PLY_AKYsid_RET_TABLES_END in the player about where it ends.
 
 ;Do you want a keyboard test? It takes too long and messes up with the PSG, so it *will* mess up with the SID timings!
 ;But since it is only done once per frame, it should not be heard.
@@ -13,6 +13,10 @@ PLY_AKY_SID_ADD_STOP_SOUNDS equ 1
 Start  
 
         di
+
+        ld a, (0x38) : ld (backup_38), a
+        ld hl, (0x39) : ld (backup_38 + 1), hl
+
 
         ld hl,#c9fb
         ld (#38),hl
@@ -78,6 +82,12 @@ PlayReturn
 	endrepeat
 
 
+.color_cycling_delay+*:        ld a, 0
+        inc a
+        ld (.color_cycling_delay), a
+        and %11
+        jr nz, .cont2
+
 	; next palette of the table, or the first one when the end is reached
 	ld bc, color_table_end
 	or a : sbc hl, bc : add hl, bc ; Z if hl == color_table_end ; add does not change Z
@@ -86,6 +96,7 @@ PlayReturn
 .save_ptr
 	ld (.ptr), hl
 
+.cont2
 
         ;The player has finished. Here you can perform your effects while still being perfectly synced (good luck!).
         ;The trick is to call the SID code every 36 nops *at worst*.
@@ -220,7 +231,12 @@ MainLoopEnd
 KeyPressed
 SaveSp  ld sp,0
         call PLY_AKYsid_Stop
-        jr $
+
+        ; go back to the sid caller
+        di
+        ld a, (backup_38) : ld (0x38), a
+        ld hl, (backup_38 + 1) : ld (0x39), hl
+        ret
 
 
 
@@ -236,6 +252,7 @@ Main_Player_Start:
 Main_Player_End
 
 
+backup_38 defs 3
 
 
         print "Size of player: ", {hex}(Main_Player_End - Main_Player_Start)
