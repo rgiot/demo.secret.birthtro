@@ -39,6 +39,17 @@ loading_set_palette
 	endif
 
 
+animate_loop
+	ld b, 0xf5
+	in a, (c)
+	rra
+	jr nc, animate_loop
+
+
+	call animate_sprite_2
+
+	jp animate_loop
+
 	if false
 		; setup the interrupt routine to swap colors
 		di
@@ -53,6 +64,9 @@ loading_set_palette
 		; Play the sid music
 		;di ; XXX interruption are already disabled
 		call Start
+
+		ld bc, 0x7f10 : out (c), c
+		ld bc, 0x7f44 : out (c), c
 		jp $
 		db 'EOF'
 		ret
@@ -258,8 +272,9 @@ RAND8_NOXOR:
 
 	; we do not care if they are smashed by the sid player
 	include 'loading_benediction_sample.asm'
+	include 'loading_animate.asm'
 
-
+	assert $< 0xa000; 'demossystem area. but we should target less
 
 
 	org 0xc000

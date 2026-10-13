@@ -9,7 +9,6 @@
 
 
 
-add_to_change equ duration(ld a, 0) + duration(add l) + duration(ld l, a)
 
 
 ;;
@@ -108,16 +107,4 @@ replace_background_sprite_0
 		ANIMATION_STEP(replace_background_sprite_0_2_1)
 		ANIMATION_STEP(replace_background_sprite_0_1_0)
 	dw 0
-
-
-    if false
-    ; seems to not work ATM
-enum ANIMATION_STATE
-    PLAYING
-    FINISHED
-endenum
-    else
-    ANIMATION_STATE_PLAYING equ 0
-    ANIMATION_STATE_FINISHED equ 1
-    endif
 

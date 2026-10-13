@@ -1,6 +1,9 @@
 
 	; Use a LRU cache to handle the bytes to draw
 
+    add_to_change equ duration(ld a, 0) + duration(add l) + duration(ld l, a)
+
+
     ;; Create a new LRU of size {size}
     function lru_new size
         item = list_new(2, -1) ; value, timestamp
@@ -238,7 +241,7 @@ replace_background_sprite_{sprite_nb}_{step_nb}
 
 
     ;; To speed up spirtes drwing, we want dedicated macros
-    macro GENERATE_SPRITE_DISPLAY_CODE_DELTA sprite_nb, src, dst, can_cancel
+    macro GENERATE_SPRITE_DISPLAY_CODE_DELTA sprite_nb, src, dst, can_cancel, use_mask
 ; Replace the bytes to go from sprite {src} to sprite {dst} for sprite number {sprite_nb}
 replace_background_sprite_{sprite_nb}_{src}_{dst}
 
@@ -252,14 +255,20 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
         current_sprite_location = SPRITE{sprite_nb}_LOCATION 
 
         ; XXX There is a bug in basm when using @lru instead of current_lru => the lru is wrongly altered
-        current_lru = lru_new(3)  ; LRU for C, D, E registers
+        if {use_mask}
+            current_lru = lru_new(3)  ; LRU for C, D, E registers
+        else
+            current_lru = lru_new(4)  ; LRU for C, D, E, B registers
+        endif
 		current_cursor_x = 0
 		current_cursor_y = 0
 		current_cursor_location = current_sprite_location
 		current_sprite_location_in_registers = false
 
 
-		ld b, SPECTRAL_SPRITE_DRAW_MASK_BOTH_POS | WRITTER_DRAW_MASK
+        if {use_mask}
+		    ld b, SPECTRAL_SPRITE_DRAW_MASK_BOTH_POS | WRITTER_DRAW_MASK
+        endif
 
         repeat SPRITE{sprite_nb}_HEIGHT, y, 0
            ; push hl
@@ -309,7 +318,7 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 						;print "current lru: ", current_lru, " current y: ", {y}, " current x: ", {x}, " current value: ", @current_value
 
 						; read screen and remove former background
-						ld a, (hl) : and b
+						ld a, (hl) : if {use_mask} : and b : endif
 
 						; we do not cler LRU cache when value is too rarely used, to avoid thrashing the cache
 						@current_value_used_few_times = list_get(SPRITE{sprite_nb}_FROM{src}_TO{dst}_HISTOGRAM, @current_value) <=2
@@ -339,6 +348,10 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 									case 2
 										ld e, @current_value
 										break
+                                    case 3
+                                        ld b, @current_value
+                                        assert !{use_mask}
+                                        break
 									default
 										fail "Invalid slot number"
 								endswitch
@@ -359,6 +372,10 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 								case 2
 									or e
 									break
+                                case 3
+                                    or b
+                                    assert !{use_mask}
+                                    break
 								default
 									fail "Invalid slot number"
 							endswitch
@@ -430,4 +447,16 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 		endrepeat
 		return histo
 	endfunction
+
+
+    if false
+    ; seems to not work ATM
+enum ANIMATION_STATE
+    PLAYING
+    FINISHED
+endenum
+    else
+    ANIMATION_STATE_PLAYING equ 0
+    ANIMATION_STATE_FINISHED equ 1
+    endif
 

@@ -12,10 +12,9 @@ PLY_AKY_SID_ADD_STOP_SOUNDS equ 1
 
 Start  
 
-        di
-
         ld a, (0x38) : ld (backup_38), a
         ld hl, (0x39) : ld (backup_38 + 1), hl
+        ld (backup_sp), sp
 
 
         ld hl,#c9fb
@@ -233,9 +232,9 @@ SaveSp  ld sp,0
         call PLY_AKYsid_Stop
 
         ; go back to the sid caller
-        di
         ld a, (backup_38) : ld (0x38), a
         ld hl, (backup_38 + 1) : ld (0x39), hl
+        ld sp, (backup_sp)
         ret
 
 
@@ -253,6 +252,7 @@ Main_Player_End
 
 
 backup_38 defs 3
+backup_sp defs 2
 
 
         print "Size of player: ", {hex}(Main_Player_End - Main_Player_Start)

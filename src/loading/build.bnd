@@ -1,0 +1,17 @@
+- tgt: test_loading
+  dep: loading.sna
+  phony: true
+  cmd: -emu --emulator amspiritlite   --snapshot loading.sna run
+
+- tgt: loading.sna
+  dep: loading.asm sid_player.asm ../../data/loading.pal loading_animate.asm ../animate_lib.asm ../../data/VAPEUR_000.SPR ../../data/VAPEUR_001.SPR ../../data/VAPEUR_002.SPR ../../data/VAPEUR_003.SPR ../../data/VAPEUR_004.SPR ../../data/VAPEUR_005.SPR ../../data/VAPEUR_006.SPR ../../data/VAPEUR_007.SPR ../../data/VAPEUR_008.SPR
+  cmd: basm loading.asm --snapshot -o loading.sna
+
+
+- tgt: ../../data/loading.pal
+  phony: true
+  cmd: bndbuild -f ../../data loading.pal
+
+- tgt: ../../data/VAPEUR_000.SPR ../../data/VAPEUR_001.SPR ../../data/VAPEUR_002.SPR ../../data/VAPEUR_003.SPR ../../data/VAPEUR_004.SPR ../../data/VAPEUR_005.SPR ../../data/VAPEUR_006.SPR ../../data/VAPEUR_007.SPR ../../data/VAPEUR_008.SPR
+  phony: true
+  cmd: bndbuild -f ../../data VAPEUR_000.SPR
