@@ -4,10 +4,10 @@
 	SPRITE2_NB_FRAMES equ 9
 	SPRITE2_HEIGHT equ 92
 	SPRITE2_WIDTH equ 28//2
-	SPRITE2_LOCATION equ 0xc000 ;+ (0x800*(20%8)) + (96*20//8) + 20
+	SPRITE2_LOCATION equ 0xc000 + (0x800*(20%8)) + (80*(20//8)) + 10   ; = 0xE0AA
 
 
-NB_REPEATED_FRAMES_IN_ANIMATION equ 10
+NB_REPEATED_FRAMES_IN_ANIMATION equ 20
 animation_do_nothing ret
 macro ANIMATION_STEP routine
 	dw {routine}
@@ -39,13 +39,13 @@ SPRITE2_STEP{{frame}}_CONTENT equ load(string_concat("../../data/VAPEUR_00" ,{fr
 		;print "argsort of sprite ", {src}, " to sprite ", {dest}, " is ", SPRITE2_FROM{{src}}_TO{{dest}}_ARGSORT
 
 		TMP_ADR=$
-		GENERATE_SPRITE_DISPLAY_CODE_DELTA(2, {src}, {eval}dest, false, false) ; only difference between the two sprites is shown
+		GENERATE_SPRITE_DISPLAY_CODE_DELTA(2, {src}, {eval}dest, false, false, 80) ; only difference between the two sprites is shown
 		print "Generated sprite display code for sprite ", {src}, " to sprite ", dest, " at address ", {hex}TMP_ADR, " with size ", {hex}($-TMP_ADR)
 
 	endrepeat
 
 
-	animate_sprite_2
+animate_sprite_2
 	; Get the appropriate routine
 	ld hl, .table : .ptr equ $-2
 	ld e, (hl) : inc hl : ld d, (hl)

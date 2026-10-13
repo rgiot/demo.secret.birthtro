@@ -33,22 +33,15 @@ loading_set_palette
 	call generate_color_table ; must be done before the interrupt routine starts using the table
 
 
+	call animate_start
+
 	if ENABLE_SAMPLE
 		; interruption are already disabled
 		call PlayBenedictionSample
 	endif
 
 
-animate_loop
-	ld b, 0xf5
-	in a, (c)
-	rra
-	jr nc, animate_loop
 
-
-	call animate_sprite_2
-
-	jp animate_loop
 
 	if false
 		; setup the interrupt routine to swap colors
@@ -59,6 +52,10 @@ animate_loop
 			ld (0x39), hl
 		ei
 	endif
+
+
+	call animate_start
+
 
 	if ENABLE_SID
 		; Play the sid music
@@ -273,6 +270,25 @@ RAND8_NOXOR:
 	; we do not care if they are smashed by the sid player
 	include 'loading_benediction_sample.asm'
 	include 'loading_animate.asm'
+
+animate_start
+	ld a, ANIMATION_STATE_PLAYING
+	ld (animation_state), a
+	ld hl, animate_sprite_2.table
+	ld (animate_sprite_2.ptr), hl
+animate_loop
+	ld b, 0xf5
+	in a, (c)
+	rra
+	jr nc, animate_loop
+
+
+	call animate_sprite_2
+
+	ld a, (animation_state)
+	cp ANIMATION_STATE_FINISHED
+	ret z
+	jp animate_loop
 
 	assert $< 0xa000; 'demossystem area. but we should target less
 

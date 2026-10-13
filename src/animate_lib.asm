@@ -208,7 +208,7 @@ replace_background_sprite_{sprite_nb}_{step_nb}
             pop hl
             call bc26_hl
             current_sprite_location = current_sprite_location - SPRITE{sprite_nb}_WIDTH
-            current_sprite_location = compute_next_line(current_sprite_location)
+            current_sprite_location = compute_next_line(current_sprite_location, 96)
             current_lru = lru_remove_slot(current_lru, 0) ; a has been used in bc26
         endrepeat
         ret
@@ -219,7 +219,7 @@ replace_background_sprite_{sprite_nb}_{step_nb}
 
 
     ;; bc26 but in assembler
-    function compute_next_line, current_sprite_location
+    function compute_next_line, current_sprite_location, screen_width
 
         h = high({current_sprite_location})
         l = low({current_sprite_location})
@@ -227,7 +227,7 @@ replace_background_sprite_{sprite_nb}_{step_nb}
         h = h + 8
         if h > 0xff
             h = h - 0x100
-			l = l + 96
+			l = l + {screen_width}
 			if l > 0xff
 				l = l - 0x100
 				h = h + 1
@@ -241,7 +241,7 @@ replace_background_sprite_{sprite_nb}_{step_nb}
 
 
     ;; To speed up spirtes drwing, we want dedicated macros
-    macro GENERATE_SPRITE_DISPLAY_CODE_DELTA sprite_nb, src, dst, can_cancel, use_mask
+    macro GENERATE_SPRITE_DISPLAY_CODE_DELTA sprite_nb, src, dst, can_cancel, use_mask, screen_width
 ; Replace the bytes to go from sprite {src} to sprite {dst} for sprite number {sprite_nb}
 replace_background_sprite_{sprite_nb}_{src}_{dst}
 
@@ -318,14 +318,19 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 						;print "current lru: ", current_lru, " current y: ", {y}, " current x: ", {x}, " current value: ", @current_value
 
 						; read screen and remove former background
-						ld a, (hl) : if {use_mask} : and b : endif
+						if {use_mask} : ld a, (hl) : and b : endif
 
 						; we do not cler LRU cache when value is too rarely used, to avoid thrashing the cache
 						@current_value_used_few_times = list_get(SPRITE{sprite_nb}_FROM{src}_TO{dst}_HISTOGRAM, @current_value) <=2
 						if @current_value_used_few_times
 							; print "Scarce value, writing directly to memory: ", @current_value
 							; if the value is used few times, we do not use the LRU cache, we just write it directly
-							ld (hl), @current_value
+							if {use_mask}
+								or @current_value
+								ld (hl), a
+							else
+								ld (hl), @current_value
+							endif
 						else
 							; print "Value is used more than twice, using LRU cache: ", @current_value
 							; check if the value is in the LRU cache
@@ -362,29 +367,41 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 							endif
 
 							; write in memory the proper value from the LRU cache
-							switch @slot
-								case 0
-									or c
-									break   
-								case 1
-									or d
-									break
-								case 2
-									or e
-									break
-                                case 3
-                                    or b
-                                    assert !{use_mask}
-                                    break
-								default
-									fail "Invalid slot number"
-							endswitch
-
-							; in any case we need to update the counters
-
+							; with a mask the background is kept (or + store), otherwise the byte is simply replaced
+							if {use_mask}
+								switch @slot
+									case 0
+										or c
+										break
+									case 1
+										or d
+										break
+									case 2
+										or e
+										break
+									default
+										fail "Invalid slot number"
+								endswitch
+								ld (hl), a
+							else
+								switch @slot
+									case 0
+										ld (hl), c
+										break
+									case 1
+										ld (hl), d
+										break
+									case 2
+										ld (hl), e
+										break
+									case 3
+										ld (hl), b
+										break
+									default
+										fail "Invalid slot number"
+								endswitch
+							endif
 						endif
-
-						ld (hl), a
 
 					endif
 
@@ -402,7 +419,7 @@ replace_background_sprite_{sprite_nb}_{src}_{dst}
 
             ;call bc26_hl
             current_sprite_location = previous_sprite_location ; go back to the beginning of the line
-            current_sprite_location = compute_next_line(current_sprite_location) ; compute the next line
+            current_sprite_location = compute_next_line(current_sprite_location, {screen_width}) ; compute the next line
 
 			;print {hex}current_sprite_location
 			assert current_sprite_location >= 0xc000
