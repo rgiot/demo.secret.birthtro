@@ -11,6 +11,9 @@
 	;; so interuptions are cut all the time
 	;; TODO the palette should be set right from the basic
 	org 0x2000
+MAIN_MEMORY_START
+
+
 	di
 
 	; Set the palette of the real screen
@@ -291,7 +294,16 @@ animate_loop
 	jp animate_loop
 
 	assert $< 0xa000; 'demossystem area. but we should target less
+MAIN_MEMORY_STOP
+
 
 
 	org 0xc000
+SCREEN_MEMORY_START
 	incbin "../../data/loading.scr"
+SCREEN_MEMORY_STOP
+
+
+
+save "C0.2000", MAIN_MEMORY_START, MAIN_MEMORY_STOP-MAIN_MEMORY_START
+save "C0.C000", SCREEN_MEMORY_START, 0x4000

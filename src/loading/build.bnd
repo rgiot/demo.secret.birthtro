@@ -1,12 +1,15 @@
 - tgt: test_loading
   dep: loading.sna
   phony: true
-  cmd: -emu --emulator amspiritlite   --snapshot loading.sna run
+  cmd: -emu --emulator ace   --snapshot loading.sna run
 
-- tgt: loading.sna
-  dep: loading.asm sid_player.asm ../../data/loading.pal loading_animate.asm ../animate_lib.asm ../../data/VAPEUR_000.SPR ../../data/VAPEUR_001.SPR ../../data/VAPEUR_002.SPR ../../data/VAPEUR_003.SPR ../../data/VAPEUR_004.SPR ../../data/VAPEUR_005.SPR ../../data/VAPEUR_006.SPR ../../data/VAPEUR_007.SPR ../../data/VAPEUR_008.SPR
+- tgt: loading.sna C0.2000 C0.C000
+  dep: loading.asm sid_player.asm ../../data/loading.pal loading_animate.asm ../animate_lib.asm ../../data/VAPEUR_000.SPR ../../data/VAPEUR_001.SPR ../../data/VAPEUR_002.SPR ../../data/VAPEUR_003.SPR ../../data/VAPEUR_004.SPR ../../data/VAPEUR_005.SPR ../../data/VAPEUR_006.SPR ../../data/VAPEUR_007.SPR ../../data/VAPEUR_008.SPR ../../data/music/loading/birthtro_sid.asm
   cmd: basm loading.asm --snapshot -o loading.sna
 
+- tgt: linked_loading.sna
+  dep: C0.2000 C0.C000
+  cmd: basm linked_loading.asm --snapshot -o linked_loading.sna
 
 - tgt: ../../data/loading.pal
   phony: true
@@ -15,3 +18,9 @@
 - tgt: ../../data/VAPEUR_000.SPR ../../data/VAPEUR_001.SPR ../../data/VAPEUR_002.SPR ../../data/VAPEUR_003.SPR ../../data/VAPEUR_004.SPR ../../data/VAPEUR_005.SPR ../../data/VAPEUR_006.SPR ../../data/VAPEUR_007.SPR ../../data/VAPEUR_008.SPR
   phony: true
   cmd: bndbuild -f ../../data VAPEUR_000.SPR
+
+
+- tgt: clean
+  phony: true
+  cmd:
+    - rm  loading.{sna,bin,lst,html}

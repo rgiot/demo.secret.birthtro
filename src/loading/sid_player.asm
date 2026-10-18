@@ -240,9 +240,9 @@ SaveSp  ld sp,0
 
 
 
-	include "../../data/music/loading/signal_in_disarray_playerconfig.asm"
+	include "../../data/music/loading/birthtro_sid_playerconfig.asm"
 Music_Start
-	include "../../data/music/loading/signal_in_disarray.asm"
+	include "../../data/music/loading/birthtro_sid.asm"
 Music_End
 
 
