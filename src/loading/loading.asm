@@ -10,7 +10,7 @@
 	;; The system is not destroyed at all
 	;; so interuptions are cut all the time
 	;; TODO the palette should be set right from the basic
-	org 0x2000
+	org LOADER_CODE_ADDRESS
 MAIN_MEMORY_START
 
 

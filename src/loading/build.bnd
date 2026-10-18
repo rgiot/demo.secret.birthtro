@@ -1,3 +1,16 @@
+{% set LOADER_CODE_ADDRESS = 0x2000 %}
+{% set LOADER_LINKER_ADDRESS = 0x1000 %}
+
+- tgt: test_loading_linker
+  dep: loading_linker.sna
+  phony: true
+  cmd: ace loading_linker.sna 
+
+- tgt: loading_linker.sna
+  dep: C0.C000 C0.2000 loading_linker.asm
+  cmd: basm loading_linker.asm --snapshot -o loading_linker.sna -DLOADER_LINKER_ADDRESS={{ LOADER_LINKER_ADDRESS }} -DLOADER_CODE_ADDRESS={{ LOADER_CODE_ADDRESS }}
+
+
 - tgt: test_loading
   dep: loading.sna
   phony: true
@@ -5,7 +18,7 @@
 
 - tgt: loading.sna C0.2000 C0.C000
   dep: loading.asm sid_player.asm ../../data/loading.pal loading_animate.asm ../animate_lib.asm ../../data/VAPEUR_000.SPR ../../data/VAPEUR_001.SPR ../../data/VAPEUR_002.SPR ../../data/VAPEUR_003.SPR ../../data/VAPEUR_004.SPR ../../data/VAPEUR_005.SPR ../../data/VAPEUR_006.SPR ../../data/VAPEUR_007.SPR ../../data/VAPEUR_008.SPR ../../data/music/loading/birthtro_sid.asm
-  cmd: basm loading.asm --snapshot -o loading.sna
+  cmd: basm loading.asm --snapshot -o loading.sna -DLOADER_CODE_ADDRESS={{ LOADER_CODE_ADDRESS }} -DLOADER_LINKER_ADDRESS={{ LOADER_LINKER_ADDRESS }}
 
 - tgt: linked_loading.sna
   dep: C0.2000 C0.C000
@@ -23,4 +36,4 @@
 - tgt: clean
   phony: true
   cmd:
-    - rm  loading.{sna,bin,lst,html}
+    - rm  *.{sna,bin,lst,html}
