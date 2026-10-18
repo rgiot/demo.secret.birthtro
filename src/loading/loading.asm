@@ -65,6 +65,9 @@ loading_set_palette
 		;di ; XXX interruption are already disabled
 		call Start
 
+	call animate_start
+
+
 		ld bc, 0x7f10 : out (c), c
 		ld bc, 0x7f44 : out (c), c
 		jp $
