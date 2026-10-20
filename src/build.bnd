@@ -86,3 +86,11 @@
   cmd: 
    - bndbuild -f ../data {{FACE ~ "_cpc.pal"}}
    - bndbuild -f ../data {{FACE ~ "_eye0.spr"}}
+
+
+- tgt: PATER.{{DSK}}
+  dep: PATER.000
+  cmd:
+    - bndbuild -f loading PATER.DSK
+    - cp ./loading/PATER.DSK PATER.DSK
+    - dsk PATER.DSK add PATER.000

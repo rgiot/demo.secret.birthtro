@@ -70,8 +70,6 @@ loading_set_palette
 
 		ld bc, 0x7f10 : out (c), c
 		ld bc, 0x7f44 : out (c), c
-		jp $
-		db 'EOF'
 		ret
 	else
 		; stop just to get the interrupted code that handles the music

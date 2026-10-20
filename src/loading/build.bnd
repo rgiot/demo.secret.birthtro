@@ -1,13 +1,29 @@
 {% set LOADER_CODE_ADDRESS = 0x2000 %}
-{% set LOADER_LINKER_ADDRESS = 0x1000 %}
+{% set LOADER_LINKER_ADDRESS = 0x2B0 %}
+
+
+- tgt: test
+  dep: PATER.DSK
+  phony: true
+  cmd: -ace   PATER.DSK
+
+- tgt: PATER.DSK
+  dep: PATER.BAS
+  cmd:
+    - dsk PATER.DSK format
+    - dsk PATER.DSK add PATER.BAS
+
+- tgt: PATER.BAS
+  dep: paternity.asm LOADER.BIN build.bnd
+  cmd: basm paternity.asm --basic -o PATER.BAS -DLOADER_LINKER_ADDRESS={{ LOADER_LINKER_ADDRESS }}
 
 - tgt: test_loading_linker
   dep: loading_linker.sna
   phony: true
   cmd: ace loading_linker.sna 
 
-- tgt: loading_linker.sna
-  dep: C0.C000 C0.2000 loading_linker.asm
+- tgt: loading_linker.sna LOADER.BIN
+  dep: C0.C000 C0.2000 loading_linker.asm build.bnd
   cmd: basm loading_linker.asm --snapshot -o loading_linker.sna -DLOADER_LINKER_ADDRESS={{ LOADER_LINKER_ADDRESS }} -DLOADER_CODE_ADDRESS={{ LOADER_CODE_ADDRESS }}
 
 
