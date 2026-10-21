@@ -53,7 +53,7 @@ SPRITE0_STEP{{frame}}_CONTENT equ load(LEFT_EYE{{frame}}_SPR)
 				;print "argsort of sprite ", {src}, " to sprite ", {dest}, " is ", SPRITE0_FROM{{src}}_TO{{dest}}_ARGSORT
 
                 TMP_ADR=$
-				GENERATE_SPRITE_DISPLAY_CODE_DELTA(0, {src}, {dest}, true, false, 96) ; only difference between the two sprites is shown
+				GENERATE_SPRITE_DISPLAY_CODE_DELTA(0, {src}, {dest}, true, true, 96) ; only difference between the two sprites is shown
                 print "Generated sprite display code for sprite ", {src}, " to sprite ", {dest}, " at address ", {hex}TMP_ADR, " with size ", {hex}($-TMP_ADR)
 			endif
 

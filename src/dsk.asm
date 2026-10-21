@@ -48,4 +48,5 @@
 
 
 
-	SAVE 'BIRTHTRO', , , DSK, 'BIRTHTRO.DSK'
+
+	SAVE 'PATER.000', , , DSK, 'PATER.DSK'

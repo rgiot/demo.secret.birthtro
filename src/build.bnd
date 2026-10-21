@@ -1,7 +1,7 @@
 
 {% set SNA="birthtro.sna" %}
-{% set DSK="BIRTHTRO.DSK" %}
-{% set EXE="BIRTHTRO.BIN" %}
+{% set DSK="PATER.DSK" %}
+{% set EXE="PATER.000" %}
 
 # Variables to be set by the user. They control the image used as well as its dimensions
 # Wrong values imply wrong results, so be careful when changing them
@@ -66,9 +66,6 @@
   dep: link.sna
   cmd: -emu --emulator ace --snapshot link.sna run
 
-- tgt: {{DSK}} link.sna
-  dep: {{SNA_GENERATED | join(" ")}} dsk.asm
-  cmd: basm dsk.asm --override --snapshot -o link.sna
 
 - tgt: test_dsk
   dep: {{DSK}}
@@ -88,9 +85,11 @@
    - bndbuild -f ../data {{FACE ~ "_eye0.spr"}}
 
 
-- tgt: PATER.{{DSK}}
-  dep: PATER.000
+- tgt: link.sna {{DSK}} 
+  dep: {{SNA_GENERATED | join(" ")}} dsk.asm
+  phony: true
   cmd:
-    - bndbuild -f loading PATER.DSK
-    - cp ./loading/PATER.DSK PATER.DSK
-    - dsk PATER.DSK add PATER.000
+     - bndbuild -f loading PATER.DSK
+     - cp ./loading/PATER.DSK PATER.DSK
+
+     - basm dsk.asm --override --snapshot -o link.sna
