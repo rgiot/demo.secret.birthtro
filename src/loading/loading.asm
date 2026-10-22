@@ -44,17 +44,6 @@ loading_set_palette
 
 
 
-	if false
-		; setup the interrupt routine to swap colors
-		di
-			ld hl, interrupt_routine
-			ld a, list_get(assemble("jp 0"), 0)
-			ld (0x38), a
-			ld (0x39), hl
-		ei
-	endif
-
-
 	call animate_start
 
 
@@ -80,32 +69,7 @@ palette
 
 
 
-interrupt_routine
-	push af
-	; slow down to execute it once per frame
-.frame+*:	ld a, 0
-	inc a
-	ld (.frame), a
-	cp 6 : jp nz, .cont
-	xor a
-	ld (.frame), a
 
-
-	.counter+*: ld a, 0
-	inc a : and %11 : ld (.counter), a
-	jr nz, .cont
-
-	push hl, bc, de
-
-		call handle_color_swap
-
-	pop de, bc, hl
-
-.cont
-	pop af
-
-	ei
-	ret
 
 ; Number of precomputed palettes, played in loop. Only the colors of the pens 10 to 15 are changed
 NB_COLOR_PALETTES equ 50
@@ -286,6 +250,14 @@ animate_loop
 
 
 	call animate_sprite_2
+
+
+swap_wait+*: ld a, 0
+	inc a
+	and 0b111
+	ld (swap_wait), a
+	call z, handle_color_swap
+
 
 	ld a, (animation_state)
 	cp ANIMATION_STATE_FINISHED
