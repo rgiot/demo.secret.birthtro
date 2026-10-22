@@ -602,8 +602,16 @@ writter_or_sprite_w{w}
             return "comma"
         elseif {char} == "!"
             return "exclam"
+        elseif {char} == "é"
+            return "eacute"
         else
-            return {char}
+            ; BUG the é test does not work, no idea why yet.
+            ;     to we chear
+            if {char} > 'z'
+                return "eacute"
+            else
+                return {char}
+            endif
         endif
     endfunction
 
@@ -621,6 +629,8 @@ writter_or_sprite_w{w}
             return "'"
         elseif {code} == "comma"
             return ","
+        elseif {code} == "eacute"
+            return "é"
         else
             return {code}
         endif
@@ -800,7 +810,7 @@ endfunction
     macro WRITTER_ADD_PAGE_FROM_FILE file_name
 WRITTER_PAGE{CURRENT_PAGE_NUMBER}
     CURRENT_PAGE_NUMBER += 1
-    CURRENT_PAGE_CONTENT = load({file_name})
+    CURRENT_PAGE_CONTENT = load_utf8({file_name})
     CURRENT_PAGE_LINES = list_split_by_value(CURRENT_PAGE_CONTENT, "\n")
 
     if list_len(CURRENT_PAGE_LINES) != WRITTER_GRID_HEIGHT
@@ -808,16 +818,16 @@ WRITTER_PAGE{CURRENT_PAGE_NUMBER}
     endif
 
 
-    line0 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 0), "IS_NOT_CRLF"))
-    line1 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 1), "IS_NOT_CRLF"))
-    line2 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 2), "IS_NOT_CRLF"))
-    line3 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 3), "IS_NOT_CRLF"))
-    line4 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 4), "IS_NOT_CRLF"))
-    line5 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 5), "IS_NOT_CRLF"))
-    line6 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 6), "IS_NOT_CRLF"))
-    line7 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 7), "IS_NOT_CRLF"))
-    line8 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 8), "IS_NOT_CRLF"))
-    line9 = string_from_list(list_filter(list_get(CURRENT_PAGE_LINES, 9), "IS_NOT_CRLF"))
+    line0 = list_filter(list_get(CURRENT_PAGE_LINES, 0), "IS_NOT_CRLF")
+    line1 = list_filter(list_get(CURRENT_PAGE_LINES, 1), "IS_NOT_CRLF")
+    line2 = list_filter(list_get(CURRENT_PAGE_LINES, 2), "IS_NOT_CRLF")
+    line3 = list_filter(list_get(CURRENT_PAGE_LINES, 3), "IS_NOT_CRLF")
+    line4 = list_filter(list_get(CURRENT_PAGE_LINES, 4), "IS_NOT_CRLF")
+    line5 = list_filter(list_get(CURRENT_PAGE_LINES, 5), "IS_NOT_CRLF")
+    line6 = list_filter(list_get(CURRENT_PAGE_LINES, 6), "IS_NOT_CRLF")
+    line7 = list_filter(list_get(CURRENT_PAGE_LINES, 7), "IS_NOT_CRLF")
+    line8 = list_filter(list_get(CURRENT_PAGE_LINES, 8), "IS_NOT_CRLF")
+    line9 = list_filter(list_get(CURRENT_PAGE_LINES, 9), "IS_NOT_CRLF")
 
     WRITTER_ENCODE_PAGE(line0, line1, line2, line3, line4, line5, line6, line7, line8, line9)
 

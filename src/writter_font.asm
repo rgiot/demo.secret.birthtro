@@ -67,6 +67,18 @@ WRITTER_CREATE_CHAR(
 )
 
 
+WRITTER_CREATE_CHAR(
+    eacute,
+    "   #####",
+    " #####  ",
+    "###  ## ",
+    "###  ## ",
+    "### ### ",
+    "###     ",
+    " #####  ",
+    "        "
+)
+
 
 ; Lowercase
 WRITTER_CREATE_CHAR(
