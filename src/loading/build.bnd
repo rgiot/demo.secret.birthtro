@@ -52,4 +52,4 @@
 - tgt: clean
   phony: true
   cmd:
-    - rm  *.{sna,bin,lst,html}
+    - -rm  *.{sna,bin,lst,html}

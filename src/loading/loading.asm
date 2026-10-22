@@ -12,8 +12,6 @@
 	;; TODO the palette should be set right from the basic
 	org LOADER_CODE_ADDRESS
 MAIN_MEMORY_START
-
-
 	di
 
 	; Set the palette of the real screen

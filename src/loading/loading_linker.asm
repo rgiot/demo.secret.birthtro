@@ -2,6 +2,7 @@
     org LOADER_LINKER_ADDRESS
 
     include "../demosystem/linker_common.asm"
+    include "inner://firmware/scrpack.asm"
 
     run $
 
@@ -31,8 +32,72 @@
         pop bc, de, hl
       exx
     ei
+
+
+  ; copy the interrupted stuff to the right place
+  ld hl, interrupted_start
+  ld de, 0x8000
+  ld bc, interrupted_stop - interrupted_start
+  ldir
+
+  ; activate it
+    ld hl,Event_Block
+    call &bce3 ; KL ADD FAST TICKER
+;
     ret ; go back to basic
     
+
+interrupted_start
+  rorg 0x8000
+
+Event_Block
+; bloc de controle
+        dw 0
+; partie commune
+        dw 0
+        db 0 ; compteur
+        db %10000011 ; classe
+        dw interrupted_routine ; routine d'interruption
+        db 0
+
+interrupted_routine
+    push af, hl, de, bc
+      call random_palette
+    pop bc, de, hl, af
+    reti
+
+
+random_palette
+    ld a, 10
+.loop
+
+    ; select random color for pen a
+    push af
+      ld a, r
+      and 31
+.safety
+      cp 27
+      jr nc, .continue
+      sub 27
+      jr .safety
+.continue
+
+    ld b, a
+    pop af
+    ld c, b
+    ; A = pen
+    ; B = C = ink
+    push af
+      call SCR_SET_INK
+    pop af
+
+    inc a
+    cp 16
+    jr nz, .loop
+    ret
+
+  rend
+interrupted_stop
 
 
     INSTALL_UNCRUNCHER()

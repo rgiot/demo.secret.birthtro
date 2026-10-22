@@ -76,6 +76,7 @@
   cmd:
     - -rm {{SNA}} {{DSK}} {{SNA_GENERATED | join(" ")}} link.sna sna.map
     - bndbuild -f ../data clean
+    - bndbuild -f loading clean
 
 
 - tgt: {{ FACE_SCR }} {{EYE0_SPR}} {{EYE1_SPR}} {{EYE2_SPR}}
