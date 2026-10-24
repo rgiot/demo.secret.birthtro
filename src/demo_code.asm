@@ -61,6 +61,8 @@ demo_init_copy_screen
     ret
     endif
 
+    include "demosystem/arkos_setup_crtc.asm"
+
 ; Ensure the screen is BLACK and CRTC setup properly
 demo_init_screen
 .ga_init
@@ -77,20 +79,7 @@ demo_init_screen
 
     ; set up the CRTC as expected
 .setup_crtc
-    ld bc, 0xbc00 + 0 : out (c), c : ld bc, 0xbd00 + 64-1 : out (c), c
-    ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00 + SCREEN_WIDTH_WORDS : out (c), c
-    ld bc, 0xbc00 + 3 : out (c), c : ld bc, 0xbd00 + SCREEN_CRTC_R3 : out (c), c
-    ld bc, 0xbc00 + 2 : out (c), c
-    if SHIFT_SCREEN_FOR_DEBUG
-        ld bc, 0xbd00 + SCREEN_CRTC_R2 + 4 : out (c), c
-    else
-        ld bc, 0xbd00 + SCREEN_CRTC_R2 : out (c), c
-    endif
-.crtc_r2_value equ $-2 - list_len(assemble("out(c),c"))
-    ld bc, 0xbc00 + 7 : out (c), c : ld bc, 0xbd00 + 29 : out (c), c
-    ld bc, 0xbc00 + 6 : out (c), c : ld bc, 0xbd00 + SCREEN_HEIGHT_CHARS : out (c), c
-    ld bc, 0xbc00 + 12 : out (c),c : ld bc, 0xbd00 + 0x30 : out (c), c
-    ld bc, 0xbc00 + 13 : out (c),c : ld bc, 0xbd00 : out (c), c
+    AKS_HANDLE_CRTC_TRANSITION(crtc_table)
     ret
 
 demo_adapt_for_crtc
@@ -109,7 +98,22 @@ demo_adapt_for_crtc
     endif
     ret
 
+
+crtc_table
+    AKS_CRTC_TRANS_TABLE([
+        [0, 64-1], 
+        [1, SCREEN_WIDTH_WORDS], 
+        [2, SCREEN_CRTC_R2], 
+        [3, SCREEN_CRTC_R3], 
+        [6, SCREEN_HEIGHT_CHARS], 
+        [7, 29],
+        [12, 0x30],
+     [13, 0x00]
+    ])
+
+
 ; XXX Can be moved in an ara that will be overriden later
+crtc_detection 
 	DS_PRODUCE_CRTC_DETECTOR_ROUTINE()
 
 demo_run

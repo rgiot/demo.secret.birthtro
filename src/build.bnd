@@ -45,6 +45,7 @@
 - tgt: {{SNA}} {{SNA_GENERATED | join(" ")}} sna.lst  sna.map sna.sym
   dep:
     - "*.asm"
+    - "demosystem/*.asm"
     - {{ FACE_SCR }}
     - {{ FACE_PAL }}
     - {{ LEFT_EYE0_SPR }} {{ LEFT_EYE1_SPR }} {{ LEFT_EYE2_SPR }}

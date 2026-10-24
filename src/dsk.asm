@@ -1,6 +1,5 @@
 
 	include "demosystem/linker_common.asm" ; TODO include it inside basm as it is so useful
-
 	org 0x100
 	
 	
@@ -12,6 +11,8 @@
 	ei
 
 
+
+go_on_uncrunch
 	SELECTED_CRUNCHER = CRUNCHER_ZX0 : MOVE_CRUNCHED_DATA(C4_4000, 0x8000)
 	ld bc, 0x7fc4 : out (c), c
 	SELECTED_CRUNCHER = CRUNCHER_ZX0 : INDIRECT_UNCRUNCH(0x8000, C4_4000, 0x4000)
