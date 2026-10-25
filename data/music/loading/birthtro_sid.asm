@@ -13469,7 +13469,7 @@ MainSubsong0DisarkByteRegionStart3783
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd3783
 MainSubsong0DisarkPointerRegionStart3784
-    dw MainSubsong0_RegisterBlock_1870
+    dw MainSubsong0_RegisterBlock_2252
 MainSubsong0DisarkPointerRegionEnd3784
 
 MainSubsong0DisarkByteRegionStart3785
@@ -13532,7 +13532,7 @@ MainSubsong0DisarkByteRegionStart3801
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd3801
 MainSubsong0DisarkPointerRegionStart3802
-    dw MainSubsong0_RegisterBlock_1870
+    dw MainSubsong0_RegisterBlock_2252
 MainSubsong0DisarkPointerRegionEnd3802
 
 MainSubsong0DisarkByteRegionStart3803
@@ -13567,7 +13567,7 @@ MainSubsong0DisarkByteRegionStart3811
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd3811
 MainSubsong0DisarkPointerRegionStart3812
-    dw MainSubsong0_RegisterBlock_1870
+    dw MainSubsong0_RegisterBlock_2252
 MainSubsong0DisarkPointerRegionEnd3812
 
 MainSubsong0DisarkByteRegionStart3813
@@ -14917,7 +14917,7 @@ MainSubsong0DisarkByteRegionStart4195
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4195
 MainSubsong0DisarkPointerRegionStart4196
-    dw MainSubsong0_RegisterBlock_1870
+    dw MainSubsong0_RegisterBlock_2252
 MainSubsong0DisarkPointerRegionEnd4196
 
 MainSubsong0_Track_105
@@ -16152,200 +16152,200 @@ MainSubsong0DisarkPointerRegionStart4546
 MainSubsong0DisarkPointerRegionEnd4546
 
 MainSubsong0DisarkByteRegionStart4547
-    db 6    ; Duration.
+    db 18    ; Duration.
 MainSubsong0DisarkByteRegionEnd4547
 MainSubsong0DisarkPointerRegionStart4548
-    dw MainSubsong0_RegisterBlock_1811
+    dw MainSubsong0_RegisterBlock_2252
 MainSubsong0DisarkPointerRegionEnd4548
 
 MainSubsong0DisarkByteRegionStart4549
-    db 6    ; Duration.
+    db 12    ; Duration.
 MainSubsong0DisarkByteRegionEnd4549
 MainSubsong0DisarkPointerRegionStart4550
-    dw MainSubsong0_RegisterBlock_1869
+    dw MainSubsong0_RegisterBlock_1980
 MainSubsong0DisarkPointerRegionEnd4550
 
 MainSubsong0DisarkByteRegionStart4551
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4551
 MainSubsong0DisarkPointerRegionStart4552
-    dw MainSubsong0_RegisterBlock_1870
+    dw MainSubsong0_RegisterBlock_1460
 MainSubsong0DisarkPointerRegionEnd4552
 
 MainSubsong0DisarkByteRegionStart4553
-    db 12    ; Duration.
+    db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4553
 MainSubsong0DisarkPointerRegionStart4554
-    dw MainSubsong0_RegisterBlock_1980
+    dw MainSubsong0_RegisterBlock_1959
 MainSubsong0DisarkPointerRegionEnd4554
 
 MainSubsong0DisarkByteRegionStart4555
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4555
 MainSubsong0DisarkPointerRegionStart4556
-    dw MainSubsong0_RegisterBlock_1460
+    dw MainSubsong0_RegisterBlock_1965
 MainSubsong0DisarkPointerRegionEnd4556
 
 MainSubsong0DisarkByteRegionStart4557
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4557
 MainSubsong0DisarkPointerRegionStart4558
-    dw MainSubsong0_RegisterBlock_1959
+    dw MainSubsong0_RegisterBlock_1811
 MainSubsong0DisarkPointerRegionEnd4558
 
 MainSubsong0DisarkByteRegionStart4559
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4559
 MainSubsong0DisarkPointerRegionStart4560
-    dw MainSubsong0_RegisterBlock_1965
+    dw MainSubsong0_RegisterBlock_2252
 MainSubsong0DisarkPointerRegionEnd4560
 
+MainSubsong0_Track_111
 MainSubsong0DisarkByteRegionStart4561
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4561
 MainSubsong0DisarkPointerRegionStart4562
-    dw MainSubsong0_RegisterBlock_1811
+    dw MainSubsong0_RegisterBlock_1488
 MainSubsong0DisarkPointerRegionEnd4562
 
 MainSubsong0DisarkByteRegionStart4563
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4563
 MainSubsong0DisarkPointerRegionStart4564
-    dw MainSubsong0_RegisterBlock_1870
+    dw MainSubsong0_RegisterBlock_250
 MainSubsong0DisarkPointerRegionEnd4564
 
-MainSubsong0_Track_111
 MainSubsong0DisarkByteRegionStart4565
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4565
 MainSubsong0DisarkPointerRegionStart4566
-    dw MainSubsong0_RegisterBlock_1488
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4566
 
 MainSubsong0DisarkByteRegionStart4567
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4567
 MainSubsong0DisarkPointerRegionStart4568
-    dw MainSubsong0_RegisterBlock_250
+    dw MainSubsong0_RegisterBlock_722
 MainSubsong0DisarkPointerRegionEnd4568
 
 MainSubsong0DisarkByteRegionStart4569
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4569
 MainSubsong0DisarkPointerRegionStart4570
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_0
 MainSubsong0DisarkPointerRegionEnd4570
 
 MainSubsong0DisarkByteRegionStart4571
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4571
 MainSubsong0DisarkPointerRegionStart4572
-    dw MainSubsong0_RegisterBlock_722
+    dw MainSubsong0_RegisterBlock_1488
 MainSubsong0DisarkPointerRegionEnd4572
 
 MainSubsong0DisarkByteRegionStart4573
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4573
 MainSubsong0DisarkPointerRegionStart4574
-    dw MainSubsong0_RegisterBlock_0
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4574
 
 MainSubsong0DisarkByteRegionStart4575
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4575
 MainSubsong0DisarkPointerRegionStart4576
-    dw MainSubsong0_RegisterBlock_1488
+    dw MainSubsong0_RegisterBlock_722
 MainSubsong0DisarkPointerRegionEnd4576
 
 MainSubsong0DisarkByteRegionStart4577
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4577
 MainSubsong0DisarkPointerRegionStart4578
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_1488
 MainSubsong0DisarkPointerRegionEnd4578
 
 MainSubsong0DisarkByteRegionStart4579
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4579
 MainSubsong0DisarkPointerRegionStart4580
-    dw MainSubsong0_RegisterBlock_722
+    dw MainSubsong0_RegisterBlock_250
 MainSubsong0DisarkPointerRegionEnd4580
 
 MainSubsong0DisarkByteRegionStart4581
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4581
 MainSubsong0DisarkPointerRegionStart4582
-    dw MainSubsong0_RegisterBlock_1488
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4582
 
 MainSubsong0DisarkByteRegionStart4583
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4583
 MainSubsong0DisarkPointerRegionStart4584
-    dw MainSubsong0_RegisterBlock_250
+    dw MainSubsong0_RegisterBlock_722
 MainSubsong0DisarkPointerRegionEnd4584
 
 MainSubsong0DisarkByteRegionStart4585
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4585
 MainSubsong0DisarkPointerRegionStart4586
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_0
 MainSubsong0DisarkPointerRegionEnd4586
 
 MainSubsong0DisarkByteRegionStart4587
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4587
 MainSubsong0DisarkPointerRegionStart4588
-    dw MainSubsong0_RegisterBlock_722
+    dw MainSubsong0_RegisterBlock_801
 MainSubsong0DisarkPointerRegionEnd4588
 
 MainSubsong0DisarkByteRegionStart4589
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4589
 MainSubsong0DisarkPointerRegionStart4590
-    dw MainSubsong0_RegisterBlock_0
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4590
 
 MainSubsong0DisarkByteRegionStart4591
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4591
 MainSubsong0DisarkPointerRegionStart4592
-    dw MainSubsong0_RegisterBlock_801
+    dw MainSubsong0_RegisterBlock_1488
 MainSubsong0DisarkPointerRegionEnd4592
 
 MainSubsong0DisarkByteRegionStart4593
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4593
 MainSubsong0DisarkPointerRegionStart4594
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_722
 MainSubsong0DisarkPointerRegionEnd4594
 
 MainSubsong0DisarkByteRegionStart4595
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4595
 MainSubsong0DisarkPointerRegionStart4596
-    dw MainSubsong0_RegisterBlock_1488
+    dw MainSubsong0_RegisterBlock_250
 MainSubsong0DisarkPointerRegionEnd4596
 
 MainSubsong0DisarkByteRegionStart4597
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4597
 MainSubsong0DisarkPointerRegionStart4598
-    dw MainSubsong0_RegisterBlock_1488
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4598
 
 MainSubsong0DisarkByteRegionStart4599
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4599
 MainSubsong0DisarkPointerRegionStart4600
-    dw MainSubsong0_RegisterBlock_250
+    dw MainSubsong0_RegisterBlock_1488
 MainSubsong0DisarkPointerRegionEnd4600
 
 MainSubsong0DisarkByteRegionStart4601
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4601
 MainSubsong0DisarkPointerRegionStart4602
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_0
 MainSubsong0DisarkPointerRegionEnd4602
 
 MainSubsong0DisarkByteRegionStart4603
@@ -16359,56 +16359,56 @@ MainSubsong0DisarkByteRegionStart4605
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4605
 MainSubsong0DisarkPointerRegionStart4606
-    dw MainSubsong0_RegisterBlock_0
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4606
 
 MainSubsong0DisarkByteRegionStart4607
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4607
 MainSubsong0DisarkPointerRegionStart4608
-    dw MainSubsong0_RegisterBlock_1488
+    dw MainSubsong0_RegisterBlock_722
 MainSubsong0DisarkPointerRegionEnd4608
 
 MainSubsong0DisarkByteRegionStart4609
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4609
 MainSubsong0DisarkPointerRegionStart4610
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_1488
 MainSubsong0DisarkPointerRegionEnd4610
 
 MainSubsong0DisarkByteRegionStart4611
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4611
 MainSubsong0DisarkPointerRegionStart4612
-    dw MainSubsong0_RegisterBlock_722
+    dw MainSubsong0_RegisterBlock_250
 MainSubsong0DisarkPointerRegionEnd4612
 
 MainSubsong0DisarkByteRegionStart4613
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4613
 MainSubsong0DisarkPointerRegionStart4614
-    dw MainSubsong0_RegisterBlock_1488
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4614
 
 MainSubsong0DisarkByteRegionStart4615
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4615
 MainSubsong0DisarkPointerRegionStart4616
-    dw MainSubsong0_RegisterBlock_250
+    dw MainSubsong0_RegisterBlock_1488
 MainSubsong0DisarkPointerRegionEnd4616
 
 MainSubsong0DisarkByteRegionStart4617
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4617
 MainSubsong0DisarkPointerRegionStart4618
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_0
 MainSubsong0DisarkPointerRegionEnd4618
 
 MainSubsong0DisarkByteRegionStart4619
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4619
 MainSubsong0DisarkPointerRegionStart4620
-    dw MainSubsong0_RegisterBlock_1488
+    dw MainSubsong0_RegisterBlock_801
 MainSubsong0DisarkPointerRegionEnd4620
 
 MainSubsong0DisarkByteRegionStart4621
@@ -16422,169 +16422,169 @@ MainSubsong0DisarkByteRegionStart4623
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4623
 MainSubsong0DisarkPointerRegionStart4624
-    dw MainSubsong0_RegisterBlock_801
+    dw MainSubsong0_RegisterBlock_0
 MainSubsong0DisarkPointerRegionEnd4624
 
+MainSubsong0_Track_112
 MainSubsong0DisarkByteRegionStart4625
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4625
 MainSubsong0DisarkPointerRegionStart4626
-    dw MainSubsong0_RegisterBlock_0
+    dw MainSubsong0_RegisterBlock_2291
 MainSubsong0DisarkPointerRegionEnd4626
 
 MainSubsong0DisarkByteRegionStart4627
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4627
 MainSubsong0DisarkPointerRegionStart4628
-    dw MainSubsong0_RegisterBlock_0
+    dw MainSubsong0_RegisterBlock_99
 MainSubsong0DisarkPointerRegionEnd4628
 
-MainSubsong0_Track_112
 MainSubsong0DisarkByteRegionStart4629
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4629
 MainSubsong0DisarkPointerRegionStart4630
-    dw MainSubsong0_RegisterBlock_2293
+    dw MainSubsong0_RegisterBlock_754
 MainSubsong0DisarkPointerRegionEnd4630
 
 MainSubsong0DisarkByteRegionStart4631
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4631
 MainSubsong0DisarkPointerRegionStart4632
-    dw MainSubsong0_RegisterBlock_99
+    dw MainSubsong0_RegisterBlock_2291
 MainSubsong0DisarkPointerRegionEnd4632
 
 MainSubsong0DisarkByteRegionStart4633
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4633
 MainSubsong0DisarkPointerRegionStart4634
-    dw MainSubsong0_RegisterBlock_754
+    dw MainSubsong0_RegisterBlock_99
 MainSubsong0DisarkPointerRegionEnd4634
 
 MainSubsong0DisarkByteRegionStart4635
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4635
 MainSubsong0DisarkPointerRegionStart4636
-    dw MainSubsong0_RegisterBlock_2293
+    dw MainSubsong0_RegisterBlock_577
 MainSubsong0DisarkPointerRegionEnd4636
 
 MainSubsong0DisarkByteRegionStart4637
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4637
 MainSubsong0DisarkPointerRegionStart4638
-    dw MainSubsong0_RegisterBlock_99
+    dw MainSubsong0_RegisterBlock_2291
 MainSubsong0DisarkPointerRegionEnd4638
 
 MainSubsong0DisarkByteRegionStart4639
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4639
 MainSubsong0DisarkPointerRegionStart4640
-    dw MainSubsong0_RegisterBlock_577
+    dw MainSubsong0_RegisterBlock_754
 MainSubsong0DisarkPointerRegionEnd4640
 
 MainSubsong0DisarkByteRegionStart4641
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4641
 MainSubsong0DisarkPointerRegionStart4642
-    dw MainSubsong0_RegisterBlock_2293
+    dw MainSubsong0_RegisterBlock_2299
 MainSubsong0DisarkPointerRegionEnd4642
 
 MainSubsong0DisarkByteRegionStart4643
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4643
 MainSubsong0DisarkPointerRegionStart4644
-    dw MainSubsong0_RegisterBlock_754
+    dw MainSubsong0_RegisterBlock_577
 MainSubsong0DisarkPointerRegionEnd4644
 
 MainSubsong0DisarkByteRegionStart4645
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4645
 MainSubsong0DisarkPointerRegionStart4646
-    dw MainSubsong0_RegisterBlock_2301
+    dw MainSubsong0_RegisterBlock_754
 MainSubsong0DisarkPointerRegionEnd4646
 
 MainSubsong0DisarkByteRegionStart4647
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4647
 MainSubsong0DisarkPointerRegionStart4648
-    dw MainSubsong0_RegisterBlock_577
+    dw MainSubsong0_RegisterBlock_2302
 MainSubsong0DisarkPointerRegionEnd4648
 
 MainSubsong0DisarkByteRegionStart4649
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4649
 MainSubsong0DisarkPointerRegionStart4650
-    dw MainSubsong0_RegisterBlock_754
+    dw MainSubsong0_RegisterBlock_729
 MainSubsong0DisarkPointerRegionEnd4650
 
 MainSubsong0DisarkByteRegionStart4651
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4651
 MainSubsong0DisarkPointerRegionStart4652
-    dw MainSubsong0_RegisterBlock_2304
+    dw MainSubsong0_RegisterBlock_823
 MainSubsong0DisarkPointerRegionEnd4652
 
 MainSubsong0DisarkByteRegionStart4653
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4653
 MainSubsong0DisarkPointerRegionStart4654
-    dw MainSubsong0_RegisterBlock_729
+    dw MainSubsong0_RegisterBlock_754
 MainSubsong0DisarkPointerRegionEnd4654
 
 MainSubsong0DisarkByteRegionStart4655
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4655
 MainSubsong0DisarkPointerRegionStart4656
-    dw MainSubsong0_RegisterBlock_823
+    dw MainSubsong0_RegisterBlock_2302
 MainSubsong0DisarkPointerRegionEnd4656
 
 MainSubsong0DisarkByteRegionStart4657
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4657
 MainSubsong0DisarkPointerRegionStart4658
-    dw MainSubsong0_RegisterBlock_754
+    dw MainSubsong0_RegisterBlock_2307
 MainSubsong0DisarkPointerRegionEnd4658
 
 MainSubsong0DisarkByteRegionStart4659
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4659
 MainSubsong0DisarkPointerRegionStart4660
-    dw MainSubsong0_RegisterBlock_2304
+    dw MainSubsong0_RegisterBlock_99
 MainSubsong0DisarkPointerRegionEnd4660
 
 MainSubsong0DisarkByteRegionStart4661
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4661
 MainSubsong0DisarkPointerRegionStart4662
-    dw MainSubsong0_RegisterBlock_2309
+    dw MainSubsong0_RegisterBlock_754
 MainSubsong0DisarkPointerRegionEnd4662
 
 MainSubsong0DisarkByteRegionStart4663
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4663
 MainSubsong0DisarkPointerRegionStart4664
-    dw MainSubsong0_RegisterBlock_99
+    dw MainSubsong0_RegisterBlock_2307
 MainSubsong0DisarkPointerRegionEnd4664
 
 MainSubsong0DisarkByteRegionStart4665
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4665
 MainSubsong0DisarkPointerRegionStart4666
-    dw MainSubsong0_RegisterBlock_754
+    dw MainSubsong0_RegisterBlock_99
 MainSubsong0DisarkPointerRegionEnd4666
 
 MainSubsong0DisarkByteRegionStart4667
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4667
 MainSubsong0DisarkPointerRegionStart4668
-    dw MainSubsong0_RegisterBlock_2309
+    dw MainSubsong0_RegisterBlock_577
 MainSubsong0DisarkPointerRegionEnd4668
 
 MainSubsong0DisarkByteRegionStart4669
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4669
 MainSubsong0DisarkPointerRegionStart4670
-    dw MainSubsong0_RegisterBlock_99
+    dw MainSubsong0_RegisterBlock_2307
 MainSubsong0DisarkPointerRegionEnd4670
 
 MainSubsong0DisarkByteRegionStart4671
@@ -16598,7 +16598,7 @@ MainSubsong0DisarkByteRegionStart4673
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4673
 MainSubsong0DisarkPointerRegionStart4674
-    dw MainSubsong0_RegisterBlock_2309
+    dw MainSubsong0_RegisterBlock_2299
 MainSubsong0DisarkPointerRegionEnd4674
 
 MainSubsong0DisarkByteRegionStart4675
@@ -16612,92 +16612,92 @@ MainSubsong0DisarkByteRegionStart4677
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4677
 MainSubsong0DisarkPointerRegionStart4678
-    dw MainSubsong0_RegisterBlock_2301
+    dw MainSubsong0_RegisterBlock_754
 MainSubsong0DisarkPointerRegionEnd4678
 
 MainSubsong0DisarkByteRegionStart4679
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4679
 MainSubsong0DisarkPointerRegionStart4680
-    dw MainSubsong0_RegisterBlock_577
+    dw MainSubsong0_RegisterBlock_2302
 MainSubsong0DisarkPointerRegionEnd4680
 
 MainSubsong0DisarkByteRegionStart4681
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4681
 MainSubsong0DisarkPointerRegionStart4682
-    dw MainSubsong0_RegisterBlock_754
+    dw MainSubsong0_RegisterBlock_729
 MainSubsong0DisarkPointerRegionEnd4682
 
 MainSubsong0DisarkByteRegionStart4683
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4683
 MainSubsong0DisarkPointerRegionStart4684
-    dw MainSubsong0_RegisterBlock_2304
+    dw MainSubsong0_RegisterBlock_823
 MainSubsong0DisarkPointerRegionEnd4684
 
 MainSubsong0DisarkByteRegionStart4685
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4685
 MainSubsong0DisarkPointerRegionStart4686
-    dw MainSubsong0_RegisterBlock_729
+    dw MainSubsong0_RegisterBlock_2299
 MainSubsong0DisarkPointerRegionEnd4686
 
 MainSubsong0DisarkByteRegionStart4687
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4687
 MainSubsong0DisarkPointerRegionStart4688
-    dw MainSubsong0_RegisterBlock_823
+    dw MainSubsong0_RegisterBlock_2322
 MainSubsong0DisarkPointerRegionEnd4688
 
+MainSubsong0_Track_113
 MainSubsong0DisarkByteRegionStart4689
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4689
 MainSubsong0DisarkPointerRegionStart4690
-    dw MainSubsong0_RegisterBlock_2301
+    dw MainSubsong0_RegisterBlock_1809
 MainSubsong0DisarkPointerRegionEnd4690
 
 MainSubsong0DisarkByteRegionStart4691
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4691
 MainSubsong0DisarkPointerRegionStart4692
-    dw MainSubsong0_RegisterBlock_2324
+    dw MainSubsong0_RegisterBlock_1810
 MainSubsong0DisarkPointerRegionEnd4692
 
-MainSubsong0_Track_113
 MainSubsong0DisarkByteRegionStart4693
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4693
 MainSubsong0DisarkPointerRegionStart4694
-    dw MainSubsong0_RegisterBlock_1809
+    dw MainSubsong0_RegisterBlock_1811
 MainSubsong0DisarkPointerRegionEnd4694
 
 MainSubsong0DisarkByteRegionStart4695
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4695
 MainSubsong0DisarkPointerRegionStart4696
-    dw MainSubsong0_RegisterBlock_1810
+    dw MainSubsong0_RegisterBlock_785
 MainSubsong0DisarkPointerRegionEnd4696
 
 MainSubsong0DisarkByteRegionStart4697
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4697
 MainSubsong0DisarkPointerRegionStart4698
-    dw MainSubsong0_RegisterBlock_1811
+    dw MainSubsong0_RegisterBlock_1813
 MainSubsong0DisarkPointerRegionEnd4698
 
 MainSubsong0DisarkByteRegionStart4699
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4699
 MainSubsong0DisarkPointerRegionStart4700
-    dw MainSubsong0_RegisterBlock_785
+    dw MainSubsong0_RegisterBlock_1830
 MainSubsong0DisarkPointerRegionEnd4700
 
 MainSubsong0DisarkByteRegionStart4701
-    db 6    ; Duration.
+    db 18    ; Duration.
 MainSubsong0DisarkByteRegionEnd4701
 MainSubsong0DisarkPointerRegionStart4702
-    dw MainSubsong0_RegisterBlock_1813
+    dw MainSubsong0_RegisterBlock_1815
 MainSubsong0DisarkPointerRegionEnd4702
 
 MainSubsong0DisarkByteRegionStart4703
@@ -16711,42 +16711,42 @@ MainSubsong0DisarkByteRegionStart4705
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4705
 MainSubsong0DisarkPointerRegionStart4706
-    dw MainSubsong0_RegisterBlock_1834
+    dw MainSubsong0_RegisterBlock_1813
 MainSubsong0DisarkPointerRegionEnd4706
 
 MainSubsong0DisarkByteRegionStart4707
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4707
 MainSubsong0DisarkPointerRegionStart4708
-    dw MainSubsong0_RegisterBlock_2332
+    dw MainSubsong0_RegisterBlock_1830
 MainSubsong0DisarkPointerRegionEnd4708
 
 MainSubsong0DisarkByteRegionStart4709
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4709
 MainSubsong0DisarkPointerRegionStart4710
-    dw MainSubsong0_RegisterBlock_1815
+    dw MainSubsong0_RegisterBlock_1809
 MainSubsong0DisarkPointerRegionEnd4710
 
 MainSubsong0DisarkByteRegionStart4711
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4711
 MainSubsong0DisarkPointerRegionStart4712
-    dw MainSubsong0_RegisterBlock_1830
+    dw MainSubsong0_RegisterBlock_1811
 MainSubsong0DisarkPointerRegionEnd4712
 
 MainSubsong0DisarkByteRegionStart4713
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4713
 MainSubsong0DisarkPointerRegionStart4714
-    dw MainSubsong0_RegisterBlock_1813
+    dw MainSubsong0_RegisterBlock_785
 MainSubsong0DisarkPointerRegionEnd4714
 
 MainSubsong0DisarkByteRegionStart4715
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4715
 MainSubsong0DisarkPointerRegionStart4716
-    dw MainSubsong0_RegisterBlock_1830
+    dw MainSubsong0_RegisterBlock_1813
 MainSubsong0DisarkPointerRegionEnd4716
 
 MainSubsong0DisarkByteRegionStart4717
@@ -16760,129 +16760,129 @@ MainSubsong0DisarkByteRegionStart4719
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4719
 MainSubsong0DisarkPointerRegionStart4720
-    dw MainSubsong0_RegisterBlock_1811
+    dw MainSubsong0_RegisterBlock_1810
 MainSubsong0DisarkPointerRegionEnd4720
 
 MainSubsong0DisarkByteRegionStart4721
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4721
 MainSubsong0DisarkPointerRegionStart4722
-    dw MainSubsong0_RegisterBlock_785
+    dw MainSubsong0_RegisterBlock_1811
 MainSubsong0DisarkPointerRegionEnd4722
 
 MainSubsong0DisarkByteRegionStart4723
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4723
 MainSubsong0DisarkPointerRegionStart4724
-    dw MainSubsong0_RegisterBlock_1813
+    dw MainSubsong0_RegisterBlock_785
 MainSubsong0DisarkPointerRegionEnd4724
 
 MainSubsong0DisarkByteRegionStart4725
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4725
 MainSubsong0DisarkPointerRegionStart4726
-    dw MainSubsong0_RegisterBlock_1809
+    dw MainSubsong0_RegisterBlock_1813
 MainSubsong0DisarkPointerRegionEnd4726
 
 MainSubsong0DisarkByteRegionStart4727
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4727
 MainSubsong0DisarkPointerRegionStart4728
-    dw MainSubsong0_RegisterBlock_1810
+    dw MainSubsong0_RegisterBlock_1830
 MainSubsong0DisarkPointerRegionEnd4728
 
 MainSubsong0DisarkByteRegionStart4729
-    db 6    ; Duration.
+    db 18    ; Duration.
 MainSubsong0DisarkByteRegionEnd4729
 MainSubsong0DisarkPointerRegionStart4730
-    dw MainSubsong0_RegisterBlock_1811
+    dw MainSubsong0_RegisterBlock_1815
 MainSubsong0DisarkPointerRegionEnd4730
 
 MainSubsong0DisarkByteRegionStart4731
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4731
 MainSubsong0DisarkPointerRegionStart4732
-    dw MainSubsong0_RegisterBlock_785
+    dw MainSubsong0_RegisterBlock_1830
 MainSubsong0DisarkPointerRegionEnd4732
 
 MainSubsong0DisarkByteRegionStart4733
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4733
 MainSubsong0DisarkPointerRegionStart4734
-    dw MainSubsong0_RegisterBlock_1813
+    dw MainSubsong0_RegisterBlock_1830
 MainSubsong0DisarkPointerRegionEnd4734
 
 MainSubsong0DisarkByteRegionStart4735
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4735
 MainSubsong0DisarkPointerRegionStart4736
-    dw MainSubsong0_RegisterBlock_1830
+    dw MainSubsong0_RegisterBlock_1813
 MainSubsong0DisarkPointerRegionEnd4736
 
 MainSubsong0DisarkByteRegionStart4737
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4737
 MainSubsong0DisarkPointerRegionStart4738
-    dw MainSubsong0_RegisterBlock_1834
+    dw MainSubsong0_RegisterBlock_1809
 MainSubsong0DisarkPointerRegionEnd4738
 
 MainSubsong0DisarkByteRegionStart4739
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4739
 MainSubsong0DisarkPointerRegionStart4740
-    dw MainSubsong0_RegisterBlock_2332
+    dw MainSubsong0_RegisterBlock_1811
 MainSubsong0DisarkPointerRegionEnd4740
 
 MainSubsong0DisarkByteRegionStart4741
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4741
 MainSubsong0DisarkPointerRegionStart4742
-    dw MainSubsong0_RegisterBlock_1815
+    dw MainSubsong0_RegisterBlock_1834
 MainSubsong0DisarkPointerRegionEnd4742
 
 MainSubsong0DisarkByteRegionStart4743
-    db 12    ; Duration.
+    db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4743
 MainSubsong0DisarkPointerRegionStart4744
-    dw MainSubsong0_RegisterBlock_1830
+    dw MainSubsong0_RegisterBlock_1815
 MainSubsong0DisarkPointerRegionEnd4744
 
+MainSubsong0_Track_114
 MainSubsong0DisarkByteRegionStart4745
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4745
 MainSubsong0DisarkPointerRegionStart4746
-    dw MainSubsong0_RegisterBlock_1813
+    dw MainSubsong0_RegisterBlock_1836
 MainSubsong0DisarkPointerRegionEnd4746
 
 MainSubsong0DisarkByteRegionStart4747
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4747
 MainSubsong0DisarkPointerRegionStart4748
-    dw MainSubsong0_RegisterBlock_1809
+    dw MainSubsong0_RegisterBlock_250
 MainSubsong0DisarkPointerRegionEnd4748
 
 MainSubsong0DisarkByteRegionStart4749
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4749
 MainSubsong0DisarkPointerRegionStart4750
-    dw MainSubsong0_RegisterBlock_1811
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4750
 
 MainSubsong0DisarkByteRegionStart4751
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4751
 MainSubsong0DisarkPointerRegionStart4752
-    dw MainSubsong0_RegisterBlock_1834
+    dw MainSubsong0_RegisterBlock_1839
 MainSubsong0DisarkPointerRegionEnd4752
 
 MainSubsong0DisarkByteRegionStart4753
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4753
 MainSubsong0DisarkPointerRegionStart4754
-    dw MainSubsong0_RegisterBlock_1815
+    dw MainSubsong0_RegisterBlock_0
 MainSubsong0DisarkPointerRegionEnd4754
 
-MainSubsong0_Track_114
 MainSubsong0DisarkByteRegionStart4755
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4755
@@ -16894,70 +16894,70 @@ MainSubsong0DisarkByteRegionStart4757
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4757
 MainSubsong0DisarkPointerRegionStart4758
-    dw MainSubsong0_RegisterBlock_250
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4758
 
 MainSubsong0DisarkByteRegionStart4759
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4759
 MainSubsong0DisarkPointerRegionStart4760
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_1839
 MainSubsong0DisarkPointerRegionEnd4760
 
 MainSubsong0DisarkByteRegionStart4761
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4761
 MainSubsong0DisarkPointerRegionStart4762
-    dw MainSubsong0_RegisterBlock_1839
+    dw MainSubsong0_RegisterBlock_1836
 MainSubsong0DisarkPointerRegionEnd4762
 
 MainSubsong0DisarkByteRegionStart4763
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4763
 MainSubsong0DisarkPointerRegionStart4764
-    dw MainSubsong0_RegisterBlock_0
+    dw MainSubsong0_RegisterBlock_250
 MainSubsong0DisarkPointerRegionEnd4764
 
 MainSubsong0DisarkByteRegionStart4765
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4765
 MainSubsong0DisarkPointerRegionStart4766
-    dw MainSubsong0_RegisterBlock_1836
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4766
 
 MainSubsong0DisarkByteRegionStart4767
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4767
 MainSubsong0DisarkPointerRegionStart4768
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_1839
 MainSubsong0DisarkPointerRegionEnd4768
 
 MainSubsong0DisarkByteRegionStart4769
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4769
 MainSubsong0DisarkPointerRegionStart4770
-    dw MainSubsong0_RegisterBlock_1839
+    dw MainSubsong0_RegisterBlock_0
 MainSubsong0DisarkPointerRegionEnd4770
 
 MainSubsong0DisarkByteRegionStart4771
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4771
 MainSubsong0DisarkPointerRegionStart4772
-    dw MainSubsong0_RegisterBlock_1836
+    dw MainSubsong0_RegisterBlock_1473
 MainSubsong0DisarkPointerRegionEnd4772
 
 MainSubsong0DisarkByteRegionStart4773
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4773
 MainSubsong0DisarkPointerRegionStart4774
-    dw MainSubsong0_RegisterBlock_250
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4774
 
 MainSubsong0DisarkByteRegionStart4775
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4775
 MainSubsong0DisarkPointerRegionStart4776
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_1836
 MainSubsong0DisarkPointerRegionEnd4776
 
 MainSubsong0DisarkByteRegionStart4777
@@ -16971,28 +16971,28 @@ MainSubsong0DisarkByteRegionStart4779
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4779
 MainSubsong0DisarkPointerRegionStart4780
-    dw MainSubsong0_RegisterBlock_0
+    dw MainSubsong0_RegisterBlock_250
 MainSubsong0DisarkPointerRegionEnd4780
 
 MainSubsong0DisarkByteRegionStart4781
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4781
 MainSubsong0DisarkPointerRegionStart4782
-    dw MainSubsong0_RegisterBlock_1473
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4782
 
 MainSubsong0DisarkByteRegionStart4783
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4783
 MainSubsong0DisarkPointerRegionStart4784
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_1836
 MainSubsong0DisarkPointerRegionEnd4784
 
 MainSubsong0DisarkByteRegionStart4785
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4785
 MainSubsong0DisarkPointerRegionStart4786
-    dw MainSubsong0_RegisterBlock_1836
+    dw MainSubsong0_RegisterBlock_0
 MainSubsong0DisarkPointerRegionEnd4786
 
 MainSubsong0DisarkByteRegionStart4787
@@ -17006,120 +17006,120 @@ MainSubsong0DisarkByteRegionStart4789
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4789
 MainSubsong0DisarkPointerRegionStart4790
-    dw MainSubsong0_RegisterBlock_250
+    dw MainSubsong0_RegisterBlock_385
 MainSubsong0DisarkPointerRegionEnd4790
 
 MainSubsong0DisarkByteRegionStart4791
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4791
 MainSubsong0DisarkPointerRegionStart4792
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_1839
 MainSubsong0DisarkPointerRegionEnd4792
 
 MainSubsong0DisarkByteRegionStart4793
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4793
 MainSubsong0DisarkPointerRegionStart4794
-    dw MainSubsong0_RegisterBlock_1836
+    dw MainSubsong0_RegisterBlock_2375
 MainSubsong0DisarkPointerRegionEnd4794
 
 MainSubsong0DisarkByteRegionStart4795
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4795
 MainSubsong0DisarkPointerRegionStart4796
-    dw MainSubsong0_RegisterBlock_0
+    dw MainSubsong0_RegisterBlock_2375
 MainSubsong0DisarkPointerRegionEnd4796
 
 MainSubsong0DisarkByteRegionStart4797
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4797
 MainSubsong0DisarkPointerRegionStart4798
-    dw MainSubsong0_RegisterBlock_1836
+    dw MainSubsong0_RegisterBlock_1
 MainSubsong0DisarkPointerRegionEnd4798
 
 MainSubsong0DisarkByteRegionStart4799
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4799
 MainSubsong0DisarkPointerRegionStart4800
-    dw MainSubsong0_RegisterBlock_385
+    dw MainSubsong0_RegisterBlock_1
 MainSubsong0DisarkPointerRegionEnd4800
 
 MainSubsong0DisarkByteRegionStart4801
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4801
 MainSubsong0DisarkPointerRegionStart4802
-    dw MainSubsong0_RegisterBlock_1839
+    dw MainSubsong0_RegisterBlock_1391
 MainSubsong0DisarkPointerRegionEnd4802
 
 MainSubsong0DisarkByteRegionStart4803
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4803
 MainSubsong0DisarkPointerRegionStart4804
-    dw MainSubsong0_RegisterBlock_2380
+    dw MainSubsong0_RegisterBlock_1391
 MainSubsong0DisarkPointerRegionEnd4804
 
 MainSubsong0DisarkByteRegionStart4805
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4805
 MainSubsong0DisarkPointerRegionStart4806
-    dw MainSubsong0_RegisterBlock_2380
+    dw MainSubsong0_RegisterBlock_0
 MainSubsong0DisarkPointerRegionEnd4806
 
 MainSubsong0DisarkByteRegionStart4807
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4807
 MainSubsong0DisarkPointerRegionStart4808
-    dw MainSubsong0_RegisterBlock_1
+    dw MainSubsong0_RegisterBlock_0
 MainSubsong0DisarkPointerRegionEnd4808
 
+MainSubsong0_Track_115
 MainSubsong0DisarkByteRegionStart4809
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4809
 MainSubsong0DisarkPointerRegionStart4810
-    dw MainSubsong0_RegisterBlock_1
+    dw MainSubsong0_RegisterBlock_2383
 MainSubsong0DisarkPointerRegionEnd4810
 
 MainSubsong0DisarkByteRegionStart4811
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4811
 MainSubsong0DisarkPointerRegionStart4812
-    dw MainSubsong0_RegisterBlock_1391
+    dw MainSubsong0_RegisterBlock_2384
 MainSubsong0DisarkPointerRegionEnd4812
 
 MainSubsong0DisarkByteRegionStart4813
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4813
 MainSubsong0DisarkPointerRegionStart4814
-    dw MainSubsong0_RegisterBlock_1391
+    dw MainSubsong0_RegisterBlock_1595
 MainSubsong0DisarkPointerRegionEnd4814
 
 MainSubsong0DisarkByteRegionStart4815
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4815
 MainSubsong0DisarkPointerRegionStart4816
-    dw MainSubsong0_RegisterBlock_0
+    dw MainSubsong0_RegisterBlock_2383
 MainSubsong0DisarkPointerRegionEnd4816
 
 MainSubsong0DisarkByteRegionStart4817
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4817
 MainSubsong0DisarkPointerRegionStart4818
-    dw MainSubsong0_RegisterBlock_0
+    dw MainSubsong0_RegisterBlock_2384
 MainSubsong0DisarkPointerRegionEnd4818
 
-MainSubsong0_Track_115
 MainSubsong0DisarkByteRegionStart4819
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4819
 MainSubsong0DisarkPointerRegionStart4820
-    dw MainSubsong0_RegisterBlock_2388
+    dw MainSubsong0_RegisterBlock_13
 MainSubsong0DisarkPointerRegionEnd4820
 
 MainSubsong0DisarkByteRegionStart4821
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4821
 MainSubsong0DisarkPointerRegionStart4822
-    dw MainSubsong0_RegisterBlock_2389
+    dw MainSubsong0_RegisterBlock_2383
 MainSubsong0DisarkPointerRegionEnd4822
 
 MainSubsong0DisarkByteRegionStart4823
@@ -17133,426 +17133,370 @@ MainSubsong0DisarkByteRegionStart4825
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4825
 MainSubsong0DisarkPointerRegionStart4826
-    dw MainSubsong0_RegisterBlock_2388
+    dw MainSubsong0_RegisterBlock_577
 MainSubsong0DisarkPointerRegionEnd4826
 
 MainSubsong0DisarkByteRegionStart4827
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4827
 MainSubsong0DisarkPointerRegionStart4828
-    dw MainSubsong0_RegisterBlock_2389
+    dw MainSubsong0_RegisterBlock_13
 MainSubsong0DisarkPointerRegionEnd4828
 
 MainSubsong0DisarkByteRegionStart4829
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4829
 MainSubsong0DisarkPointerRegionStart4830
-    dw MainSubsong0_RegisterBlock_13
+    dw MainSubsong0_RegisterBlock_1595
 MainSubsong0DisarkPointerRegionEnd4830
 
 MainSubsong0DisarkByteRegionStart4831
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4831
 MainSubsong0DisarkPointerRegionStart4832
-    dw MainSubsong0_RegisterBlock_2388
+    dw MainSubsong0_RegisterBlock_2033
 MainSubsong0DisarkPointerRegionEnd4832
 
 MainSubsong0DisarkByteRegionStart4833
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4833
 MainSubsong0DisarkPointerRegionStart4834
-    dw MainSubsong0_RegisterBlock_1595
+    dw MainSubsong0_RegisterBlock_823
 MainSubsong0DisarkPointerRegionEnd4834
 
 MainSubsong0DisarkByteRegionStart4835
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4835
 MainSubsong0DisarkPointerRegionStart4836
-    dw MainSubsong0_RegisterBlock_577
+    dw MainSubsong0_RegisterBlock_12
 MainSubsong0DisarkPointerRegionEnd4836
 
 MainSubsong0DisarkByteRegionStart4837
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4837
 MainSubsong0DisarkPointerRegionStart4838
-    dw MainSubsong0_RegisterBlock_13
+    dw MainSubsong0_RegisterBlock_1595
 MainSubsong0DisarkPointerRegionEnd4838
 
 MainSubsong0DisarkByteRegionStart4839
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4839
 MainSubsong0DisarkPointerRegionStart4840
-    dw MainSubsong0_RegisterBlock_1595
+    dw MainSubsong0_RegisterBlock_2033
 MainSubsong0DisarkPointerRegionEnd4840
 
 MainSubsong0DisarkByteRegionStart4841
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4841
 MainSubsong0DisarkPointerRegionStart4842
-    dw MainSubsong0_RegisterBlock_2033
+    dw MainSubsong0_RegisterBlock_2399
 MainSubsong0DisarkPointerRegionEnd4842
 
 MainSubsong0DisarkByteRegionStart4843
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4843
 MainSubsong0DisarkPointerRegionStart4844
-    dw MainSubsong0_RegisterBlock_823
+    dw MainSubsong0_RegisterBlock_2384
 MainSubsong0DisarkPointerRegionEnd4844
 
 MainSubsong0DisarkByteRegionStart4845
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4845
 MainSubsong0DisarkPointerRegionStart4846
-    dw MainSubsong0_RegisterBlock_12
+    dw MainSubsong0_RegisterBlock_1595
 MainSubsong0DisarkPointerRegionEnd4846
 
 MainSubsong0DisarkByteRegionStart4847
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4847
 MainSubsong0DisarkPointerRegionStart4848
-    dw MainSubsong0_RegisterBlock_1595
+    dw MainSubsong0_RegisterBlock_2399
 MainSubsong0DisarkPointerRegionEnd4848
 
 MainSubsong0DisarkByteRegionStart4849
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4849
 MainSubsong0DisarkPointerRegionStart4850
-    dw MainSubsong0_RegisterBlock_2033
+    dw MainSubsong0_RegisterBlock_2384
 MainSubsong0DisarkPointerRegionEnd4850
 
 MainSubsong0DisarkByteRegionStart4851
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4851
 MainSubsong0DisarkPointerRegionStart4852
-    dw MainSubsong0_RegisterBlock_2404
+    dw MainSubsong0_RegisterBlock_13
 MainSubsong0DisarkPointerRegionEnd4852
 
 MainSubsong0DisarkByteRegionStart4853
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4853
 MainSubsong0DisarkPointerRegionStart4854
-    dw MainSubsong0_RegisterBlock_2389
+    dw MainSubsong0_RegisterBlock_2399
 MainSubsong0DisarkPointerRegionEnd4854
 
 MainSubsong0DisarkByteRegionStart4855
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4855
 MainSubsong0DisarkPointerRegionStart4856
-    dw MainSubsong0_RegisterBlock_1595
+    dw MainSubsong0_RegisterBlock_13
 MainSubsong0DisarkPointerRegionEnd4856
 
 MainSubsong0DisarkByteRegionStart4857
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4857
 MainSubsong0DisarkPointerRegionStart4858
-    dw MainSubsong0_RegisterBlock_2404
+    dw MainSubsong0_RegisterBlock_577
 MainSubsong0DisarkPointerRegionEnd4858
 
 MainSubsong0DisarkByteRegionStart4859
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4859
 MainSubsong0DisarkPointerRegionStart4860
-    dw MainSubsong0_RegisterBlock_2389
+    dw MainSubsong0_RegisterBlock_13
 MainSubsong0DisarkPointerRegionEnd4860
 
 MainSubsong0DisarkByteRegionStart4861
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4861
 MainSubsong0DisarkPointerRegionStart4862
-    dw MainSubsong0_RegisterBlock_13
+    dw MainSubsong0_RegisterBlock_1595
 MainSubsong0DisarkPointerRegionEnd4862
 
 MainSubsong0DisarkByteRegionStart4863
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4863
 MainSubsong0DisarkPointerRegionStart4864
-    dw MainSubsong0_RegisterBlock_2404
+    dw MainSubsong0_RegisterBlock_2033
 MainSubsong0DisarkPointerRegionEnd4864
 
 MainSubsong0DisarkByteRegionStart4865
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4865
 MainSubsong0DisarkPointerRegionStart4866
-    dw MainSubsong0_RegisterBlock_13
+    dw MainSubsong0_RegisterBlock_823
 MainSubsong0DisarkPointerRegionEnd4866
 
 MainSubsong0DisarkByteRegionStart4867
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4867
 MainSubsong0DisarkPointerRegionStart4868
-    dw MainSubsong0_RegisterBlock_577
+    dw MainSubsong0_RegisterBlock_729
 MainSubsong0DisarkPointerRegionEnd4868
 
 MainSubsong0DisarkByteRegionStart4869
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4869
 MainSubsong0DisarkPointerRegionStart4870
-    dw MainSubsong0_RegisterBlock_13
+    dw MainSubsong0_RegisterBlock_148
 MainSubsong0DisarkPointerRegionEnd4870
 
 MainSubsong0DisarkByteRegionStart4871
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4871
 MainSubsong0DisarkPointerRegionStart4872
-    dw MainSubsong0_RegisterBlock_1595
+    dw MainSubsong0_RegisterBlock_2414
 MainSubsong0DisarkPointerRegionEnd4872
 
+MainSubsong0_Track_116
 MainSubsong0DisarkByteRegionStart4873
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4873
 MainSubsong0DisarkPointerRegionStart4874
-    dw MainSubsong0_RegisterBlock_2033
+    dw MainSubsong0_RegisterBlock_1811
 MainSubsong0DisarkPointerRegionEnd4874
 
 MainSubsong0DisarkByteRegionStart4875
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4875
 MainSubsong0DisarkPointerRegionStart4876
-    dw MainSubsong0_RegisterBlock_823
+    dw MainSubsong0_RegisterBlock_1869
 MainSubsong0DisarkPointerRegionEnd4876
 
 MainSubsong0DisarkByteRegionStart4877
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4877
 MainSubsong0DisarkPointerRegionStart4878
-    dw MainSubsong0_RegisterBlock_729
+    dw MainSubsong0_RegisterBlock_2252
 MainSubsong0DisarkPointerRegionEnd4878
 
 MainSubsong0DisarkByteRegionStart4879
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4879
 MainSubsong0DisarkPointerRegionStart4880
-    dw MainSubsong0_RegisterBlock_148
+    dw MainSubsong0_RegisterBlock_1871
 MainSubsong0DisarkPointerRegionEnd4880
 
 MainSubsong0DisarkByteRegionStart4881
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4881
 MainSubsong0DisarkPointerRegionStart4882
-    dw MainSubsong0_RegisterBlock_2419
+    dw MainSubsong0_RegisterBlock_1872
 MainSubsong0DisarkPointerRegionEnd4882
 
-MainSubsong0_Track_116
 MainSubsong0DisarkByteRegionStart4883
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4883
 MainSubsong0DisarkPointerRegionStart4884
-    dw MainSubsong0_RegisterBlock_1811
+    dw MainSubsong0_RegisterBlock_1889
 MainSubsong0DisarkPointerRegionEnd4884
 
 MainSubsong0DisarkByteRegionStart4885
-    db 6    ; Duration.
+    db 18    ; Duration.
 MainSubsong0DisarkByteRegionEnd4885
 MainSubsong0DisarkPointerRegionStart4886
-    dw MainSubsong0_RegisterBlock_1869
+    dw MainSubsong0_RegisterBlock_1874
 MainSubsong0DisarkPointerRegionEnd4886
 
 MainSubsong0DisarkByteRegionStart4887
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4887
 MainSubsong0DisarkPointerRegionStart4888
-    dw MainSubsong0_RegisterBlock_1870
+    dw MainSubsong0_RegisterBlock_1889
 MainSubsong0DisarkPointerRegionEnd4888
 
 MainSubsong0DisarkByteRegionStart4889
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4889
 MainSubsong0DisarkPointerRegionStart4890
-    dw MainSubsong0_RegisterBlock_1871
+    dw MainSubsong0_RegisterBlock_1872
 MainSubsong0DisarkPointerRegionEnd4890
 
 MainSubsong0DisarkByteRegionStart4891
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4891
 MainSubsong0DisarkPointerRegionStart4892
-    dw MainSubsong0_RegisterBlock_1872
+    dw MainSubsong0_RegisterBlock_1889
 MainSubsong0DisarkPointerRegionEnd4892
 
 MainSubsong0DisarkByteRegionStart4893
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4893
 MainSubsong0DisarkPointerRegionStart4894
-    dw MainSubsong0_RegisterBlock_1889
+    dw MainSubsong0_RegisterBlock_1811
 MainSubsong0DisarkPointerRegionEnd4894
 
 MainSubsong0DisarkByteRegionStart4895
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4895
 MainSubsong0DisarkPointerRegionStart4896
-    dw MainSubsong0_RegisterBlock_1815
+    dw MainSubsong0_RegisterBlock_2252
 MainSubsong0DisarkPointerRegionEnd4896
 
 MainSubsong0DisarkByteRegionStart4897
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4897
 MainSubsong0DisarkPointerRegionStart4898
-    dw MainSubsong0_RegisterBlock_2427
+    dw MainSubsong0_RegisterBlock_1871
 MainSubsong0DisarkPointerRegionEnd4898
 
 MainSubsong0DisarkByteRegionStart4899
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4899
 MainSubsong0DisarkPointerRegionStart4900
-    dw MainSubsong0_RegisterBlock_1874
+    dw MainSubsong0_RegisterBlock_1872
 MainSubsong0DisarkPointerRegionEnd4900
 
 MainSubsong0DisarkByteRegionStart4901
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4901
 MainSubsong0DisarkPointerRegionStart4902
-    dw MainSubsong0_RegisterBlock_1889
+    dw MainSubsong0_RegisterBlock_1811
 MainSubsong0DisarkPointerRegionEnd4902
 
 MainSubsong0DisarkByteRegionStart4903
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4903
 MainSubsong0DisarkPointerRegionStart4904
-    dw MainSubsong0_RegisterBlock_1872
+    dw MainSubsong0_RegisterBlock_1869
 MainSubsong0DisarkPointerRegionEnd4904
 
 MainSubsong0DisarkByteRegionStart4905
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4905
 MainSubsong0DisarkPointerRegionStart4906
-    dw MainSubsong0_RegisterBlock_1889
+    dw MainSubsong0_RegisterBlock_2252
 MainSubsong0DisarkPointerRegionEnd4906
 
 MainSubsong0DisarkByteRegionStart4907
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4907
 MainSubsong0DisarkPointerRegionStart4908
-    dw MainSubsong0_RegisterBlock_1811
+    dw MainSubsong0_RegisterBlock_1871
 MainSubsong0DisarkPointerRegionEnd4908
 
 MainSubsong0DisarkByteRegionStart4909
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4909
 MainSubsong0DisarkPointerRegionStart4910
-    dw MainSubsong0_RegisterBlock_1870
+    dw MainSubsong0_RegisterBlock_1872
 MainSubsong0DisarkPointerRegionEnd4910
 
 MainSubsong0DisarkByteRegionStart4911
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4911
 MainSubsong0DisarkPointerRegionStart4912
-    dw MainSubsong0_RegisterBlock_1871
+    dw MainSubsong0_RegisterBlock_1889
 MainSubsong0DisarkPointerRegionEnd4912
 
 MainSubsong0DisarkByteRegionStart4913
-    db 6    ; Duration.
+    db 18    ; Duration.
 MainSubsong0DisarkByteRegionEnd4913
 MainSubsong0DisarkPointerRegionStart4914
-    dw MainSubsong0_RegisterBlock_1872
+    dw MainSubsong0_RegisterBlock_1874
 MainSubsong0DisarkPointerRegionEnd4914
 
 MainSubsong0DisarkByteRegionStart4915
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4915
 MainSubsong0DisarkPointerRegionStart4916
-    dw MainSubsong0_RegisterBlock_1811
+    dw MainSubsong0_RegisterBlock_1889
 MainSubsong0DisarkPointerRegionEnd4916
 
 MainSubsong0DisarkByteRegionStart4917
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4917
 MainSubsong0DisarkPointerRegionStart4918
-    dw MainSubsong0_RegisterBlock_1869
+    dw MainSubsong0_RegisterBlock_1872
 MainSubsong0DisarkPointerRegionEnd4918
 
 MainSubsong0DisarkByteRegionStart4919
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4919
 MainSubsong0DisarkPointerRegionStart4920
-    dw MainSubsong0_RegisterBlock_1870
+    dw MainSubsong0_RegisterBlock_1872
 MainSubsong0DisarkPointerRegionEnd4920
 
 MainSubsong0DisarkByteRegionStart4921
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4921
 MainSubsong0DisarkPointerRegionStart4922
-    dw MainSubsong0_RegisterBlock_1871
+    dw MainSubsong0_RegisterBlock_1811
 MainSubsong0DisarkPointerRegionEnd4922
 
 MainSubsong0DisarkByteRegionStart4923
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4923
 MainSubsong0DisarkPointerRegionStart4924
-    dw MainSubsong0_RegisterBlock_1872
+    dw MainSubsong0_RegisterBlock_1809
 MainSubsong0DisarkPointerRegionEnd4924
 
 MainSubsong0DisarkByteRegionStart4925
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4925
 MainSubsong0DisarkPointerRegionStart4926
-    dw MainSubsong0_RegisterBlock_1889
+    dw MainSubsong0_RegisterBlock_1965
 MainSubsong0DisarkPointerRegionEnd4926
 
 MainSubsong0DisarkByteRegionStart4927
     db 6    ; Duration.
 MainSubsong0DisarkByteRegionEnd4927
 MainSubsong0DisarkPointerRegionStart4928
-    dw MainSubsong0_RegisterBlock_1815
-MainSubsong0DisarkPointerRegionEnd4928
-
-MainSubsong0DisarkByteRegionStart4929
-    db 6    ; Duration.
-MainSubsong0DisarkByteRegionEnd4929
-MainSubsong0DisarkPointerRegionStart4930
-    dw MainSubsong0_RegisterBlock_2427
-MainSubsong0DisarkPointerRegionEnd4930
-
-MainSubsong0DisarkByteRegionStart4931
-    db 6    ; Duration.
-MainSubsong0DisarkByteRegionEnd4931
-MainSubsong0DisarkPointerRegionStart4932
-    dw MainSubsong0_RegisterBlock_1874
-MainSubsong0DisarkPointerRegionEnd4932
-
-MainSubsong0DisarkByteRegionStart4933
-    db 12    ; Duration.
-MainSubsong0DisarkByteRegionEnd4933
-MainSubsong0DisarkPointerRegionStart4934
-    dw MainSubsong0_RegisterBlock_1889
-MainSubsong0DisarkPointerRegionEnd4934
-
-MainSubsong0DisarkByteRegionStart4935
-    db 6    ; Duration.
-MainSubsong0DisarkByteRegionEnd4935
-MainSubsong0DisarkPointerRegionStart4936
-    dw MainSubsong0_RegisterBlock_1872
-MainSubsong0DisarkPointerRegionEnd4936
-
-MainSubsong0DisarkByteRegionStart4937
-    db 6    ; Duration.
-MainSubsong0DisarkByteRegionEnd4937
-MainSubsong0DisarkPointerRegionStart4938
-    dw MainSubsong0_RegisterBlock_1811
-MainSubsong0DisarkPointerRegionEnd4938
-
-MainSubsong0DisarkByteRegionStart4939
-    db 6    ; Duration.
-MainSubsong0DisarkByteRegionEnd4939
-MainSubsong0DisarkPointerRegionStart4940
-    dw MainSubsong0_RegisterBlock_1809
-MainSubsong0DisarkPointerRegionEnd4940
-
-MainSubsong0DisarkByteRegionStart4941
-    db 6    ; Duration.
-MainSubsong0DisarkByteRegionEnd4941
-MainSubsong0DisarkPointerRegionStart4942
-    dw MainSubsong0_RegisterBlock_1965
-MainSubsong0DisarkPointerRegionEnd4942
-
-MainSubsong0DisarkByteRegionStart4943
-    db 6    ; Duration.
-MainSubsong0DisarkByteRegionEnd4943
-MainSubsong0DisarkPointerRegionStart4944
     dw MainSubsong0_RegisterBlock_1894
-MainSubsong0DisarkPointerRegionEnd4944
+MainSubsong0DisarkPointerRegionEnd4928
 
 
 ; The RegisterBlocks.
-MainSubsong0DisarkByteRegionStart4945
+MainSubsong0DisarkByteRegionStart4929
 MainSubsong0_RegisterBlock_1284
     db 121    ; Initial State: software only.
     db 190    ; Software period.
@@ -17673,9 +17617,9 @@ MainSubsong0_RegisterBlock_1284_Loop
     db 4    ; Non-initial State, no software no hardware.
 
     db 8    ; Loop to index 38.
-MainSubsong0DisarkPointerRegionStart4946
+MainSubsong0DisarkPointerRegionStart4930
     dw MainSubsong0_RegisterBlock_1284_Loop
-MainSubsong0DisarkPointerRegionEnd4946
+MainSubsong0DisarkPointerRegionEnd4930
 
 MainSubsong0_RegisterBlock_1283
     db 131    ; Initial State : software and hardware.
@@ -18391,9 +18335,9 @@ MainSubsong0_RegisterBlock_382_Loop
     db 37    ; Non-initial State, software only.
 
     db 8    ; Loop to index 8.
-MainSubsong0DisarkPointerRegionStart4947
+MainSubsong0DisarkPointerRegionStart4931
     dw MainSubsong0_RegisterBlock_382_Loop
-MainSubsong0DisarkPointerRegionEnd4947
+MainSubsong0DisarkPointerRegionEnd4931
 
 MainSubsong0_RegisterBlock_383
     db 105    ; Initial State: software only.
@@ -18438,9 +18382,9 @@ MainSubsong0_RegisterBlock_383_Loop
     db 37    ; Non-initial State, software only.
 
     db 8    ; Loop to index 8.
-MainSubsong0DisarkPointerRegionStart4948
+MainSubsong0DisarkPointerRegionStart4932
     dw MainSubsong0_RegisterBlock_383_Loop
-MainSubsong0DisarkPointerRegionEnd4948
+MainSubsong0DisarkPointerRegionEnd4932
 
 MainSubsong0_RegisterBlock_412
     db 105    ; Initial State: software only.
@@ -18489,9 +18433,9 @@ MainSubsong0_RegisterBlock_412_Loop
     db 37    ; Non-initial State, software only.
 
     db 8    ; Loop to index 8.
-MainSubsong0DisarkPointerRegionStart4949
+MainSubsong0DisarkPointerRegionStart4933
     dw MainSubsong0_RegisterBlock_412_Loop
-MainSubsong0DisarkPointerRegionEnd4949
+MainSubsong0DisarkPointerRegionEnd4933
 
 MainSubsong0_RegisterBlock_413
     db 105    ; Initial State: software only.
@@ -18540,9 +18484,9 @@ MainSubsong0_RegisterBlock_413_Loop
     db 37    ; Non-initial State, software only.
 
     db 8    ; Loop to index 8.
-MainSubsong0DisarkPointerRegionStart4950
+MainSubsong0DisarkPointerRegionStart4934
     dw MainSubsong0_RegisterBlock_413_Loop
-MainSubsong0DisarkPointerRegionEnd4950
+MainSubsong0DisarkPointerRegionEnd4934
 
 MainSubsong0_RegisterBlock_476
     db 105    ; Initial State: software only.
@@ -18591,9 +18535,9 @@ MainSubsong0_RegisterBlock_476_Loop
     db 37    ; Non-initial State, software only.
 
     db 8    ; Loop to index 8.
-MainSubsong0DisarkPointerRegionStart4951
+MainSubsong0DisarkPointerRegionStart4935
     dw MainSubsong0_RegisterBlock_476_Loop
-MainSubsong0DisarkPointerRegionEnd4951
+MainSubsong0DisarkPointerRegionEnd4935
 
 MainSubsong0_RegisterBlock_3
     db 131    ; Initial State : software and hardware.
@@ -19767,9 +19711,9 @@ MainSubsong0_RegisterBlock_8_Loop
     db 3    ; Non-initial State, software and hardware.
 
     db 8    ; Loop to index 8.
-MainSubsong0DisarkPointerRegionStart4952
+MainSubsong0DisarkPointerRegionStart4936
     dw MainSubsong0_RegisterBlock_8_Loop
-MainSubsong0DisarkPointerRegionEnd4952
+MainSubsong0DisarkPointerRegionEnd4936
 
 MainSubsong0_RegisterBlock_76
     db 131    ; Initial State : software and hardware.
@@ -19823,9 +19767,9 @@ MainSubsong0_RegisterBlock_76_Loop
     db 3    ; Non-initial State, software and hardware.
 
     db 8    ; Loop to index 8.
-MainSubsong0DisarkPointerRegionStart4953
+MainSubsong0DisarkPointerRegionStart4937
     dw MainSubsong0_RegisterBlock_76_Loop
-MainSubsong0DisarkPointerRegionEnd4953
+MainSubsong0DisarkPointerRegionEnd4937
 
 MainSubsong0_RegisterBlock_144
     db 131    ; Initial State : software and hardware.
@@ -19879,9 +19823,9 @@ MainSubsong0_RegisterBlock_144_Loop
     db 3    ; Non-initial State, software and hardware.
 
     db 8    ; Loop to index 8.
-MainSubsong0DisarkPointerRegionStart4954
+MainSubsong0DisarkPointerRegionStart4938
     dw MainSubsong0_RegisterBlock_144_Loop
-MainSubsong0DisarkPointerRegionEnd4954
+MainSubsong0DisarkPointerRegionEnd4938
 
 MainSubsong0_RegisterBlock_477
     db 105    ; Initial State: software only.
@@ -19930,9 +19874,9 @@ MainSubsong0_RegisterBlock_477_Loop
     db 37    ; Non-initial State, software only.
 
     db 8    ; Loop to index 8.
-MainSubsong0DisarkPointerRegionStart4955
+MainSubsong0DisarkPointerRegionStart4939
     dw MainSubsong0_RegisterBlock_477_Loop
-MainSubsong0DisarkPointerRegionEnd4955
+MainSubsong0DisarkPointerRegionEnd4939
 
 MainSubsong0_RegisterBlock_478
     db 105    ; Initial State: software only.
@@ -19981,9 +19925,9 @@ MainSubsong0_RegisterBlock_478_Loop
     db 37    ; Non-initial State, software only.
 
     db 8    ; Loop to index 8.
-MainSubsong0DisarkPointerRegionStart4956
+MainSubsong0DisarkPointerRegionStart4940
     dw MainSubsong0_RegisterBlock_478_Loop
-MainSubsong0DisarkPointerRegionEnd4956
+MainSubsong0DisarkPointerRegionEnd4940
 
 MainSubsong0_RegisterBlock_544
     db 105    ; Initial State: software only.
@@ -20298,9 +20242,9 @@ MainSubsong0_RegisterBlock_1285_Loop
     db 4    ; Non-initial State, no software no hardware.
 
     db 8    ; Loop to index 30.
-MainSubsong0DisarkPointerRegionStart4957
+MainSubsong0DisarkPointerRegionStart4941
     dw MainSubsong0_RegisterBlock_1285_Loop
-MainSubsong0DisarkPointerRegionEnd4957
+MainSubsong0DisarkPointerRegionEnd4941
 
 MainSubsong0_RegisterBlock_184
     db 131    ; Initial State : software and hardware.
@@ -20441,10 +20385,10 @@ MainSubsong0_RegisterBlock_1460
     db 9    ; Non-initial State, software only.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4958
+MainSubsong0DisarkPointerRegionStart4942
 ; Optimization: goto common Block at index 29.
     dw MainSubsong0_RegisterBlock_1285 + 118
-MainSubsong0DisarkPointerRegionEnd4958
+MainSubsong0DisarkPointerRegionEnd4942
 MainSubsong0_RegisterBlock_1467
     db 128    ; Initial State: SID.
     db 129    ; 8-bit SID high-shelf duration.
@@ -20502,10 +20446,10 @@ MainSubsong0_RegisterBlock_1467
     db 29    ; Non-initial State, software only.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4959
+MainSubsong0DisarkPointerRegionStart4943
 ; Optimization: goto common Block at index 9.
     dw MainSubsong0_RegisterBlock_1460 + 14
-MainSubsong0DisarkPointerRegionEnd4959
+MainSubsong0DisarkPointerRegionEnd4943
 MainSubsong0_RegisterBlock_4
     db 97    ; Initial State: software only.
     db 239    ; Software period.
@@ -21237,9 +21181,9 @@ MainSubsong0_RegisterBlock_1815_Loop
     db 57    ; Non-initial State, software only.
 
     db 8    ; Loop to index 1.
-MainSubsong0DisarkPointerRegionStart4960
+MainSubsong0DisarkPointerRegionStart4944
     dw MainSubsong0_RegisterBlock_1815_Loop
-MainSubsong0DisarkPointerRegionEnd4960
+MainSubsong0DisarkPointerRegionEnd4944
 
 MainSubsong0_RegisterBlock_1874
     db 128    ; Initial State: SID.
@@ -21250,10 +21194,10 @@ MainSubsong0_RegisterBlock_1874
     db 0    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4961
+MainSubsong0DisarkPointerRegionStart4945
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1815 + 6
-MainSubsong0DisarkPointerRegionEnd4961
+MainSubsong0DisarkPointerRegionEnd4945
 MainSubsong0_RegisterBlock_1965
     db 128    ; Initial State: SID.
     db 40    ; 8-bit SID high-shelf duration.
@@ -21263,10 +21207,23 @@ MainSubsong0_RegisterBlock_1965
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4962
+MainSubsong0DisarkPointerRegionStart4946
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1815 + 6
-MainSubsong0DisarkPointerRegionEnd4962
+MainSubsong0DisarkPointerRegionEnd4946
+MainSubsong0_RegisterBlock_2252
+    db 128    ; Initial State: SID.
+    db 30    ; 8-bit SID high-shelf duration.
+    db 30    ; 8-bit SID low-shelf duration.
+    db 113    ; Initial State: software only.
+    db 239    ; Software period.
+    db 0    ; Software period.
+
+    db 8
+MainSubsong0DisarkPointerRegionStart4947
+; Optimization: goto common Block at index 1.
+    dw MainSubsong0_RegisterBlock_1815 + 6
+MainSubsong0DisarkPointerRegionEnd4947
 MainSubsong0_RegisterBlock_628
     db 131    ; Initial State : software and hardware.
     db 253    ; Software period.
@@ -21448,10 +21405,10 @@ MainSubsong0_RegisterBlock_1289
     db 7    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4963
+MainSubsong0DisarkPointerRegionStart4948
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1291 + 3
-MainSubsong0DisarkPointerRegionEnd4963
+MainSubsong0DisarkPointerRegionEnd4948
 MainSubsong0_RegisterBlock_1830
     db 128    ; Initial State: SID.
     db 50    ; 8-bit SID high-shelf duration.
@@ -21461,10 +21418,10 @@ MainSubsong0_RegisterBlock_1830
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4964
+MainSubsong0DisarkPointerRegionStart4949
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4964
+MainSubsong0DisarkPointerRegionEnd4949
 MainSubsong0_RegisterBlock_1889
     db 128    ; Initial State: SID.
     db 45    ; 8-bit SID high-shelf duration.
@@ -21474,10 +21431,10 @@ MainSubsong0_RegisterBlock_1889
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4965
+MainSubsong0DisarkPointerRegionStart4950
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4965
+MainSubsong0DisarkPointerRegionEnd4950
 MainSubsong0_RegisterBlock_1980
     db 128    ; Initial State: SID.
     db 60    ; 8-bit SID high-shelf duration.
@@ -21487,10 +21444,10 @@ MainSubsong0_RegisterBlock_1980
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4966
+MainSubsong0DisarkPointerRegionStart4951
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4966
+MainSubsong0DisarkPointerRegionEnd4951
 MainSubsong0_RegisterBlock_0
     db 125    ; Initial State: software only.
     db 9    ; Noise.
@@ -21547,10 +21504,10 @@ MainSubsong0_RegisterBlock_2
     db 0    ; Hardware period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4967
+MainSubsong0DisarkPointerRegionStart4952
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_8 + 5
-MainSubsong0DisarkPointerRegionEnd4967
+MainSubsong0DisarkPointerRegionEnd4952
 MainSubsong0_RegisterBlock_12
     db 117    ; Initial State: software only.
     db 1    ; Noise.
@@ -21704,10 +21661,10 @@ MainSubsong0_RegisterBlock_44
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4968
+MainSubsong0DisarkPointerRegionStart4953
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4968
+MainSubsong0DisarkPointerRegionEnd4953
 MainSubsong0_RegisterBlock_45
     db 128    ; Initial State: SID.
     db 119    ; 8-bit SID high-shelf duration.
@@ -21717,10 +21674,10 @@ MainSubsong0_RegisterBlock_45
     db 3    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4969
+MainSubsong0DisarkPointerRegionStart4954
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4969
+MainSubsong0DisarkPointerRegionEnd4954
 MainSubsong0_RegisterBlock_46
     db 128    ; Initial State: SID.
     db 40    ; 8-bit SID high-shelf duration.
@@ -21733,9 +21690,9 @@ MainSubsong0_RegisterBlock_46_Loop
     db 61    ; Non-initial State, software only.
 
     db 8    ; Loop to index 1.
-MainSubsong0DisarkPointerRegionStart4970
+MainSubsong0DisarkPointerRegionStart4955
     dw MainSubsong0_RegisterBlock_46_Loop
-MainSubsong0DisarkPointerRegionEnd4970
+MainSubsong0DisarkPointerRegionEnd4955
 
 MainSubsong0_RegisterBlock_60
     db 128    ; Initial State: SID.
@@ -21784,10 +21741,10 @@ MainSubsong0_RegisterBlock_61
     db 3    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4971
+MainSubsong0DisarkPointerRegionStart4956
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1467 + 6
-MainSubsong0DisarkPointerRegionEnd4971
+MainSubsong0DisarkPointerRegionEnd4956
 MainSubsong0_RegisterBlock_99
     db 117    ; Initial State: software only.
     db 1    ; Noise.
@@ -21833,10 +21790,10 @@ MainSubsong0_RegisterBlock_112
     db 2    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4972
+MainSubsong0DisarkPointerRegionStart4957
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4972
+MainSubsong0DisarkPointerRegionEnd4957
 MainSubsong0_RegisterBlock_113
     db 128    ; Initial State: SID.
     db 150    ; 8-bit SID high-shelf duration.
@@ -21846,10 +21803,10 @@ MainSubsong0_RegisterBlock_113
     db 4    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4973
+MainSubsong0DisarkPointerRegionStart4958
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4973
+MainSubsong0DisarkPointerRegionEnd4958
 MainSubsong0_RegisterBlock_128
     db 128    ; Initial State: SID.
     db 81    ; 8-bit SID high-shelf duration.
@@ -22117,10 +22074,10 @@ MainSubsong0_RegisterBlock_217
     db 2    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4974
+MainSubsong0DisarkPointerRegionStart4959
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4974
+MainSubsong0DisarkPointerRegionEnd4959
 MainSubsong0_RegisterBlock_218
     db 128    ; Initial State: SID.
     db 159    ; 8-bit SID high-shelf duration.
@@ -22130,10 +22087,10 @@ MainSubsong0_RegisterBlock_218
     db 4    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4975
+MainSubsong0DisarkPointerRegionStart4960
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4975
+MainSubsong0DisarkPointerRegionEnd4960
 MainSubsong0_RegisterBlock_233
     db 128    ; Initial State: SID.
     db 87    ; 8-bit SID high-shelf duration.
@@ -22468,10 +22425,10 @@ MainSubsong0_RegisterBlock_411
     db 0    ; Hardware period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4976
+MainSubsong0DisarkPointerRegionStart4961
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_628 + 5
-MainSubsong0DisarkPointerRegionEnd4976
+MainSubsong0DisarkPointerRegionEnd4961
 MainSubsong0_RegisterBlock_442
     db 128    ; Initial State: SID.
     db 69    ; 8-bit SID high-shelf duration.
@@ -22557,10 +22514,10 @@ MainSubsong0_RegisterBlock_444
     db 0    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4977
+MainSubsong0DisarkPointerRegionStart4962
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_46 + 6
-MainSubsong0DisarkPointerRegionEnd4977
+MainSubsong0DisarkPointerRegionEnd4962
 MainSubsong0_RegisterBlock_481
     db 128    ; Initial State: SID.
     db 37    ; 8-bit SID high-shelf duration.
@@ -22570,10 +22527,10 @@ MainSubsong0_RegisterBlock_481
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4978
+MainSubsong0DisarkPointerRegionStart4963
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_46 + 6
-MainSubsong0DisarkPointerRegionEnd4978
+MainSubsong0DisarkPointerRegionEnd4963
 MainSubsong0_RegisterBlock_577
     db 117    ; Initial State: software only.
     db 1    ; Noise.
@@ -22655,10 +22612,10 @@ MainSubsong0_RegisterBlock_691
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4979
+MainSubsong0DisarkPointerRegionStart4964
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4979
+MainSubsong0DisarkPointerRegionEnd4964
 MainSubsong0_RegisterBlock_692
     db 128    ; Initial State: SID.
     db 126    ; 8-bit SID high-shelf duration.
@@ -22668,10 +22625,10 @@ MainSubsong0_RegisterBlock_692
     db 3    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4980
+MainSubsong0DisarkPointerRegionStart4965
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4980
+MainSubsong0DisarkPointerRegionEnd4965
 MainSubsong0_RegisterBlock_729
     db 117    ; Initial State: software only.
     db 1    ; Noise.
@@ -22925,10 +22882,10 @@ MainSubsong0_RegisterBlock_793
     db 0    ; Hardware period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4981
+MainSubsong0DisarkPointerRegionStart4966
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_801 + 5
-MainSubsong0DisarkPointerRegionEnd4981
+MainSubsong0DisarkPointerRegionEnd4966
 MainSubsong0_RegisterBlock_823
     db 117    ; Initial State: software only.
     db 1    ; Noise.
@@ -23031,10 +22988,10 @@ MainSubsong0_RegisterBlock_855
     db 2    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4982
+MainSubsong0DisarkPointerRegionStart4967
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4982
+MainSubsong0DisarkPointerRegionEnd4967
 MainSubsong0_RegisterBlock_856
     db 128    ; Initial State: SID.
     db 134    ; 8-bit SID high-shelf duration.
@@ -23044,10 +23001,10 @@ MainSubsong0_RegisterBlock_856
     db 4    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4983
+MainSubsong0DisarkPointerRegionStart4968
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4983
+MainSubsong0DisarkPointerRegionEnd4968
 MainSubsong0_RegisterBlock_857
     db 128    ; Initial State: SID.
     db 33    ; 8-bit SID high-shelf duration.
@@ -23057,10 +23014,10 @@ MainSubsong0_RegisterBlock_857
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4984
+MainSubsong0DisarkPointerRegionStart4969
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_46 + 6
-MainSubsong0DisarkPointerRegionEnd4984
+MainSubsong0DisarkPointerRegionEnd4969
 MainSubsong0_RegisterBlock_912
     db 131    ; Initial State : software and hardware.
     db 150    ; Software period.
@@ -23069,10 +23026,10 @@ MainSubsong0_RegisterBlock_912
     db 0    ; Hardware period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4985
+MainSubsong0DisarkPointerRegionStart4970
 ; Optimization: goto common Block at index 6.
     dw MainSubsong0_RegisterBlock_76 + 13
-MainSubsong0DisarkPointerRegionEnd4985
+MainSubsong0DisarkPointerRegionEnd4970
 MainSubsong0_RegisterBlock_921
     db 121    ; Initial State: software only.
     db 119    ; Software period.
@@ -23322,10 +23279,10 @@ MainSubsong0_RegisterBlock_1274
     db 0    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4986
+MainSubsong0DisarkPointerRegionStart4971
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4986
+MainSubsong0DisarkPointerRegionEnd4971
 MainSubsong0_RegisterBlock_1275
     db 128    ; Initial State: SID.
     db 53    ; 8-bit SID high-shelf duration.
@@ -23335,10 +23292,10 @@ MainSubsong0_RegisterBlock_1275
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4987
+MainSubsong0DisarkPointerRegionStart4972
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4987
+MainSubsong0DisarkPointerRegionEnd4972
 MainSubsong0_RegisterBlock_1277
     db 128    ; Initial State: SID.
     db 25    ; 8-bit SID high-shelf duration.
@@ -23348,10 +23305,10 @@ MainSubsong0_RegisterBlock_1277
     db 0    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4988
+MainSubsong0DisarkPointerRegionStart4973
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4988
+MainSubsong0DisarkPointerRegionEnd4973
 MainSubsong0_RegisterBlock_1391
     db 117    ; Initial State: software only.
     db 9    ; Noise.
@@ -23425,10 +23382,10 @@ MainSubsong0_RegisterBlock_1507
     db 0    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4989
+MainSubsong0DisarkPointerRegionStart4974
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4989
+MainSubsong0DisarkPointerRegionEnd4974
 MainSubsong0_RegisterBlock_1509
     db 128    ; Initial State: SID.
     db 33    ; 8-bit SID high-shelf duration.
@@ -23438,10 +23395,10 @@ MainSubsong0_RegisterBlock_1509
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4990
+MainSubsong0DisarkPointerRegionStart4975
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4990
+MainSubsong0DisarkPointerRegionEnd4975
 MainSubsong0_RegisterBlock_1511
     db 128    ; Initial State: SID.
     db 36    ; 8-bit SID high-shelf duration.
@@ -23527,10 +23484,10 @@ MainSubsong0_RegisterBlock_1519
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4991
+MainSubsong0DisarkPointerRegionStart4976
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4991
+MainSubsong0DisarkPointerRegionEnd4976
 MainSubsong0_RegisterBlock_1520
     db 128    ; Initial State: SID.
     db 33    ; 8-bit SID high-shelf duration.
@@ -23540,10 +23497,10 @@ MainSubsong0_RegisterBlock_1520
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4992
+MainSubsong0DisarkPointerRegionStart4977
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4992
+MainSubsong0DisarkPointerRegionEnd4977
 MainSubsong0_RegisterBlock_1536
     db 128    ; Initial State: SID.
     db 26    ; 8-bit SID high-shelf duration.
@@ -23553,10 +23510,10 @@ MainSubsong0_RegisterBlock_1536
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4993
+MainSubsong0DisarkPointerRegionStart4978
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4993
+MainSubsong0DisarkPointerRegionEnd4978
 MainSubsong0_RegisterBlock_1595
     db 117    ; Initial State: software only.
     db 1    ; Noise.
@@ -23624,10 +23581,10 @@ MainSubsong0_RegisterBlock_1809
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4994
+MainSubsong0DisarkPointerRegionStart4979
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1815 + 6
-MainSubsong0DisarkPointerRegionEnd4994
+MainSubsong0DisarkPointerRegionEnd4979
 MainSubsong0_RegisterBlock_1810
     db 128    ; Initial State: SID.
     db 37    ; 8-bit SID high-shelf duration.
@@ -23676,10 +23633,10 @@ MainSubsong0_RegisterBlock_1811
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4995
+MainSubsong0DisarkPointerRegionStart4980
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1815 + 6
-MainSubsong0DisarkPointerRegionEnd4995
+MainSubsong0DisarkPointerRegionEnd4980
 MainSubsong0_RegisterBlock_1813
     db 128    ; Initial State: SID.
     db 100    ; 8-bit SID high-shelf duration.
@@ -23689,10 +23646,10 @@ MainSubsong0_RegisterBlock_1813
     db 3    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4996
+MainSubsong0DisarkPointerRegionStart4981
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4996
+MainSubsong0DisarkPointerRegionEnd4981
 MainSubsong0_RegisterBlock_1814
     db 128    ; Initial State: SID.
     db 50    ; 8-bit SID high-shelf duration.
@@ -23702,10 +23659,10 @@ MainSubsong0_RegisterBlock_1814
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4997
+MainSubsong0DisarkPointerRegionStart4982
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4997
+MainSubsong0DisarkPointerRegionEnd4982
 MainSubsong0_RegisterBlock_1834
     db 128    ; Initial State: SID.
     db 28    ; 8-bit SID high-shelf duration.
@@ -23715,10 +23672,10 @@ MainSubsong0_RegisterBlock_1834
     db 0    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4998
+MainSubsong0DisarkPointerRegionStart4983
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1815 + 6
-MainSubsong0DisarkPointerRegionEnd4998
+MainSubsong0DisarkPointerRegionEnd4983
 MainSubsong0_RegisterBlock_1835
     db 128    ; Initial State: SID.
     db 56    ; 8-bit SID high-shelf duration.
@@ -23728,10 +23685,10 @@ MainSubsong0_RegisterBlock_1835
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart4999
+MainSubsong0DisarkPointerRegionStart4984
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd4999
+MainSubsong0DisarkPointerRegionEnd4984
 MainSubsong0_RegisterBlock_1836
     db 131    ; Initial State : software and hardware.
     db 102    ; Software period.
@@ -23837,10 +23794,10 @@ MainSubsong0_RegisterBlock_1870
     db 0    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart5000
+MainSubsong0DisarkPointerRegionStart4985
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1815 + 6
-MainSubsong0DisarkPointerRegionEnd5000
+MainSubsong0DisarkPointerRegionEnd4985
 MainSubsong0_RegisterBlock_1871
     db 128    ; Initial State: SID.
     db 49    ; 8-bit SID high-shelf duration.
@@ -23888,10 +23845,10 @@ MainSubsong0_RegisterBlock_1872
     db 2    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart5001
+MainSubsong0DisarkPointerRegionStart4986
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd5001
+MainSubsong0DisarkPointerRegionEnd4986
 MainSubsong0_RegisterBlock_1873
     db 128    ; Initial State: SID.
     db 45    ; 8-bit SID high-shelf duration.
@@ -23901,10 +23858,10 @@ MainSubsong0_RegisterBlock_1873
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart5002
+MainSubsong0DisarkPointerRegionStart4987
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1460 + 6
-MainSubsong0DisarkPointerRegionEnd5002
+MainSubsong0DisarkPointerRegionEnd4987
 MainSubsong0_RegisterBlock_1893
     db 128    ; Initial State: SID.
     db 40    ; 8-bit SID high-shelf duration.
@@ -23914,10 +23871,10 @@ MainSubsong0_RegisterBlock_1893
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart5003
+MainSubsong0DisarkPointerRegionStart4988
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1815 + 6
-MainSubsong0DisarkPointerRegionEnd5003
+MainSubsong0DisarkPointerRegionEnd4988
 MainSubsong0_RegisterBlock_1894
     db 128    ; Initial State: SID.
     db 42    ; 8-bit SID high-shelf duration.
@@ -23927,10 +23884,10 @@ MainSubsong0_RegisterBlock_1894
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart5004
+MainSubsong0DisarkPointerRegionStart4989
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1815 + 6
-MainSubsong0DisarkPointerRegionEnd5004
+MainSubsong0DisarkPointerRegionEnd4989
 MainSubsong0_RegisterBlock_1927
     db 121    ; Initial State: software only.
     db 239    ; Software period.
@@ -23997,10 +23954,10 @@ MainSubsong0_RegisterBlock_1959
     db 1    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart5005
+MainSubsong0DisarkPointerRegionStart4990
 ; Optimization: goto common Block at index 1.
     dw MainSubsong0_RegisterBlock_1815 + 6
-MainSubsong0DisarkPointerRegionEnd5005
+MainSubsong0DisarkPointerRegionEnd4990
 MainSubsong0_RegisterBlock_1960
     db 128    ; Initial State: SID.
     db 44    ; 8-bit SID high-shelf duration.
@@ -24087,11 +24044,11 @@ MainSubsong0_RegisterBlock_2167
     db 2    ; Software period.
 
     db 8
-MainSubsong0DisarkPointerRegionStart5006
+MainSubsong0DisarkPointerRegionStart4991
 ; Optimization: goto common Block at index 2.
     dw MainSubsong0_RegisterBlock_1460 + 7
-MainSubsong0DisarkPointerRegionEnd5006
-MainSubsong0_RegisterBlock_2293
+MainSubsong0DisarkPointerRegionEnd4991
+MainSubsong0_RegisterBlock_2291
     db 121    ; Initial State: software only.
     db 201    ; Software period.
     db 0    ; Software period.
@@ -24110,7 +24067,7 @@ MainSubsong0_RegisterBlock_2293
     db 121    ; Non-initial State, software only.
     db 150    ; New LSB for software period.
 
-MainSubsong0_RegisterBlock_2301
+MainSubsong0_RegisterBlock_2299
     db 117    ; Initial State: software only.
     db 1    ; Noise.
     db 113    ; Software period.
@@ -24128,7 +24085,7 @@ MainSubsong0_RegisterBlock_2301
     db 105    ; Non-initial State, software only.
     db 224    ; New LSB for software period.
 
-MainSubsong0_RegisterBlock_2304
+MainSubsong0_RegisterBlock_2302
     db 77    ; Initial State: software only.
     db 1    ; Noise.
     db 201    ; Software period.
@@ -24147,7 +24104,7 @@ MainSubsong0_RegisterBlock_2304
     db 85    ; Non-initial State, software only.
     db 145    ; New LSB for software period.
 
-MainSubsong0_RegisterBlock_2309
+MainSubsong0_RegisterBlock_2307
     db 121    ; Initial State: software only.
     db 201    ; Software period.
     db 0    ; Software period.
@@ -24166,7 +24123,7 @@ MainSubsong0_RegisterBlock_2309
     db 121    ; Non-initial State, software only.
     db 169    ; New LSB for software period.
 
-MainSubsong0_RegisterBlock_2324
+MainSubsong0_RegisterBlock_2322
     db 77    ; Initial State: software only.
     db 1    ; Noise.
     db 113    ; Software period.
@@ -24184,46 +24141,7 @@ MainSubsong0_RegisterBlock_2324
     db 85    ; Non-initial State, software only.
     db 224    ; New LSB for software period.
 
-MainSubsong0_RegisterBlock_2332
-    db 128    ; Initial State: SID.
-    db 28    ; 8-bit SID high-shelf duration.
-    db 28    ; 8-bit SID low-shelf duration.
-    db 113    ; Initial State: software only.
-    db 222    ; Software period.
-    db 0    ; Software period.
-
-    db 16    ; Non-initial State: SID.
-    db 1    ; SID state + low-shelf volume.
-    db 27    ; 8-bit SID high-shelf duration.
-    db 28    ; 8-bit SID low-shelf duration.
-    db 121    ; Non-initial State, software only.
-    db 219    ; New LSB for software period.
-
-    db 16    ; Non-initial State: SID.
-    db 1    ; SID state + low-shelf volume.
-    db 27    ; 8-bit SID high-shelf duration.
-    db 27    ; 8-bit SID low-shelf duration.
-    db 121    ; Non-initial State, software only.
-    db 216    ; New LSB for software period.
-
-    db 16    ; Non-initial State: SID.
-    db 1    ; SID state + low-shelf volume.
-    db 26    ; 8-bit SID high-shelf duration.
-    db 27    ; 8-bit SID low-shelf duration.
-    db 121    ; Non-initial State, software only.
-    db 213    ; New LSB for software period.
-
-    db 121    ; Non-initial State, software only.
-    db 210    ; New LSB for software period.
-
-    db 16    ; Non-initial State: SID.
-    db 1    ; SID state + low-shelf volume.
-    db 26    ; 8-bit SID high-shelf duration.
-    db 26    ; 8-bit SID low-shelf duration.
-    db 121    ; Non-initial State, software only.
-    db 207    ; New LSB for software period.
-
-MainSubsong0_RegisterBlock_2380
+MainSubsong0_RegisterBlock_2375
     db 85    ; Initial State: software only.
     db 9    ; Noise.
     db 225    ; Software period.
@@ -24247,7 +24165,7 @@ MainSubsong0_RegisterBlock_2380
 
     db 4    ; Non-initial State, no software no hardware.
 
-MainSubsong0_RegisterBlock_2388
+MainSubsong0_RegisterBlock_2383
     db 121    ; Initial State: software only.
     db 179    ; Software period.
     db 0    ; Software period.
@@ -24266,7 +24184,7 @@ MainSubsong0_RegisterBlock_2388
     db 121    ; Non-initial State, software only.
     db 134    ; New LSB for software period.
 
-MainSubsong0_RegisterBlock_2389
+MainSubsong0_RegisterBlock_2384
     db 117    ; Initial State: software only.
     db 1    ; Noise.
     db 45    ; Software period.
@@ -24284,7 +24202,7 @@ MainSubsong0_RegisterBlock_2389
     db 105    ; Non-initial State, software only.
     db 88    ; New LSB for software period.
 
-MainSubsong0_RegisterBlock_2404
+MainSubsong0_RegisterBlock_2399
     db 121    ; Initial State: software only.
     db 179    ; Software period.
     db 0    ; Software period.
@@ -24303,7 +24221,7 @@ MainSubsong0_RegisterBlock_2404
     db 121    ; Non-initial State, software only.
     db 150    ; New LSB for software period.
 
-MainSubsong0_RegisterBlock_2419
+MainSubsong0_RegisterBlock_2414
     db 117    ; Initial State: software only.
     db 1    ; Noise.
     db 169    ; Software period.
@@ -24321,45 +24239,6 @@ MainSubsong0_RegisterBlock_2419
 
     db 105    ; Non-initial State, software only.
     db 81    ; New LSB for software period.
-
-MainSubsong0_RegisterBlock_2427
-    db 128    ; Initial State: SID.
-    db 25    ; 8-bit SID high-shelf duration.
-    db 25    ; 8-bit SID low-shelf duration.
-    db 113    ; Initial State: software only.
-    db 198    ; Software period.
-    db 0    ; Software period.
-
-    db 16    ; Non-initial State: SID.
-    db 1    ; SID state + low-shelf volume.
-    db 24    ; 8-bit SID high-shelf duration.
-    db 25    ; 8-bit SID low-shelf duration.
-    db 121    ; Non-initial State, software only.
-    db 195    ; New LSB for software period.
-
-    db 16    ; Non-initial State: SID.
-    db 1    ; SID state + low-shelf volume.
-    db 24    ; 8-bit SID high-shelf duration.
-    db 24    ; 8-bit SID low-shelf duration.
-    db 121    ; Non-initial State, software only.
-    db 192    ; New LSB for software period.
-
-    db 16    ; Non-initial State: SID.
-    db 1    ; SID state + low-shelf volume.
-    db 23    ; 8-bit SID high-shelf duration.
-    db 24    ; 8-bit SID low-shelf duration.
-    db 121    ; Non-initial State, software only.
-    db 189    ; New LSB for software period.
-
-    db 121    ; Non-initial State, software only.
-    db 186    ; New LSB for software period.
-
-    db 16    ; Non-initial State: SID.
-    db 1    ; SID state + low-shelf volume.
-    db 23    ; 8-bit SID high-shelf duration.
-    db 23    ; 8-bit SID low-shelf duration.
-    db 121    ; Non-initial State, software only.
-    db 183    ; New LSB for software period.
 
 MainSubsong0_RegisterBlock_929
     db 93    ; Initial State: software only.
@@ -24994,4 +24873,4 @@ MainSubsong0_RegisterBlock_1458
     db 69    ; Non-initial State, software only.
     db 134    ; New LSB for software period.
 
-MainSubsong0DisarkByteRegionEnd4945
+MainSubsong0DisarkByteRegionEnd4929
