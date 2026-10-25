@@ -5,6 +5,7 @@
     include once 'demosystem/public.asm'
     include once "macros.asm"
     include once "functions.asm"
+    include "constants.asm"
 
 
 ;; We assume everythin is properly loaded in memory, and we just need to run the demo
@@ -346,7 +347,6 @@ demo_play_music
     assert $<0x4000
 
     ; all common stuffs
-    include "constants.asm"
     include "lib.asm"
     include "palettes.asm"
     include "events.asm"
