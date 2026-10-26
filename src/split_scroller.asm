@@ -927,6 +927,12 @@ SCROLLER_MONOCHROME_RASTERS_DATA
 	db GA_BLACK ; The very last one is black to hide everything
 
 
+SCROLLER_MONOCHROME_RASTERS_DATA2
+.start
+	db SCROLLER_MONOCHROME_PALETTE2
+.stop
+	db GA_BLACK ; The very last one is black to hide everything
+
 
 	; TODO add something to ensure we have not memory issue there
 	repeat NB_SCROLLER_PALETTE, palette, 0
