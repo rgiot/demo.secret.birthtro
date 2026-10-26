@@ -602,6 +602,8 @@ writter_or_sprite_w{w}
             return "comma"
         elseif {char} == "!"
             return "exclam"
+        elseif {char} == "-"
+            return "dash"
         elseif {char} == "é"
             return "eacute"
         else
@@ -631,6 +633,8 @@ writter_or_sprite_w{w}
             return ","
         elseif {code} == "eacute"
             return "é"
+        elseif {code} == "dash"
+            return "-"
         else
             return {code}
         endif
