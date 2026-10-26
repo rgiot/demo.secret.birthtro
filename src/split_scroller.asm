@@ -820,7 +820,7 @@ complete_charset = " .,!:)'" ; very first char is space, then  punctuation
 
 		repeat string_len({registered_scroller_unique_char}), i, 0
 		current_char = int(list_get({registered_scroller_unique_char}, {i}))
-		if current_char != '2' && current_char != '6'
+		if current_char != '2' && current_char != '6' && current_char != '9' && current_char != '0' && current_char != '1' && current_char != '3' && current_char != '4' && current_char != '5' && current_char != '7' && current_char != '8'
 			current_char += ('A'-'a') ; add the upper case version of the char to the charset
 		endif
 			complete_charset = string_concat(complete_charset, char(current_char))
