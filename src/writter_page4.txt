@@ -1,10 +1,10 @@
 Platform: CPC NEXT GEN.
 Memory: 128KB and growing.
-
+ 
 Sleep requirements:
 DEFINITELY NOT
 CPC COMPATIBLE!
-
+ 
 Release status: FINAL.
 No patches expected.
 ...yeah, right! :)

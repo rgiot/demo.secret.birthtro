@@ -1,10 +1,10 @@
 After Eliot:
  
-The musician,
-The writter,
-The democoder,
-The party organizer:
-The game maker,
-The graphician,
-The party-cipant
+The musician.
+The writter.
+The democoder.
+The party organizer.
+The game maker.
+The graphician.
+The party-cipant.
 ...
