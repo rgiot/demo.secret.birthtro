@@ -1,10 +1,10 @@
-Team,
-Dead Hackers Society,
-Dekadence, Dentifrice,
-Desire, Dreamweb,
-Extend, Fairlight, Fit,
-Flush, Futurs', Ghostown,
-GPA, Hemoroids, Hooy
-Program, Keops,
-Impact, Les Sucres En
-Morceaux,
+Platform: CPC NEXT GEN.
+Memory: 128KB and growing.
+
+Sleep requirements:
+DEFINITELY NOT
+CPC COMPATIBLE!
+
+Release status: FINAL.
+No patches expected.
+...yeah, right! :)
