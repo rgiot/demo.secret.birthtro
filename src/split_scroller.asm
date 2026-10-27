@@ -806,7 +806,7 @@ letter_{char}_line_0 equ letter_ipm{char}_line_0
 	;; take as input a lowercase string and generate the charset command and the table with the mapping for each char to its font data
 	;; Generation order space, lower1, upper1, lower2, upper2, ...
 	macro FONT_MAPPING_GENERATE lowercase_chars, registered_scroller_unique_char
-complete_charset = " .,!:)'" ; very first char is space, then  punctuation
+complete_charset = " .,!:)'?#" ; very first char is space, then  punctuation
 
 		; generate the string to provide to charset directive
 		repeat string_len({lowercase_chars}), i, 0
@@ -842,6 +842,8 @@ FONT_CHAR_TABLE
 		dw letter_column
 		dw letter_closing
 		dw letter_acute
+		dw letter_question
+		dw letter_hash
 
 		repeat string_len({lowercase_chars}), i, 0
 			FONT_MAPPING_ENTRY({eval}list_get({lowercase_chars}, {i}))

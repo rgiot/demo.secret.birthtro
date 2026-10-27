@@ -904,15 +904,15 @@ writter_transition_table{table_code}
     ; generate the copy tables for the writter
     BUILD_WRITTER_TRANSITION_TABLE(0) ; XXX this one is the very first one. It concerns the whole screen and has to be handled differently than the others
     BUILD_WRITTER_TRANSITION_TABLE(1)
-    BUILD_WRITTER_TRANSITION_TABLE(2)
-   ; BUILD_WRITTER_TRANSITION_TABLE(3)
+   ; BUILD_WRITTER_TRANSITION_TABLE(2)
+    BUILD_WRITTER_TRANSITION_TABLE(3)
     
 transition_tables
     dw writter_transition_table0 ; this one is used the very first time to display the whole screen
 .restart
     dw writter_transition_table1
-    dw writter_transition_table2
-  ;  dw writter_transition_table3
+  ;  dw writter_transition_table2
+    dw writter_transition_table3
     dw 0
 
 
