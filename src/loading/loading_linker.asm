@@ -20,7 +20,9 @@
       ex af, af'
       push ix, iy
 
+        ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00+0: out (c),c
         UNCRUNCH(C0_C000, 0xC000)
+        ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00+80/2: out (c),c
         UNCRUNCH(C0_2000, LOADER_CODE_ADDRESS)
         call LOADER_CODE_ADDRESS
 
