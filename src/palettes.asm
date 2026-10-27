@@ -238,6 +238,117 @@ SCROLLER_MONOCHROME_PALETTE2 equ [
 
 
 
+SCROLLER_RANDOM_PALETTE_0 equ [
+        GA_COL_7,
+        GA_COL_22,
+        GA_COL_3,
+        GA_COL_15,
+        GA_COL_0,
+        GA_COL_18,
+        GA_COL_11,
+        GA_COL_25
+]
+
+SCROLLER_RANDOM_PALETTE_1 equ [
+        GA_COL_13,
+        GA_COL_4,
+        GA_COL_20,
+        GA_COL_8,
+        GA_COL_26,
+        GA_COL_2,
+        GA_COL_17,
+        GA_COL_10
+]
+
+SCROLLER_RANDOM_PALETTE_2 equ [
+        GA_COL_1,
+        GA_COL_24,
+        GA_COL_9,
+        GA_COL_16,
+        GA_COL_5,
+        GA_COL_21,
+        GA_COL_12,
+        GA_COL_6
+]
+
+SCROLLER_RANDOM_PALETTE_3 equ [
+        GA_COL_19,
+        GA_COL_0,
+        GA_COL_14,
+        GA_COL_23,
+        GA_COL_7,
+        GA_COL_3,
+        GA_COL_25,
+        GA_COL_11
+]
+
+SCROLLER_RANDOM_PALETTE_4 equ [
+        GA_COL_8,
+        GA_COL_18,
+        GA_COL_2,
+        GA_COL_26,
+        GA_COL_13,
+        GA_COL_5,
+        GA_COL_20,
+        GA_COL_1
+]
+
+SCROLLER_RANDOM_PALETTE_5 equ [
+        GA_COL_16,
+        GA_COL_6,
+        GA_COL_22,
+        GA_COL_10,
+        GA_COL_4,
+        GA_COL_24,
+        GA_COL_15,
+        GA_COL_9
+]
+
+SCROLLER_RANDOM_PALETTE_6 equ [
+        GA_COL_3,
+        GA_COL_17,
+        GA_COL_12,
+        GA_COL_25,
+        GA_COL_0,
+        GA_COL_19,
+        GA_COL_8,
+        GA_COL_21
+]
+
+SCROLLER_RANDOM_PALETTE_7 equ [
+        GA_COL_26,
+        GA_COL_11,
+        GA_COL_5,
+        GA_COL_14,
+        GA_COL_23,
+        GA_COL_2,
+        GA_COL_18,
+        GA_COL_7
+]
+
+SCROLLER_RANDOM_PALETTE_8 equ [
+        GA_COL_10,
+        GA_COL_21,
+        GA_COL_1,
+        GA_COL_16,
+        GA_COL_24,
+        GA_COL_13,
+        GA_COL_6,
+        GA_COL_20
+]
+
+SCROLLER_RANDOM_PALETTE_9 equ [
+        GA_COL_15,
+        GA_COL_4,
+        GA_COL_25,
+        GA_COL_9,
+        GA_COL_17,
+        GA_COL_0,
+        GA_COL_22,
+        GA_COL_12
+]
+
+
 ;;
 ;; Generate the palette with the given configuration.
 ;; Even when something is hidden a palette needs to be provided

@@ -945,6 +945,14 @@ SCROLLER_COLORED_RASTERS_DATA_{{palette}}
 	db GA_BLACK ; The very last one is black to hide everything
 	endr
 
+	repeat 10, randompal, 0
+	SCROLLER_RANDOM_RASTERS_DATA_{{randompal}}
+.start
+	db SCROLLER_RANDOM_PALETTE_{{randompal}}
+.stop
+	db GA_BLACK ; The very last one is black to hide everything
+	endr
+
 
 	align 256
 SCROLLER_CURVE_DATA db SCROLLER_SINE
