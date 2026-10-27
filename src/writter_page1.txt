@@ -1,10 +1,10 @@
-Welcome in:
-PATER.BAS
-hoMage to Eliot's
-greatest production
+Welcome to
+
+DAD-MODE.BAS
+
+A hoMage to Eliot's
+greatest production yet.
  
-This demo has been
-released at the
-Benediction Coding
-Party
+Released at the
+Benediction Coding Party
 THE CPC Demoparty
