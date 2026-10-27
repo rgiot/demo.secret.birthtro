@@ -14,6 +14,7 @@
 ; is paged in would jump into logo data instead of the real handler).
 
 
+charset ; reset the charset
 
 
 include "spectral_sprites_logo.asm"
