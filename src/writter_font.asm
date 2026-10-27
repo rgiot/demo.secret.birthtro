@@ -68,6 +68,19 @@ WRITTER_CREATE_CHAR(
 
 
 WRITTER_CREATE_CHAR(
+    hash,
+    " ## ##  ",
+    "####### ",
+    " ## ##  ",
+    " ## ##  ",
+    " ## ##  ",
+    "####### ",
+    " ## ##  ",
+    "        "
+)
+
+
+WRITTER_CREATE_CHAR(
     eacute,
     "   #####",
     " #####  ",
@@ -75,6 +88,47 @@ WRITTER_CREATE_CHAR(
     "###  ## ",
     "### ### ",
     "###     ",
+    " #####  ",
+    "        "
+)
+
+;version 2 (e with an acute)
+;WRITTER_CREATE_CHAR(
+;    eacute,
+;    "      ##",
+;    " #####  ",
+;    "###  ## ",
+;    "###  ## ",
+;    "### ### ",
+;    "###     ",
+;    " #####  ",
+;    "        "
+;)
+
+
+;version 3 (e with an acute)
+;WRITTER_CREATE_CHAR(
+;    eacute,
+;    "     ## ",
+;    "    ##  ",
+;    " ###    ",
+;    "###  ## ",
+;    "### ### ",
+;    "###     ",
+;    " #####  ",
+;    "        "
+;)
+
+
+; Digits
+WRITTER_CREATE_CHAR(
+    6,
+    " ###### ",
+    "###     ",
+    "###     ",
+    "######  ",
+    "###  ## ",
+    "###  ## ",
     " #####  ",
     "        "
 )
