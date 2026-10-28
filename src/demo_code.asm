@@ -197,11 +197,11 @@ demo_frame_run
     ld a, ANIMATION_STATE_PLAYING
     ld (animation_state), a
     xor a : ld (.reset_animation), a
-    ;CALL_IN_BANK(reset_background_sprite_0, ANIMATE_BANK)
+    CALL_IN_BANK(reset_background_sprite_0, ANIMATE_BANK)
     CALL_IN_BANK(reset_background_sprite_1, ANIMATE2_BANK)
 .no_reset_animation
 
-   ;CALL_IN_BANK(replace_background_sprite_0, ANIMATE_BANK)
+   CALL_IN_BANK(replace_background_sprite_0, ANIMATE_BANK)
    CALL_IN_BANK(replace_background_sprite_1, ANIMATE2_BANK)
 .no_animated_background
     DEBUG(GA_BLACK)

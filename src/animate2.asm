@@ -92,7 +92,7 @@ replace_background_sprite_1
 	ret
 .over
     ld a, ANIMATION_STATE_FINISHED
-    ld (animation_state), a
+    ld (animation_state2), a
     ret
 
 .table
@@ -102,4 +102,5 @@ replace_background_sprite_1
 		ANIMATION2_STEP(replace_background_sprite_1_1_0)
 	dw 0
 
+animation_state2 db 0
     print {hex}$
