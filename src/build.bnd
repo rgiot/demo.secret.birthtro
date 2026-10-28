@@ -35,7 +35,7 @@
 {% set MUSIC_DATA="../data/music/birhtro.asm" %}
 {% set MUSIC_CFG="../data/music/birhtro_playerconfig.asm" %}
 
-{%set SNA_GENERATED=["C0.300", "C0.8000", "C5.4000", "C6.4000"]%}
+{%set SNA_GENERATED=["C0.300", "C0.8000", "C5.4000", "C6.4000", "C7.4000"]%}
 
 - tgt: test_sna
   dep: {{ SNA }}

@@ -94,3 +94,5 @@ section demo_code_c7
 	SAVE_SECTION(screen_buffer, "C0.8000")
 	SAVE_SECTION(demo_code_c5,"C5.4000")
 	SAVE_SECTION(paged_music_for_c6,"C6.4000")
+	SAVE_SECTION(demo_code_c7,"C7.4000")
+
