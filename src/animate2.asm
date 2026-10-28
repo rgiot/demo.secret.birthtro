@@ -25,9 +25,6 @@ cancel_animation_1_if_needed
 
 ; Generate sprites data and code
 
-;SPRITE0_STEP0_CONTENT equ load("../data/face0_eye0.spr")
-;SPRITE0_STEP1_CONTENT equ load("../data/face0_eye1.spr")
-;SPRITE0_STEP2_CONTENT equ load("../data/face0_eye2.spr")
 
 	; load the sprites
 	repeat SPRITE1_NB_FRAMES, frame, 0
@@ -56,9 +53,13 @@ SPRITE1_STEP{{frame}}_CONTENT equ load(RIGHT_EYE{{frame}}_SPR)
 		endrepeat
 	endrepeat
 
+;; This bank is mapped at the same address as the one of animate.asm, so we MUST NOT use its
+;; animation_do_nothing: in this bank the same address points in the middle of another routine.
+animation2_do_nothing ret
+
 macro ANIMATION2_STEP routine
 	repeat NB_REPEATED_FRAMES_IN_ANIMATION-1, i, 0
-		dw animation_do_nothing
+		dw animation2_do_nothing
 	endrepeat
 	dw {routine}
 endm
