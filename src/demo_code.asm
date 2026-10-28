@@ -185,7 +185,7 @@ demo_frame_run
    DEBUG(GA_BRIGHT_CYAN)
    ld a, 0 : .animated_background_activated equ $-1
    or a
-   jr z, .no_animated_background
+   jp z, .no_animated_background
 
 
     ld a, 1 : .reset_animation equ $-1
@@ -197,8 +197,37 @@ demo_frame_run
     ld a, ANIMATION_STATE_PLAYING
     ld (animation_state), a
     xor a : ld (.reset_animation), a
-    CALL_IN_BANK(reset_background_sprite_0, ANIMATE_BANK)
-    CALL_IN_BANK(reset_background_sprite_1, ANIMATE2_BANK)
+
+    ld a, (kind_of_display) 
+    inc a
+    cp 3
+    jr nz, .continue_to_change
+    xor a
+.continue_to_change
+    ld (kind_of_display), a
+
+    or a : jr z,.select_left_eye_only
+    cp 1 : jr z, .select_right_eye_only
+    cp 2 : jr z, .select_both_eyes
+    jp $ ; error
+.select_left_eye_only
+    ld hl, replace_background_sprite_0.table
+    ld de, replace_background_sprite_1.empty
+    jr .activate_selection
+.select_right_eye_only
+    ld hl, replace_background_sprite_0.empty
+    ld de, replace_background_sprite_1.table
+    jr .activate_selection
+.select_both_eyes
+    ld hl, replace_background_sprite_0.table
+    ld de, replace_background_sprite_1.table
+.activate_selection
+    ld bc, 0x7f00 + ANIMATE_BANK : out (c), c
+	ld (replace_background_sprite_0.ptr), hl
+    ld bc, 0x7f00 + ANIMATE2_BANK : out (c), c
+	ld (replace_background_sprite_1.ptr), de
+    ld bc, 0x7f00 + 0xC0 : out (c), c
+
 .no_reset_animation
 
    CALL_IN_BANK(replace_background_sprite_0, ANIMATE_BANK)
@@ -211,6 +240,11 @@ demo_frame_run
 
 
     ret
+
+
+kind_of_display db 0 
+
+
 
     assert $<0x4000 || $>0x8000
     animation_state db ANIMATION_STATE_FINISHED

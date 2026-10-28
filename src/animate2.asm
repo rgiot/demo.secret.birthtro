@@ -66,7 +66,7 @@ endm
 
 
 reset_background_sprite_1
-	ld hl, replace_background_sprite_1.table
+    ld hl, replace_background_sprite_1.table
 	ld (replace_background_sprite_1.ptr), hl
 
 
@@ -101,6 +101,11 @@ replace_background_sprite_1
 		ANIMATION2_STEP(replace_background_sprite_1_2_1)
 		ANIMATION2_STEP(replace_background_sprite_1_1_0)
 	dw 0
+.empty
+	repeat NB_REPEATED_FRAMES_IN_ANIMATION
+		ANIMATION2_STEP(animation2_do_nothing)
+	endrepeat
+    dw 0
 
 animation_state2 db 0
     print {hex}$

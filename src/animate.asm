@@ -72,7 +72,7 @@ macro ANIMATION_STEP routine
 endm
 
 reset_background_sprite_0
-	ld hl, replace_background_sprite_0.table
+    ld hl, replace_background_sprite_0.table
 	ld (replace_background_sprite_0.ptr), hl
 
 
@@ -108,3 +108,8 @@ replace_background_sprite_0
 		ANIMATION_STEP(replace_background_sprite_0_1_0)
 	dw 0
 
+.empty
+	repeat NB_REPEATED_FRAMES_IN_ANIMATION
+		ANIMATION_STEP(animation_do_nothing)
+	endrepeat
+	dw 0
