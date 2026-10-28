@@ -13,12 +13,24 @@
 {%set SPRITE0_X_OFFSET=4 %} # horizontal position in byte (so *2 to get the number of pixels) from left of the screen
 {%set SPRITE0_Y_OFFSET=28-9 %} # vertical position in pixel from top of the screen
 
+{%set SPRITE1_WIDTH=52//2 %} # Number of bytes  in the width of the sprite (we obtain the number of pixels by multiplying it by 4)
+{%set SPRITE1_HEIGHT=45 %} # Number of lines of the sprite XXX real value is 50 but demo crashes with it
+{%set SPRITE1_X_OFFSET=61 %} # horizontal position in byte (so *2 to get the number of pixels) from left of the screen
+{%set SPRITE1_Y_OFFSET=10 %} # vertical position in pixel from top of the screen
+
+
 # Automatially created variables
 {% set FACE_SCR="../data/" ~ FACE ~ "_cpc.scr" %}
 {% set FACE_PAL="../data/" ~ FACE ~ "_cpc.pal" %}
+
 {% set LEFT_EYE0_SPR="../data/" ~ FACE ~ "_eye0.spr" %}
 {% set LEFT_EYE1_SPR="../data/" ~ FACE ~ "_eye1.spr" %}
 {% set LEFT_EYE2_SPR="../data/" ~ FACE ~ "_eye2.spr" %}
+
+{% set RIGHT_EYE0_SPR="../data/" ~ FACE ~ "_right_eye0.spr" %}
+{% set RIGHT_EYE1_SPR="../data/" ~ FACE ~ "_right_eye1.spr" %}
+{% set RIGHT_EYE2_SPR="../data/" ~ FACE ~ "_right_eye2.spr" %}
+
 
 {% set MUSIC_DATA="../data/music/birhtro.asm" %}
 {% set MUSIC_CFG="../data/music/birhtro_playerconfig.asm" %}
@@ -49,16 +61,22 @@
     - {{ FACE_SCR }}
     - {{ FACE_PAL }}
     - {{ LEFT_EYE0_SPR }} {{ LEFT_EYE1_SPR }} {{ LEFT_EYE2_SPR }}
+    - {{ RIGHT_EYE0_SPR }} {{ RIGHT_EYE1_SPR }} {{ RIGHT_EYE2_SPR }}
     - {{ MUSIC_DATA }}
     - {{ MUSIC_CFG }}
     - split_scroller_text.txt
     - "writter_page*.txt"
+    - build.bnd
   cmd: |
-    basm --snapshot sna.asm -o {{SNA}} 
+    basm --snapshot sna.asm 
+        -o {{SNA}} 
         -DFACE_SCR=\"{{FACE_SCR}}\" -DFACE_PAL=\"{{FACE_PAL}}\"
         -DLEFT_EYE0_SPR=\"{{LEFT_EYE0_SPR}}\" -DLEFT_EYE1_SPR=\"{{LEFT_EYE1_SPR}}\" -DLEFT_EYE2_SPR=\"{{LEFT_EYE2_SPR}}\"
+        -DRIGHT_EYE0_SPR=\"{{RIGHT_EYE0_SPR}}\" -DRIGHT_EYE1_SPR=\"{{RIGHT_EYE1_SPR}}\" -DRIGHT_EYE2_SPR=\"{{RIGHT_EYE2_SPR}}\"
         -DSPRITE0_WIDTH={{SPRITE0_WIDTH}} -DSPRITE0_HEIGHT={{SPRITE0_HEIGHT}}
         -DSPRITE0_X_OFFSET={{SPRITE0_X_OFFSET}} -DSPRITE0_Y_OFFSET={{SPRITE0_Y_OFFSET}}
+        -DSPRITE1_WIDTH={{SPRITE1_WIDTH}} -DSPRITE1_HEIGHT={{SPRITE1_HEIGHT}}
+        -DSPRITE1_X_OFFSET={{SPRITE1_X_OFFSET}} -DSPRITE1_Y_OFFSET={{SPRITE1_Y_OFFSET}}
         -DMUSIC_DATA=\"{{MUSIC_DATA}}\" -DMUSIC_CFG=\"{{MUSIC_CFG}}\"
         --lst sna.lst --sourcemap sna.map --sym sna.sym
 
@@ -80,11 +98,12 @@
     - bndbuild -f loading clean
 
 
-- tgt: {{ FACE_SCR }} {{EYE0_SPR}} {{EYE1_SPR}} {{EYE2_SPR}}
+- tgt: {{ FACE_SCR }} {{EYE0_SPR}} {{EYE1_SPR}} {{EYE2_SPR}} {{RIGHT_EYE0_SPR}} {{RIGHT_EYE1_SPR}} {{RIGHT_EYE2_SPR}}
   phony: true
   cmd: 
    - bndbuild -f ../data {{FACE ~ "_cpc.pal"}}
    - bndbuild -f ../data {{FACE ~ "_eye0.spr"}}
+   - bndbuild -f ../data {{FACE ~ "_right_eye0.spr"}}
 
 
 - tgt: link.sna {{DSK}} 

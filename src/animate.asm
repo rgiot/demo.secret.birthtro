@@ -1,6 +1,6 @@
 	;; We do not want to display complete sprite, but sprite delta between a source sprite and a destintion sprite
 
-    include 'animate_lib.asm'
+    include once 'animate_lib.asm'
 
 
 

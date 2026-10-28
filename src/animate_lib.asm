@@ -1,5 +1,8 @@
-
-	; Use a LRU cache to handle the bytes to draw
+BEFORE_ANIMATE equ $
+	
+    
+    
+    ; Use a LRU cache to handle the bytes to draw
 
     add_to_change equ duration(ld a, 0) + duration(add l) + duration(ld l, a)
 
@@ -477,3 +480,8 @@ endenum
     ANIMATION_STATE_FINISHED equ 1
     endif
 
+
+
+END_ANIMATE equ $
+
+    assert BEFORE_ANIMATE == END_ANIMATE, "animate_lib.asm should only provide macros and functions"

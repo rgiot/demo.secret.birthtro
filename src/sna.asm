@@ -13,6 +13,7 @@ SHOW_DEBUG equ false
 
 SPECTRAL_BANK equ 0xc4
 ANIMATE_BANK equ 0xc5
+ANIMATE2_BANK equ 0xc7
 
 
 	if false
@@ -37,6 +38,7 @@ range 0xc000, 0xffff, screen_main
 range 0x0000, 0x3fff, demo_code_c4
 range 0x4000, 0x7fff, demo_code_c5
 range 0x8000, 0xb000, paged_music_for_c6
+range 0xC000, 0xffff, demo_code_c7
 
     BANKSET 0
 section demo_code_main
@@ -68,6 +70,13 @@ MUSIC
     include "PlayerAkg.asm"
 
 	assert $<0x8000
+	rend
+
+section demo_code_c7
+	rorg 0x4000
+	  include "animate2.asm"
+	  assert $>=0x4000
+	  assert $<=0xffff
 	rend
 
 

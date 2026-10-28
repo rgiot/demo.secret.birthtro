@@ -24,7 +24,7 @@ endm
 macro CALL_IN_BANK routine, bank
 	if {bank} != 0xc0
 		assert $<0x4000
-		assert {bank} == 0xc5 || {bank} == 0xc4, "bank must be 0xc5 or 0xc4; just need to handle the others, no worries ;)"
+		assert {bank} == 0xc5 || {bank} == 0xc4 || {bank} == 0xc7, "bank must be 0xc5 or 0xc4 or 0xc7; just need to handle the others, no worries ;)"
 		ld bc, 0x7f00 + {bank} : ld (current_ram_config), bc : out (c), c
 		call {routine}
 		ld bc, 0x7f00 + 0xc0 : ld (current_ram_config), bc : out (c), c
