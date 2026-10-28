@@ -69,6 +69,13 @@
   tgt: VAPEUR_000.SPR VAPEUR_001.SPR VAPEUR_002.SPR VAPEUR_003.SPR VAPEUR_004.SPR VAPEUR_005.SPR VAPEUR_006.SPR VAPEUR_007.SPR VAPEUR_008.SPR
   cmd: img2cpc --ga-pal loading.pal loader/SPRITES_VAPEUR_28x92.png tile --width 14 --height 92 --output VAPEUR.SPR
 
+
+- dep: intro/logo.png
+  tgt: logo.scr logo.pal logo.inks
+  cmd:
+    - img2cpc --mode 0 --pen0 13 --skipoddpixels --unlock-pens --overscan intro/logo.png scr --output logo.scr --palette logo.pal --inks logo.inks
+
+
 - tgt: clean
   phony: true
   cmd:
