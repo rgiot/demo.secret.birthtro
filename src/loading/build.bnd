@@ -20,10 +20,10 @@
 
 
 - tgt: DAD-MODE.DSK
-  dep: DAD-MODE.BAS DAD-MODE.003
+  dep: DAD-MODE.BAS DAD-MODE.003 CATART.ASC
   cmd:
-    - dsk DAD-MODE.DSK format
-    - dsk DAD-MODE.DSK add DAD-MODE.BAS
+    - catalog CATART.ASC build --output DAD-MODE.DSK
+    - impdsk -dsk DAD-MODE.DSK -put DAD-MODE.BAS -hide
     - impdsk -dsk DAD-MODE.DSK -put DAD-MODE.003 -hide
 
 - tgt: DAD-MODE.BAS
