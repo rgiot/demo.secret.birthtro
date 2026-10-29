@@ -31,7 +31,6 @@ SCROLLER_COLORED_PALETTE_1 equ [
 		GA_COL_23,
 		GA_COL_14,
 		GA_COL_05
-
 ]
 
 
@@ -44,7 +43,6 @@ SCROLLER_COLORED_PALETTE_2 equ [
 		GA_COL_17,
 		GA_COL_08,
 		GA_COL_04
-
 ]
 
 
@@ -58,7 +56,6 @@ SCROLLER_COLORED_PALETTE_3 equ [
 		GA_COL_23,
 		GA_COL_14,
 		GA_COL_05
-
 ]
 
 
@@ -72,7 +69,6 @@ SCROLLER_COLORED_PALETTE_4 equ [
 		GA_COL_23,
 		GA_COL_14,
 		GA_COL_05
-
 ]
 
 
@@ -86,7 +82,6 @@ SCROLLER_COLORED_PALETTE_5 equ [
 		GA_COL_16,
 		GA_COL_07,
 		GA_COL_04
-
 ]
 
 
@@ -99,7 +94,6 @@ SCROLLER_COLORED_PALETTE_6 equ [
 		GA_COL_23,
 		GA_COL_14,
 		GA_COL_05
-
 ]
 
 
@@ -113,7 +107,6 @@ SCROLLER_COLORED_PALETTE_7 equ [
 		GA_COL_23,
 		GA_COL_14,
 		GA_COL_05
-
 ]
 
 
@@ -126,7 +119,6 @@ SCROLLER_COLORED_PALETTE_8 equ [
 		GA_COL_16,
 		GA_COL_07,
 		GA_COL_03
-
 ]
 
 
@@ -140,7 +132,6 @@ SCROLLER_COLORED_PALETTE_9 equ [
 		GA_COL_23,
 		GA_COL_14,
 		GA_COL_05
-
 ]
 
 
@@ -153,7 +144,6 @@ SCROLLER_COLORED_PALETTE_10 equ [
 		GA_COL_23,
 		GA_COL_14,
 		GA_COL_05
-
 ]
 
 
@@ -166,7 +156,6 @@ SCROLLER_COLORED_PALETTE_11 equ [
 		GA_COL_21,
 		GA_COL_19,
 		GA_COL_09
-
 ]
 
 
@@ -205,7 +194,7 @@ SCROLLER_COLORED_PALETTE_11 equ [
 ;		GA_COL_04
 ;]
 ;
-NB_SCROLLER_PALETTE equ 15
+NB_SCROLLER_PALETTE equ 12
 
 	; Check that voxy's palette are correct
 	repeat NB_SCROLLER_PALETTE, i, 0
