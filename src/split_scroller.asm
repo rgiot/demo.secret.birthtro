@@ -945,10 +945,22 @@ SCROLLER_COLORED_RASTERS_DATA_{{palette}}
 	db GA_BLACK ; The very last one is black to hide everything
 	endr
 
+/*
 	repeat 10, randompal, 0
 	SCROLLER_RANDOM_RASTERS_DATA_{{randompal}}
 .start
 	db SCROLLER_RANDOM_PALETTE_{{randompal}}
+.stop
+	db GA_BLACK ; The very last one is black to hide everything
+	endr
+
+*/
+
+
+	repeat 10, rasterpal, 0
+		SCROLLER_RASTER_RASTERS_DATA_{{rasterpal}}
+.start
+	db SCROLLER_RASTER_PALETTE_{{rasterpal}}
 .stop
 	db GA_BLACK ; The very last one is black to hide everything
 	endr
