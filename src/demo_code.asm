@@ -16,6 +16,7 @@ demo_start
         ld (0x38), hl
         ld sp, $
     ei
+    call demo_install_counting_interrupt_handler
 
     call demo_init
 
@@ -129,21 +130,35 @@ demo_run
 
 ;; handle the current effects of the frame
 demo_frame_run
+    ; The interrupts of the frame are counted from here. We cannot do it right after the vsync: the gate array
+    ; sometimes generates an additional interrupt just after it (~0.1ms), which would shift the count.
+    ; Here we are after it (the frame init lasts ~1ms) and before interrupt #1 (3.07ms).
+    xor a : ld (demo_interrupt_count), a
     DEBUG(GA_RED)
     ; We provide at maximum one halt to the sinus raster
     CALL_IN_BANK(spectral_sprite_handle, SPECTRAL_BANK)
     DEBUG(GA_WHITE)
-    halt
-
+    ; XXX There is NO halt here: the scroller has to be synchronised on interrupt #2 of the frame, whatever the
+    ; duration of the work (see below). A halt here was a race with interrupt #1 (3.07ms after the vsync) as the work
+    ; before it ends just before it: when it was slightly longer the halt waited for #2 and the scroller was 52 lines too low
 
     DEBUG(GA_RED)
     call scroller_handle_char_update
     call scroller_handle_scrolling
     DEBUG(GA_WHITE)
-    ; 2 halts before the scroll
-
-    halt
+    ; Wait for interrupt #2 of the frame, counted by the interrupt handler (demo_counting_interrupt_handler).
+    ; It does not depend on the duration of the work done before (interrupt #1 may have been handled before or not).
+    ; The interrupts are disabled while the counter is read, and the halt is preceded by ei, so there
+    ; is no race: a pending interrupt is handled right after ei (and wakes the halt immediately).
+.wait_interrupt2
     di
+    ld a, (demo_interrupt_count)
+    cp 2
+    jr nc, .interrupt2_reached
+    ei
+    halt
+    jr .wait_interrupt2
+.interrupt2_reached
 
 
     ; we want to have a sine wave
@@ -152,7 +167,10 @@ demo_frame_run
     defs 64 - duration(djnz $)-1
     djnz .wait_lines
 
-    defs 64 - 6
+    ; the interrupt handler and the loop above are longer than the original (ei : ret ; di) : compensate
+    ; so that the scroller starts at the very same nop
+    assert 64 - 6 - DEMO_SYNC_EXTRA_NOPS >= 0
+    defs 64 - 6 - DEMO_SYNC_EXTRA_NOPS
 
 	call scroller_show 
 
@@ -311,6 +329,39 @@ demo_interrupt_counter db 0
 current_ram_config dw 0x7fc0
 
 ;; Install/remove the handler that plays the music under interrupt.
+
+;; Interrupt handler used all along the demo: it just counts the interrupts of the frame.
+;; It is copied at 0x38 (the handler of the music, used during the restart, replaces it temporarily)
+demo_interrupt_count db 0
+
+demo_counting_interrupt_handler
+    push af
+    ld a, (demo_interrupt_count)
+    inc a
+    ld (demo_interrupt_count), a
+    pop af
+    ei
+    ret
+demo_counting_interrupt_handler_end
+
+;; nops added between the interrupt and the scroller by the counting handler and by the wait loop,
+;; compared to the former `halt : di` with the handler `ei : ret`:
+;;   handler: push af(4) ld a,(nn)(4) inc a(1) ld (nn),a(4) pop af(3) ei(1) ret(3) = 20
+;;   loop:    jr(3) di(1) ld a,(nn)(4) cp 2(2) jr nc taken(3) = 13
+;;   before:  ei(1) ret(3) di(1) = 5          => 20 + 13 - 5 = 28
+;; (the value is hard coded: the expression built with duration() was giving 23. It has been checked in an emulator:
+;; the scroller must start exactly 69.0us after the interrupt, like with the former code)
+DEMO_SYNC_EXTRA_NOPS equ 28
+
+demo_install_counting_interrupt_handler
+    di
+        ld hl, demo_counting_interrupt_handler
+        ld de, 0x38
+        ld bc, demo_counting_interrupt_handler_end - demo_counting_interrupt_handler
+        ldir
+    ei
+    ret
+
 demo_install_interrupt_handler
     di
         xor a : ld (demo_interrupt_counter), a
@@ -321,9 +372,8 @@ demo_install_interrupt_handler
 
 demo_remove_interrupt_handler
     di
-        ld hl, 0xc9fb : ld (0x38), hl ; ei : ret
     ei
-    ret
+    jp demo_install_counting_interrupt_handler
 
 demo_interrupt_handler
     push af : push bc : push de : push hl : push ix : push iy
