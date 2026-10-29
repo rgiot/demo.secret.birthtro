@@ -72,9 +72,9 @@
 
 # loader
 - dep : loader/loading.png
-  tgt : loading.scr loading.pal loading.inks
+  tgt : loading.scr loading.pal loading.inks loading.fadepal
   cmd:
-    - img2cpc --mode 0 --pen15 8 --pen14 10 --pen13 12 --pen12 17 --pen11 20  --pen10 14 --unlock-pens loader/loading.png scr --output loading.scr --palette loading.pal --inks loading.inks
+    - img2cpc --mode 0 --pen15 8 --pen14 10 --pen13 12 --pen12 17 --pen11 20  --pen10 14 --unlock-pens loader/loading.png scr --output loading.scr --palette loading.pal --inks loading.inks --palette_fadeout loading.fadepal
 
 - dep: loader/SPRITES_VAPEUR_28x92.png loading.pal
   tgt: VAPEUR_000.SPR VAPEUR_001.SPR VAPEUR_002.SPR VAPEUR_003.SPR VAPEUR_004.SPR VAPEUR_005.SPR VAPEUR_006.SPR VAPEUR_007.SPR VAPEUR_008.SPR

@@ -14,25 +14,23 @@
 MAIN_MEMORY_START
 	di
 
-	; Set the palette of the real screen
-loading_set_palette
-	ld hl , palette
-	ld b, 0x7f: xor a
-.loop
-	ld c, (hl) : inc hl
-	out (c), a: out (c), c
-	inc a
-	cp 16
-	jr nz , .loop
 
-	ld bc, 0x7f10 : out (c), c
-	ld hl, BORDER_COLOR*256 + 0x8c
-	out (c), h : out (c), l
 
 
 	; Generate the extra palettes
 	call generate_color_table ; must be done before the interrupt routine starts using the table
 
+        ; do the fade in
+fade_in_loop
+        ld b, 0xf5
+.novbl
+        in a, (c)
+        rra
+        jr nc, .novbl
+
+        call delay_stuff
+        call z, palette_fade_handle
+        jp nz, fade_in_loop
 
 	call animate_start
 	call animate_start
@@ -44,6 +42,20 @@ loading_set_palette
 		call Start
 
 	call animate_start
+	call animate_start
+
+	        ; do the fade out
+			call palette_fade_handle_switch
+fade_out_loop
+        ld b, 0xf5
+.novbl
+        in a, (c)
+        rra
+        jr nc, .novbl
+
+        call delay_stuff
+        call z, palette_fade_handle
+        jp nz, fade_out_loop
 
 
 		ld hl, demo_installer
@@ -56,8 +68,59 @@ loading_set_palette
 		jp $
 	endif
 
-palette
-	incbin "../../data/loading.pal"
+delay_stuff
+.wait+*: ld a, 0
+    inc a
+    and %111
+    ld (.wait), a
+    ret
+
+palette_fade_handle_switch
+    ld a, palette_fade_steps + 1
+    ld (palette_fade_handle.step), a
+
+    xor a : ld (palette_fade_handle.patch_or_a), a
+    ld (palette_fade_handle.patch_sbc), a
+
+    ld a, opcode(add hl, bc)
+    ld (palette_fade_handle.patch_sbc+1), a
+
+    ld hl, palette_fade
+    ld (palette_fade_handle.palette), hl
+    ret
+
+palette_fade_handle
+    ; stop when needed
+.step+*: ld a, palette_fade_steps + 1
+    dec a : or a : ret z
+    ld (.step), a
+
+    ; setup the palette
+.palette+*:    ld hl, palette_fade + (palette_fade_steps - 1) * palette_length
+    ld b, 0x7f : xor a
+.loop
+    out (c), a
+    ld c, (hl) : out (c), c
+    inc a : inc hl
+    cp 17
+    jp nz, .loop
+
+    ; compute next palette address
+    ld hl, (.palette)
+    ld bc, palette_length
+.patch_or_a
+    or a 
+.patch_sbc
+    sbc hl, bc
+    ld (.palette), hl
+
+    ld a, 1 : or a
+    ret
+
+palette_length = 17
+palette_fade
+	incbin "../../data/loading.fadepal"
+palette_fade_steps equ ($-palette_fade)//palette_length
 	
 
 
@@ -77,6 +140,7 @@ demo_installer
 		ld sp, 0x100
 		ld hl, 0xc9fb : ld (0x38), hl
 		jp 0x100
+		assert $< 0x100
 	endr
 demo_installer_end
 
