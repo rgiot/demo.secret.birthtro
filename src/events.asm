@@ -93,6 +93,7 @@ event_routine_{EVENT_SHOW_SPECTRAL}
 
 
 event_routine_{EVENT_START_MUSIC}
+	BREAKPOINT
 	ld a, 1
 	ld (demo_play_music.activated), a
 	ret
@@ -130,7 +131,7 @@ event_routine_restart
 
 	; reset the event handler to the first event (and re-enable it if events were disabled)
 	ld a, 0x01 : ld (event_handler), a ; opcode of "ld bc, nn" (DISABLE_EVENTS replaced it by a ret)
-	ld bc, EVENTS_FIRST_TIMEOUT : ld hl, 50*2 + 25 : add hl, bc : ld (event_handler.current_counter), hl
+	ld bc, EVENTS_FIRST_TIMEOUT : ld hl, 50*2 + 25 + 10 + 2 + 2 + 2 + 2 : add hl, bc : ld (event_handler.current_counter), hl
 	ld hl, events_list + 2 : ld (event_handler.event_table_position), hl
 
 	; reset the initial palette
