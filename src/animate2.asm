@@ -106,6 +106,3 @@ replace_background_sprite_1
 		ANIMATION2_STEP(animation2_do_nothing)
 	endrepeat
     dw 0
-
-animation_state2 db 0
-    print {hex}$

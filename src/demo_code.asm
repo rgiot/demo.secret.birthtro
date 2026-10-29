@@ -248,6 +248,7 @@ kind_of_display db 0
 
     assert $<0x4000 || $>0x8000
     animation_state db ANIMATION_STATE_FINISHED
+    animation_state2 db ANIMATION_STATE_FINISHED
 
 
 ;;
