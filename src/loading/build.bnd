@@ -24,7 +24,7 @@
   cmd:
     - dsk DAD-MODE.DSK format
     - dsk DAD-MODE.DSK add DAD-MODE.BAS
-    - dsk DAD-MODE.DSK add DAD-MODE.003
+    - impdsk -dsk DAD-MODE.DSK -put DAD-MODE.003 -hide
 
 - tgt: DAD-MODE.BAS
   dep: dad-mode.asm LOADER.BIN build.bnd

@@ -122,5 +122,5 @@
   cmd:
     - bndbuild -f loading DAD-MODE.DSK
     - cp loading/DAD-MODE.DSK DAD-MODE.DSK
-    - dsk DAD-MODE.DSK add DAD-MODE.000
-    - dsk DAD-MODE.DSK add DAD-MODE.001
+    - impdsk -dsk DAD-MODE.DSK -put DAD-MODE.000 -hide
+    - impdsk -dsk DAD-MODE.DSK -put DAD-MODE.001 -hide
