@@ -2,7 +2,7 @@
   dep: logo.sna
   phony: true
   cmd: emu --snapshot logo.sna run 
-- tgt: logo.sna C0.2000
+- tgt: logo.sna C0.4000 C0.C000
   dep: logo.asm logo_benediction_sample.asm ../../data/logo.scr ../../data/logo.fadepal
   cmd: basm logo.asm --snapshot -o logo.sna
 
@@ -10,3 +10,10 @@
 - tgt: ../../data/logo.scr ../../data/logo.fadepal
   phony: true
   cmd: bndbuild -f ../../data logo.scr
+
+
+- tgt: clean
+  phony: true
+  cmd:
+     - -rm  *.{sna,bin,lst,html}
+     - rm C0.2000 C0.4000 C0.C000

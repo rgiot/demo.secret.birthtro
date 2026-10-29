@@ -35,15 +35,6 @@ loading_set_palette
 
 
 	call animate_start
-
-	if ENABLE_SAMPLE
-		; interruption are already disabled
-		call PlayBenedictionSample
-	endif
-
-
-
-
 	call animate_start
 
 
@@ -234,7 +225,6 @@ RAND8_NOXOR:
 
 
 	; we do not care if they are smashed by the sid player
-	include 'loading_benediction_sample.asm'
 	include 'loading_animate.asm'
 
 animate_start

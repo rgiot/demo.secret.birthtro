@@ -23,9 +23,12 @@
   cmd: ace loading_linker.sna 
 
 - tgt: loading_linker.sna LOADER.BIN
-  dep: C0.C000 C0.2000 loading_linker.asm build.bnd
+  dep: C0.C000 C0.2000 loading_linker.asm build.bnd ../logo/C0.4000 ../logo/C0.C000
   cmd: basm loading_linker.asm --snapshot -o loading_linker.sna -DLOADER_LINKER_ADDRESS={{ LOADER_LINKER_ADDRESS }} -DLOADER_CODE_ADDRESS={{ LOADER_CODE_ADDRESS }}
 
+
+- tgt: ../logo/C0.4000 ../logo/C0.C000
+  cmd: bndbuild -f ../logo  C0.C000
 
 - tgt: test_loading
   dep: loading.sna

@@ -1,6 +1,6 @@
     include "../constants_screen.asm"
     
-    org 0x2000
+    org 0x4000
     run $
 LOGO_START
 
@@ -8,9 +8,6 @@ LOGO_START
 
     di
         push af, hl, bc, de
-        ld hl, (0x38) : ld (backup_38), hl ; save interrupt vector
-        ld hl, 0xc9fb : ld (0x38), hl      ; replace by ei:ret
-    ei
 
     ; black and mode 0
         ld bc, 0x7F54
@@ -64,14 +61,10 @@ fade_out_loop
         call crtc_restore ; go back to the standard screen configuration
 
 
-    di
         pop de, bc, hl, af
-backup_38+*: ld hl,0
         ld (0x38), hl
-    ei
 
 the_end
-        BREAKPOINT
 
     ret
 
@@ -173,10 +166,11 @@ crtc_table
 
 
     print "Last byte", {hex}$
-    SAVE "C0.2000", LOGO_START, $-LOGO_START
+    SAVE "C0.4000", LOGO_START, $-LOGO_START
 
 
 
     org 0xC000
     incbin "../../data/logo.scr"
+    SAVE "C0.C000", 0xC000, 0x4000
 

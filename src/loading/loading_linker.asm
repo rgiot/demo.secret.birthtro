@@ -20,6 +20,20 @@
       ex af, af'
       push ix, iy
 
+        ; hide stuff in screen
+        ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00+0: out (c),c
+
+
+      ; handle the logo code
+      UNCRUNCH(LOGO_C0_C000, 0xC000)
+      UNCRUNCH(LOGO_C0_4000, 0x4000)
+      call 0x4000 ; interription are cut and not restored
+
+
+
+
+
+      ; handle the loader code
         ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00+0: out (c),c
         UNCRUNCH(C0_C000, 0xC000)
         ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00+80/2: out (c),c
@@ -106,6 +120,12 @@ interrupted_stop
 
     LOAD_N_CRUNCH(C0_2000, "C0.2000")
     LOAD_N_CRUNCH(C0_C000, "C0.C000")
+
+    LOAD_N_CRUNCH(LOGO_C0_4000, "../logo/C0.4000")
+
+    assert $<0x4000
+
+    LOAD_N_CRUNCH(LOGO_C0_C000, "../logo/C0.C000")
 
 
     SAVE "LOADER.BIN"

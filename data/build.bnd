@@ -82,9 +82,9 @@
 
 
 - dep: intro/logo.png
-  tgt: logo.scr logo.pal logo.inks
+  tgt: logo.scr logo.pal logo.inks logo.fadepal
   cmd:
-    - img2cpc --mode 0 --pen0 13 --skipoddpixels --unlock-pens --overscan intro/logo.png scr --output logo.scr --palette logo.pal --inks logo.inks
+    - img2cpc --mode 0 --skipoddpixels  --overscan intro/logo.png scr --output logo.scr --palette logo.pal --inks logo.inks --palette_fadeout logo.fadepal
 
 
 - tgt: clean
@@ -95,7 +95,7 @@
     - -rm face?_right_eye0.spr face?_right_eye1.spr face?_right_eye2.spr
     - -rm eye0.spr eye1.spr eye2.spr
     - -rm loading.scr loading.pal loading.inks
-    - -rm logo.scr logo.pal logo.inks
+    - -rm logo.scr logo.pal logo.inks logo.fadepal
     - -rm VAPEUR_000.SPR VAPEUR_001.SPR VAPEUR_002.SPR VAPEUR_003.SPR VAPEUR_004.SPR VAPEUR_005.SPR VAPEUR_006.SPR VAPEUR_007.SPR VAPEUR_008.SPR
 
 
