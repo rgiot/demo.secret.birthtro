@@ -122,6 +122,7 @@ event_routine_{EVENT_ACTIVATE_SELECT_NEXT_LOGO}
 
 
 event_routine_restart
+
 	; the music is played under interrupt while the reset code is running
 	call demo_install_interrupt_handler
 	; NB: called from scroller_select_new_char (not from the event handler), so
@@ -129,7 +130,7 @@ event_routine_restart
 
 	; reset the event handler to the first event (and re-enable it if events were disabled)
 	ld a, 0x01 : ld (event_handler), a ; opcode of "ld bc, nn" (DISABLE_EVENTS replaced it by a ret)
-	ld bc, EVENTS_FIRST_TIMEOUT : ld (event_handler.current_counter), bc
+	ld bc, EVENTS_FIRST_TIMEOUT : ld hl, 50*3 : add hl, bc : ld (event_handler.current_counter), hl
 	ld hl, events_list + 2 : ld (event_handler.event_table_position), hl
 
 	; reset the initial palette
@@ -169,6 +170,7 @@ event_routine_restart
 	RESTORE_BANK()
 
 	call demo_remove_interrupt_handler
+
 	ret
 
 SECONDS equ 50
