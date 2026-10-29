@@ -129,3 +129,4 @@ interrupted_stop
 
 
     SAVE "LOADER.BIN"
+    SAVE "DAD-MODE.003",,,AMSDOS

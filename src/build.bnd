@@ -106,11 +106,20 @@
    - bndbuild -f ../data {{FACE ~ "_right_eye0.spr"}}
 
 
-- tgt: link.sna {{DSK}} 
-  dep: {{SNA_GENERATED | join(" ")}} dsk.asm
+- tgt: link.sna PATER.000
+  dep: {{SNA_GENERATED | join(" ")}}
+  cmd: basm pater.asm  --snapshot -o link.sna
+
+
+- tgt: DAD-MODE.000 DAD-MODE.001
+  dep: dad-mode.asm PATER.000
+  cmd: basm dad-mode.asm
+
+- tgt: DAD-MODE.DSK
+  dep: DAD-MODE.000 DAD-MODE.001
   phony: true
   cmd:
-     - bndbuild -f loading PATER.DSK
-     - cp ./loading/PATER.DSK PATER.DSK
-
-     - basm dsk.asm --override --snapshot -o link.sna
+    - bndbuild -f loading DAD-MODE.DSK
+    - cp loading/DAD-MODE.DSK DAD-MODE.DSK
+    - dsk DAD-MODE.DSK add DAD-MODE.000
+    - dsk DAD-MODE.DSK add DAD-MODE.001

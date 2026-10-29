@@ -17,12 +17,25 @@
   dep: paternity.asm LOADER.BIN build.bnd
   cmd: basm paternity.asm --basic -o PATER.BAS -DLOADER_LINKER_ADDRESS={{ LOADER_LINKER_ADDRESS }}
 
+
+
+- tgt: DAD-MODE.DSK
+  dep: DAD-MODE.BAS DAD-MODE.003
+  cmd:
+    - dsk DAD-MODE.DSK format
+    - dsk DAD-MODE.DSK add DAD-MODE.BAS
+    - dsk DAD-MODE.DSK add DAD-MODE.003
+
+- tgt: DAD-MODE.BAS
+  dep: dad-mode.asm LOADER.BIN build.bnd
+  cmd: basm dad-mode.asm --basic -o DAD-MODE.BAS -DLOADER_LINKER_ADDRESS={{ LOADER_LINKER_ADDRESS }} 
+
 - tgt: test_loading_linker
   dep: loading_linker.sna
   phony: true
   cmd: ace loading_linker.sna 
 
-- tgt: loading_linker.sna LOADER.BIN
+- tgt: loading_linker.sna LOADER.BIN DAD-MODE.003
   dep: C0.C000 C0.2000 loading_linker.asm build.bnd ../logo/C0.4000 ../logo/C0.C000
   cmd: basm loading_linker.asm --snapshot -o loading_linker.sna -DLOADER_LINKER_ADDRESS={{ LOADER_LINKER_ADDRESS }} -DLOADER_CODE_ADDRESS={{ LOADER_CODE_ADDRESS }}
 

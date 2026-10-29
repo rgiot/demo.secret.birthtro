@@ -46,9 +46,11 @@ loading_set_palette
 	call animate_start
 
 
-		ld bc, 0x7f10 : out (c), c
-		ld bc, 0x7f44 : out (c), c
-		ret
+		ld hl, demo_installer
+		ld de, 0xc000
+		ld bc, demo_installer_end - demo_installer
+		ldir
+		jp 0xc000
 	else
 		; stop just to get the interrupted code that handles the music
 		jp $
@@ -58,6 +60,21 @@ palette
 	incbin "../../data/loading.pal"
 	
 
+
+demo_installer
+	rorg 0xC000
+		di
+		ld bc, 0x7fC4: out (c), c
+		ld hl, 0x4000 : ld de, 0x100 : ld bc, 0x4000-0x100 : ldir
+		ld bc, 0x7fC5: out (c), c
+		ld hl, 0x4000 : ld de, 0x8000 : ld bc, 0x4000 : ldir
+		ld bc, 0x7fC0: out (c), c
+		ld hl, 0x8000 : ld de, 0x4000 : ld bc, 0x4000 : ldir
+		ld sp, 0x100
+		ld hl, 0xc9fb : ld (0x38), hl
+		jp 0x100
+	endr
+demo_installer_end
 
 
 
