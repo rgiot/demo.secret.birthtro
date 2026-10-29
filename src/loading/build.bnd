@@ -69,3 +69,5 @@
   phony: true
   cmd:
     - -rm  *.{sna,bin,lst,html}
+    - -rm DAD-MODE.*
+    - -rm C0.2000 C0.4000 C0.C000

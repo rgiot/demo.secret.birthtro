@@ -96,6 +96,7 @@
     - -rm {{SNA}} {{DSK}} {{SNA_GENERATED | join(" ")}} link.sna sna.map
     - bndbuild -f ../data clean
     - bndbuild -f loading clean
+    - bndbuild -f logo clean
 
 
 - tgt: {{ FACE_SCR }} {{EYE0_SPR}} {{EYE1_SPR}} {{EYE2_SPR}} {{RIGHT_EYE0_SPR}} {{RIGHT_EYE1_SPR}} {{RIGHT_EYE2_SPR}}

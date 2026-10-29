@@ -47,10 +47,10 @@ loading_set_palette
 
 
 		ld hl, demo_installer
-		ld de, 0xc000
+		ld de, 0x0080
 		ld bc, demo_installer_end - demo_installer
 		ldir
-		jp 0xc000
+		jp 0x0080
 	else
 		; stop just to get the interrupted code that handles the music
 		jp $
@@ -62,7 +62,9 @@ palette
 
 
 demo_installer
-	rorg 0xC000
+	; Located in the first page (not in the screen): this code clears the screen, and the
+	; area 0x100+ is overwritten by the demo. It must stay under 0x80 bytes (the stack grows down from 0x100)
+	rorg 0x0080
 		di
 		ld bc, 0x7fC4: out (c), c
 		ld hl, 0x4000 : ld de, 0x100 : ld bc, 0x4000-0x100 : ldir
@@ -70,6 +72,8 @@ demo_installer
 		ld hl, 0x4000 : ld de, 0x8000 : ld bc, 0x4000 : ldir
 		ld bc, 0x7fC0: out (c), c
 		ld hl, 0x8000 : ld de, 0x4000 : ld bc, 0x4000 : ldir
+		; the demo expects an empty screen (it draws over it)
+		ld hl, 0xc000 : ld de, 0xc001 : ld bc, 0x3fff : ld (hl), l : ldir
 		ld sp, 0x100
 		ld hl, 0xc9fb : ld (0x38), hl
 		jp 0x100

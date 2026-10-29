@@ -58,7 +58,10 @@ fade_out_loop
 
     ; restore standard crtc configuration
 
-        call crtc_restore ; go back to the standard screen configuration
+        ; go back to the firmware screen configuration (the loader screen expects it).
+        ; crtc_restore cannot be used: it only re-applies the LAST configuration given to crtc_setup,
+        ; which is the one of the demo (R2=50 shifts the picture on the left).
+        ld hl, crtc_table_firmware : call crtc_setup
 
 
         pop de, bc, hl, af
@@ -164,6 +167,12 @@ crtc_table
     ])
 
 
+
+crtc_table_firmware
+    AKS_CRTC_TRANS_TABLE([
+        [0, 63], [1, 40], [2, 46], [3, 0x8E], [4, 38], [5, 0],
+        [6, 25], [7, 30], [9, 7], [12, 0x30], [13, 0x00]
+    ])
 
     print "Last byte", {hex}$
     SAVE "C0.4000", LOGO_START, $-LOGO_START
