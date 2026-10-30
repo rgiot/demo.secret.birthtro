@@ -218,7 +218,8 @@ demo_frame_run
 
     ld a, (kind_of_display) 
     inc a
-    cp 3
+  ;  cp 3
+   cp 2
     jr nz, .continue_to_change
     xor a
 .continue_to_change
@@ -226,7 +227,7 @@ demo_frame_run
 
     or a : jr z,.select_left_eye_only
     cp 1 : jr z, .select_right_eye_only
-    cp 2 : jr z, .select_both_eyes
+ ;   cp 2 : jr z, .select_both_eyes
     jp $ ; error
 .select_left_eye_only
     ld hl, replace_background_sprite_0.table
@@ -235,10 +236,10 @@ demo_frame_run
 .select_right_eye_only
     ld hl, replace_background_sprite_0.empty
     ld de, replace_background_sprite_1.table
-    jr .activate_selection
-.select_both_eyes
-    ld hl, replace_background_sprite_0.table
-    ld de, replace_background_sprite_1.table
+;    jr .activate_selection
+;.select_both_eyes
+;    ld hl, replace_background_sprite_0.table
+;    ld de, replace_background_sprite_1.table
 .activate_selection
     ld bc, 0x7f00 + ANIMATE_BANK : out (c), c
 	ld (replace_background_sprite_0.ptr), hl
