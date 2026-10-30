@@ -18,6 +18,11 @@
     - cp src/DAD-MODE.001 dist/albi
     - cp *.nfo dist
 
+- tgt: archive
+  phony: true
+  dep: dist
+  cmd: archive create --output dad-mode-dot-bas.zip dist/*
+
 - tgt: clean
   phony: true
   cmd:
