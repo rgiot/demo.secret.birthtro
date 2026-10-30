@@ -212,8 +212,12 @@ demo_frame_run
 
 
     ; set the state of the animation to let the writter know it is playing and it should not copy now
+    ; BOTH eyes have to be flagged: the unused one finishes by itself after its empty table, the used one when its
+    ; animation is over (which may be much later when it is cancelled because the scroller is too low).
+    ; If one is not flagged, the writter leaves the page and kills the animation, that restarts from scratch later.
     ld a, ANIMATION_STATE_PLAYING
     ld (animation_state), a
+    ld (animation_state2), a
     xor a : ld (.reset_animation), a
 
     ld a, (kind_of_display) 

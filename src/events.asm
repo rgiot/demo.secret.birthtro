@@ -148,6 +148,7 @@ event_routine_restart
 	ld (demo_frame_run.animated_background_activated), a
 	ld a, 1 : ld (demo_frame_run.reset_animation), a
 	ld a, ANIMATION_STATE_FINISHED : ld (animation_state), a
+	ld (animation_state2), a
 	ld hl, WRITTER_PAGES+2 : ld (writter_next_page_ptr), hl
 	ld hl, transition_tables : ld (writter_advance_to_next_row.transtion_ptr), hl
 	ld a, WRITTER_TRANSITION_NB_CALLS_FULL : ld (writter_advance_to_next_row.nb_calls), a
