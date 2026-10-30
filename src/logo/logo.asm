@@ -8,27 +8,17 @@ LOGO_START
 
     di
         push af, hl, bc, de
+/*
 
-    ; black and mode 0
-        ld bc, 0x7F54
-        xor a
-.black_loop
-        out (c), a: out (c), c
-        inc a : cp 17
-        jr nz, .black_loop
-        ld c, 0x8c : out (c), c
-
+*/
 
         ; set up crtc configraiton
         call handle_crtc_in_transition
+        ld bc, 0x7F8C : out (c), c
 
         ; do the fade in
 fade_in_loop
-        ld b, 0xf5
-.novbl
-        in a, (c)
-        rra
-        jr nc, .novbl
+        call secure_vsync
 
         call delay_stuff
         call z, palette_fade_handle
@@ -45,11 +35,7 @@ fade_in_loop
 
         ; do the fade out
 fade_out_loop
-        ld b, 0xf5
-.novbl
-        in a, (c)
-        rra
-        jr nc, .novbl
+        call secure_vsync
 
         call delay_stuff
         call z, palette_fade_handle
@@ -71,10 +57,23 @@ the_end
 
     ret
 
+
+ secure_vsync
+    ld b, 0xf5
+.vbl
+        in a, (c)
+        rra
+        jr c, .vbl
+.novbl
+        in a, (c)
+        rra
+        jr nc, .novbl
+        ret   
+
 delay_stuff
 .wait+*: ld a, 0
     inc a
-    and %111
+    and %1
     ld (.wait), a
     ret
 

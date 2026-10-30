@@ -16,6 +16,7 @@
     - cp src/loading/CATART.ASC dist/albi 
     - cp src/DAD-MODE.000 dist/albi
     - cp src/DAD-MODE.001 dist/albi
+    - cp *.nfo dist
 
 - tgt: clean
   phony: true

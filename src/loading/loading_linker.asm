@@ -23,7 +23,15 @@
         ; hide stuff in screen
         ld bc, 0xbc00 + 1 : out (c), c : ld bc, 0xbd00+0: out (c),c
 
-
+    ; black and mode 0
+        ld bc, 0x7F54
+        xor a
+.black_loop
+        out (c), a: out (c), c
+        inc a : cp 17
+        jr nz, .black_loop
+        ld c, 0x8c : out (c), c
+        
       ; handle the logo code
       UNCRUNCH(LOGO_C0_C000, 0xC000)
       UNCRUNCH(LOGO_C0_4000, 0x4000)
